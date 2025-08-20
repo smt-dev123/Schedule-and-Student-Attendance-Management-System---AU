@@ -1,0 +1,32 @@
+{
+  "Home": {
+    "login": "Login"
+  },
+  "Navbar": {
+    "hello": "Hello",
+    "setting": "Setting",
+    "logout": "Logout"
+  },
+  "Sidebar": {
+    "dashboard": "Dashboard",
+    "University": {
+      "university": "University",
+      "building": "Building",
+      "room": "Room"
+    },
+    "Study": {
+      "study": "Studies",
+      "level": "Level",
+      "generation": "Generation",
+      "faculty": "Fyculty",
+      "department": "Department",
+      "major": "Major"
+    },
+    "teacher": "Teacher",
+    "student": "Student",
+    "schedule": "Schedule",
+    "attendance": "Attendance",
+    "user": "User",
+    "setting": "Setting"
+  }
+}

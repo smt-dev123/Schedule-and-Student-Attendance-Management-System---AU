@@ -1,0 +1,177 @@
+erDiagram
+    faculties {
+        int id PK
+        string name
+    }
+    departments {
+        int id PK
+        string name
+        int faculty_id FK
+    }
+    majors {
+        int id PK
+        string name
+        int department_id FK
+    }
+    subjects {
+        int id PK
+        string name
+        int credit
+        int department_id FK
+    }
+    teachers {
+        int id PK
+        string name
+        string gender
+        string marital_status
+        string education_level
+        string email
+        string phone
+        int department_id FK
+    }
+    levels {
+        int id PK
+        string name
+    }
+    generations {
+        int id PK
+        string name
+    }
+    semesters {
+        int id PK
+        string name
+        date start_date
+        date end_date
+    }
+    student_groups {
+        int id PK
+        string name
+        int generation_id FK
+        int major_id FK
+        int level_id FK
+    }
+    students {
+        int id PK
+        string student_id
+        string name
+        string gender
+        date dob
+        int generation_id FK
+        int major_id FK
+        int level_id FK
+        int student_group_id FK
+    }
+    users {
+        int id PK
+        string username
+        string email
+        string password
+        int role_id FK
+        int teacher_id FK
+        int student_id FK
+    }
+    role {
+        int id PK
+        string name
+    }
+    permission {
+        int id PK
+        string name
+    }
+    role_permission {
+        int role_id PK,FK
+        int permission_id PK,FK
+    }
+    buildings {
+        int id PK
+        string name
+    }
+    rooms {
+        int id PK
+        string name
+        int building_id FK
+    }
+    shifts {
+        int id PK
+        string name
+        time start_time
+        time end_time
+    }
+    sessions {
+        int id PK
+        int shift_id FK
+        int session_order
+    }
+    study_days {
+        int id PK
+        string name
+    }
+    schedules {
+        int id PK
+        int subject_id FK
+        int teacher_id FK
+        int room_id FK
+        int student_group_id FK
+        int study_day_id FK
+        int session_id FK
+        int semester_id FK
+    }
+    attendances {
+        int id PK
+        int student_id FK
+        int schedule_id FK
+        date date
+        string status
+    }
+    schedule_changes {
+        int id PK
+        int schedule_id FK
+        datetime old_datetime
+        datetime new_datetime
+        string reason
+    }
+    grades {
+        int id PK
+        int student_id FK
+        int schedule_id FK
+        string grade_type
+        float score
+    }
+    translations {
+        int id PK
+        string key
+        string locale
+        string value
+    }
+
+    faculties ||--o{ departments : has
+    departments ||--o{ majors : offers
+    departments ||--o{ subjects : manages
+    departments ||--o{ teachers : employs
+    majors ||--o{ students : enroll_in
+    generations ||--o{ students : belong_to
+    levels ||--o{ students : are_at
+    student_groups ||--o{ students : are_in
+    generations ||--o{ student_groups : has
+    majors ||--o{ student_groups : has
+    levels ||--o{ student_groups : has
+    buildings ||--o{ rooms : contains
+    shifts ||--o{ sessions : has_sessions
+    role ||--o{ users : assigned_to
+    students }o--|| users : can_be_a
+    teachers }o--|| users : can_be_a
+    role }o--o{ permission : has
+    role_permission }o--|| role : maps
+    role_permission }o--|| permission : maps
+    schedules ||--o{ attendances : records
+    students ||--o{ attendances : has
+    schedules ||--o{ schedule_changes : can_have
+    subjects ||--|{ schedules : is_scheduled
+    teachers ||--o{ schedules : teaches
+    rooms ||--o{ schedules : hosts
+    student_groups ||--o{ schedules : attends
+    study_days ||--o{ schedules : on
+    sessions ||--o{ schedules : during
+    semesters ||--o{ schedules : "in"
+    students ||--o{ grades : receives
+    schedules ||--o{ grades : issues
