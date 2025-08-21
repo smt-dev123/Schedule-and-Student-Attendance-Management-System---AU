@@ -1,3 +1,4 @@
+import { useTitle } from '@/hooks/useTitle'
 import { createFileRoute } from '@tanstack/react-router'
 
 export const Route = createFileRoute('/admin/level/')({
@@ -5,5 +6,6 @@ export const Route = createFileRoute('/admin/level/')({
 })
 
 function RouteComponent() {
+  useTitle('Level Management')
   return <div>Hello "/admin/level/"!</div>
 }

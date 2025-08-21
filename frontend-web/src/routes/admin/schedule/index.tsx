@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { useEffect, useState } from 'react'
+import { use, useEffect, useState } from 'react'
 import { useCalendarApp, ScheduleXCalendar } from '@schedule-x/react'
 import {
   createViewDay,
@@ -12,12 +12,14 @@ import { createEventModalPlugin } from '@schedule-x/event-modal'
 import { createDragAndDropPlugin } from '@schedule-x/drag-and-drop'
 
 import '@schedule-x/theme-default/dist/index.css'
+import { useTitle } from '@/hooks/useTitle'
 
 export const Route = createFileRoute('/admin/schedule/')({
   component: RouteComponent,
 })
 
 function RouteComponent() {
+  useTitle('Schedule Management')
   const eventsService = useState(() => createEventsServicePlugin())[0]
 
   const calendar = useCalendarApp({

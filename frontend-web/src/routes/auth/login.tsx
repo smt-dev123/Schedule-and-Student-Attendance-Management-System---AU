@@ -1,6 +1,7 @@
+import { useTitle } from '@/hooks/useTitle'
 import { Button, Flex, Spinner, Text, TextField } from '@radix-ui/themes'
 import { createFileRoute, Link } from '@tanstack/react-router'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 export const Route = createFileRoute('/auth/login')({
   component: Login,
@@ -8,6 +9,8 @@ export const Route = createFileRoute('/auth/login')({
 
 function Login() {
   const [loading, setLoading] = useState(false)
+
+  useTitle('Login')
   return (
     <>
       <Flex justify="center" align="center" mb="4">

@@ -1,3 +1,4 @@
+import { useTitle } from '@/hooks/useTitle'
 import { createFileRoute } from '@tanstack/react-router'
 
 export const Route = createFileRoute('/admin/user/')({
@@ -5,5 +6,6 @@ export const Route = createFileRoute('/admin/user/')({
 })
 
 function RouteComponent() {
+  useTitle('User Management')
   return <div>Hello "/admin/user/"!</div>
 }

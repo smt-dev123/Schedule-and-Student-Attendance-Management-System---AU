@@ -1,12 +1,13 @@
-import { createFileRoute, Link } from '@tanstack/react-router'
-
-import React, { useEffect, useState } from 'react'
+import { createFileRoute } from '@tanstack/react-router'
+import { HiArrowDown, HiArrowsUpDown, HiArrowUp } from 'react-icons/hi2'
+import { useEffect, useState } from 'react'
 import {
   useReactTable,
   getCoreRowModel,
   getFilteredRowModel,
   getPaginationRowModel,
   flexRender,
+  getSortedRowModel,
 } from '@tanstack/react-table'
 import type { ColumnDef } from '@tanstack/react-table'
 import {
@@ -28,12 +29,14 @@ import { Pagination } from '@/components/Pagination'
 import AddTeacher from '@/routes/admin/teacher/-modal/AddTeacher'
 import ViewTeacher from './-modal/ViewTeacher'
 import DeleteTeacher from './-modal/DeleteTeacher'
+import { useTitle } from '@/hooks/useTitle'
 
 export const Route = createFileRoute('/admin/teacher/')({
   component: RouteComponent,
 })
 
 function RouteComponent() {
+  useTitle('Teacher Management')
   const { teachers, loading, error, fetchTeachers } = useTeacherStore()
   const [globalFilter, setGlobalFilter] = useState('')
   const [data, setData] = useState<TeacherType[]>([])
@@ -63,6 +66,7 @@ function RouteComponent() {
     {
       id: 'actions',
       header: 'សកម្មភាព',
+      enableSorting: false,
       cell: ({ row }) => (
         <Flex gap="1">
           <ViewTeacher teachers={row.original} />
@@ -89,7 +93,10 @@ function RouteComponent() {
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
+    getSortedRowModel: getSortedRowModel(),
   })
+
+  if (loading) return <div>Loading...</div>
 
   return (
     <div>
@@ -108,10 +115,6 @@ function RouteComponent() {
               <Button variant="outline" style={{ cursor: 'pointer' }}>
                 Export Excel
               </Button>
-              {/* Btn Add */}
-              {/* <Link href="./teacher/add">
-            <Button style={{ cursor: "pointer" }}>បន្ថែមគ្រូបង្រៀន</Button>
-          </Link> */}
 
               <AddTeacher />
             </Flex>
@@ -119,32 +122,19 @@ function RouteComponent() {
           {/* Header */}
           <Flex justify="between">
             {/* Search */}
-            <Flex gap="2">
-              <Box width="250px" maxWidth="250px">
-                <TextField.Root
-                  placeholder="ស្វែងរក..."
-                  value={globalFilter ?? ''}
-                  onChange={(e) => setGlobalFilter(e.target.value)}
-                >
-                  <TextField.Slot>
-                    <IoSearch height="16" width="16" />
-                  </TextField.Slot>
-                </TextField.Root>
-              </Box>
-              <Select.Root size="2" defaultValue="តម្រៀប">
-                <Select.Trigger />
-                <Select.Content>
-                  <Select.Item value="តម្រៀប" disabled>
-                    តម្រៀប
-                  </Select.Item>
-                  <Select.Item value="IdAZ">ID A-Z</Select.Item>
-                  <Select.Item value="IdZA">ID Z-A</Select.Item>
-                  <Select.Item value="NameAZ">ឈ្មោះ A-Z</Select.Item>
-                  <Select.Item value="NameZA">ឈ្មោះ Z-A</Select.Item>
-                </Select.Content>
-              </Select.Root>
-            </Flex>
-            {/*  */}
+            <Box width="250px" maxWidth="250px">
+              <TextField.Root
+                placeholder="ស្វែងរក..."
+                value={globalFilter ?? ''}
+                onChange={(e) => setGlobalFilter(e.target.value)}
+              >
+                <TextField.Slot>
+                  <IoSearch height="16" width="16" />
+                </TextField.Slot>
+              </TextField.Root>
+            </Box>
+
+            {/* Sort by */}
             <Flex gap="2">
               <Select.Root size="2" defaultValue="ជ្រើសរើសកម្រិតថ្នាក់">
                 <Select.Trigger />
@@ -200,10 +190,22 @@ function RouteComponent() {
               <Table.Row key={hg.id}>
                 {hg.headers.map((header) => (
                   <Table.ColumnHeaderCell key={header.id}>
-                    {flexRender(
-                      header.column.columnDef.header,
-                      header.getContext(),
-                    )}
+                    <div
+                      onClick={header.column.getToggleSortingHandler()}
+                      className="flex items-center justify-between cursor-pointer"
+                    >
+                      {flexRender(
+                        header.column.columnDef.header,
+                        header.getContext(),
+                      )}
+                      {header.column.getCanSort() &&
+                        ({
+                          asc: <HiArrowUp />,
+                          desc: <HiArrowDown />,
+                        }[header.column.getIsSorted() as string] ?? (
+                          <HiArrowsUpDown />
+                        ))}
+                    </div>
                   </Table.ColumnHeaderCell>
                 ))}
               </Table.Row>

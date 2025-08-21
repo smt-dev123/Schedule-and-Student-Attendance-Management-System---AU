@@ -15,8 +15,10 @@
     "server-net": "json-server --watch data/db.json --port 5000 --host 0.0.0.0"
   },
   "dependencies": {
+    "@pdf-viewer/react": "^1.8.2",
     "@preact/signals": "^2.3.0",
     "@radix-ui/themes": "^3.2.1",
+    "@react-pdf/renderer": "^4.3.0",
     "@schedule-x/calendar": "^2.36.0",
     "@schedule-x/drag-and-drop": "^2.36.0",
     "@schedule-x/event-modal": "^2.36.0",
@@ -30,9 +32,11 @@
     "@tanstack/react-router-devtools": "^1.131.5",
     "@tanstack/react-table": "^8.21.3",
     "@tanstack/router-plugin": "^1.121.2",
+    "@types/file-saver": "^2.0.7",
     "@types/node": "^24.3.0",
     "axios": "^1.11.0",
     "date-fns": "^4.1.0",
+    "file-saver": "^2.0.5",
     "framer-motion": "^12.23.12",
     "i18next": "^25.3.6",
     "preact": "^10.27.1",
