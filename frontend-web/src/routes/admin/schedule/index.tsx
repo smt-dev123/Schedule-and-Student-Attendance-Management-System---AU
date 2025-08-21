@@ -68,7 +68,7 @@ function RouteComponent() {
   }, [])
 
   return (
-    <div>
+    <div className="bg-white text-black dark:bg-gray-900 dark:text-gray-100">
       <ScheduleXCalendar calendarApp={calendar} />
     </div>
   )

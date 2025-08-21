@@ -1,3 +1,4 @@
+import CalendarSchedule from '@/components/CalendarSchedule'
 import { createFileRoute } from '@tanstack/react-router'
 
 export const Route = createFileRoute('/admin/student/')({
@@ -5,5 +6,10 @@ export const Route = createFileRoute('/admin/student/')({
 })
 
 function RouteComponent() {
-  return <div>Hello "/admin/student/"!</div>
+  // return <div>Hello "/admin/student/"!</div>
+  return (
+    <>
+      <CalendarSchedule />
+    </>
+  )
 }

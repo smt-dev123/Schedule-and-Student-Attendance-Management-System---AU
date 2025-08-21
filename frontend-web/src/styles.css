@@ -5,6 +5,8 @@
 :root {
   --kantumruy-pro: 'Kantumruy Pro', sans-serif;
   --bayon: 'Bayon', sans-serif;
+  --sx-color-bg: #ffffff;
+  --sx-color-text: #111111;
 }
 
 body {
@@ -21,4 +23,9 @@ main {
 code {
   font-family:
     source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
+}
+
+.dark {
+  --sx-color-bg: #111827; /* bg-gray-900 */
+  --sx-color-text: #f3f4f6; /* text-gray-100 */
 }

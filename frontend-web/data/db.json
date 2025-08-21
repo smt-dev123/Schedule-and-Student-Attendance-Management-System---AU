@@ -193,66 +193,77 @@
     { "id": "2", "name": "Teacher" },
     { "id": "3", "name": "Student" }
   ],
-  "permission": [
-    { "id": "1", "name": "manage_users" },
-    { "id": "2", "name": "manage_schedules" },
-    { "id": "3", "name": "input_grades" },
-    { "id": "4", "name": "view_grades" },
-    { "id": "5", "name": "take_attendance" },
-    { "id": "6", "name": "view_schedule" }
-  ],
-  "role_permission": [
-    { "roleId": "1", "permissionId": "1" },
-    { "roleId": "1", "permissionId": "2" },
-    { "roleId": "1", "permissionId": "3" },
-    { "roleId": "1", "permissionId": "4" },
-    { "roleId": "1", "permissionId": "5" },
-    { "roleId": "1", "permissionId": "6" },
-    { "roleId": "2", "permissionId": "3" },
-    { "roleId": "2", "permissionId": "4" },
-    { "roleId": "2", "permissionId": "5" },
-    { "roleId": "2", "permissionId": "6" },
-    { "roleId": "3", "permissionId": "4" },
-    { "roleId": "3", "permissionId": "6" }
-  ],
+
   "users": [
     {
       "id": "1",
       "username": "admin",
-      "email": "admin@school.edu.kh",
-      "password": "hashed_password_example_1",
-      "roleId": "1",
-      "teacherId": null,
-      "studentId": null
+      "email": "admin@edu.kh",
+      "password": "123",
+      "role": "admin",
+      "department": null,
+      "grade_level": null,
+      "age": 35,
+      "location": "phnom_penh"
     },
     {
       "id": "2",
-      "username": "dara.k",
-      "email": "dara.k@school.edu.kh",
-      "password": "hashed_password_example_2",
-      "roleId": "2",
-      "teacherId": "1",
-      "studentId": null
+      "username": "surng",
+      "email": "surng@edu.kh",
+      "password": "123",
+      "role": "teacher",
+      "department": "math",
+      "grade_level": null,
+      "age": 30,
+      "location": "phnom_penh"
     },
     {
       "id": "3",
-      "username": "sok.panha",
-      "email": "sok.panha@student.edu.kh",
-      "password": "hashed_password_example_3",
-      "roleId": 3,
-      "teacherId": null,
-      "studentId": "1001"
+      "username": "smt",
+      "email": "smt@gmail.com",
+      "password": "123",
+      "role": "student",
+      "department": null,
+      "grade_level": 10,
+      "age": 16,
+      "location": "siem_reap"
+    }
+  ],
+  "policies": [
+    {
+      "id": "1",
+      "name": "Admin can manage users",
+      "action": "manage_users",
+      "attribute": "role",
+      "operator": "=",
+      "value": "admin"
+    },
+    {
+      "id": "2",
+      "name": "Teachers can input grades",
+      "action": "input_grades",
+      "attribute": "role",
+      "operator": "=",
+      "value": "teacher"
+    },
+    {
+      "id": "3",
+      "name": "Students can only view grades",
+      "action": "view_grades",
+      "attribute": "role",
+      "operator": "=",
+      "value": "student"
     },
     {
       "id": "4",
-      "username": "lim.mey",
-      "email": "lim.mey@student.edu.kh",
-      "password": "hashed_password_example_4",
-      "roleId": 3,
-      "teacherId": null,
-      "studentId": "1002"
+      "name": "Math teachers over 25 can take attendance",
+      "action": "take_attendance",
+      "attribute": "department",
+      "operator": "=",
+      "value": "math"
     }
   ],
+
   "buildings": [
     { "id": "1", "name": "អាគារ A" },
     { "id": "2", "name": "អាគារ B" }
