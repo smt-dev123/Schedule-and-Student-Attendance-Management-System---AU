@@ -1,7 +1,6 @@
 import { useTitle } from '@/hooks/useTitle'
 import {
   Avatar,
-  Box,
   Button,
   Card,
   Flex,
