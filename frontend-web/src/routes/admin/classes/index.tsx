@@ -116,6 +116,7 @@ function RouteComponent() {
             <Table.Row>
               <Table.ColumnHeaderCell>ID</Table.ColumnHeaderCell>
               <Table.ColumnHeaderCell>មុខជំនាញ</Table.ColumnHeaderCell>
+              <Table.ColumnHeaderCell>អគារ</Table.ColumnHeaderCell>
               <Table.ColumnHeaderCell>បន្ទប់</Table.ColumnHeaderCell>
               <Table.ColumnHeaderCell>ជំនាន់</Table.ColumnHeaderCell>
               <Table.ColumnHeaderCell className="w-56">
@@ -128,6 +129,7 @@ function RouteComponent() {
             <Table.Row>
               <Table.RowHeaderCell>1</Table.RowHeaderCell>
               <Table.Cell>វិទ្យាសាស្រ្ដកុំព្យូទ័រ</Table.Cell>
+              <Table.Cell>បណ្ឌិត សៀង ណាំ</Table.Cell>
               <Table.Cell>ស្រុកកងមាស</Table.Cell>
               <Table.Cell>១៩</Table.Cell>
               <Table.Cell>

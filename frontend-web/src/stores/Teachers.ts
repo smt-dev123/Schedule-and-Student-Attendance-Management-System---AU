@@ -6,7 +6,6 @@ import type {
   TeacherCreate,
   TeacherType,
 } from '@/types/teachersType'
-import axios from 'axios'
 
 export const useTeacherStore = create<State & Actions>((set) => ({
   teachers: [],
@@ -18,9 +17,7 @@ export const useTeacherStore = create<State & Actions>((set) => ({
   fetchTeachers: async () => {
     set({ loading: true, error: null })
     try {
-      const response = await api.get<TeacherType[]>(
-        '/teachers',
-      )
+      const response = await api.get<TeacherType[]>('/teachers')
       const updatedTeachers = response.data.map((teacher) => {
         if (teacher.education_level === 'បរិញ្ញាបត្រជាន់ខ្ពស់') {
           return { ...teacher, name: `អនុបណ្ឌិត ${teacher.name}` }
@@ -40,9 +37,7 @@ export const useTeacherStore = create<State & Actions>((set) => ({
   fetchOneTeacher: async (id: number) => {
     set({ loading: true, error: null })
     try {
-      const response = await api.get<TeacherType>(
-        `/teachers/${id}`,
-      )
+      const response = await api.get<TeacherType>(`/teachers/${id}`)
       const teacher = response.data
       if (teacher.education_level === 'បរិញ្ញាបត្រជាន់ខ្ពស់') {
         teacher.name = `អនុបណ្ឌិត ${teacher.name}`
@@ -58,10 +53,7 @@ export const useTeacherStore = create<State & Actions>((set) => ({
   createTeacher: async (addTeacher: TeacherCreate) => {
     set({ loading: true, error: null })
     try {
-      const response = await api.post<TeacherType>(
-        '/teachers',
-        addTeacher,
-      )
+      const response = await api.post<TeacherType>('/teachers', addTeacher)
 
       set({ teacher: response.data })
     } catch (err: any) {
@@ -74,10 +66,7 @@ export const useTeacherStore = create<State & Actions>((set) => ({
   updateTeacher: async (id: number, editTeacher: TeacherType) => {
     set({ loading: true, error: null })
     try {
-      const response = await api.put<TeacherType>(
-        `/teachers${id}`,
-        editTeacher,
-      )
+      const response = await api.put<TeacherType>(`/teachers${id}`, editTeacher)
 
       set({ teacher: response.data })
     } catch (err: any) {

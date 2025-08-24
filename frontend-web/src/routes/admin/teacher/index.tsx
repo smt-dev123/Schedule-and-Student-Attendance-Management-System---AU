@@ -68,7 +68,7 @@ function RouteComponent() {
       header: 'សកម្មភាព',
       enableSorting: false,
       cell: ({ row }) => (
-        <Flex gap="1">
+        <Flex gap="2">
           <ViewTeacher teachers={row.original} />
           <IconButton
             size="1"
