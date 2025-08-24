@@ -90,16 +90,10 @@ export default function Sidebar() {
       url: '/admin/student',
     },
     {
-      key: 'schedule',
+      key: 'classes',
       icon: <AiOutlineSchedule className="text-xl" />,
-      label: t('Sidebar.schedule'),
-      url: '/admin/schedule',
-    },
-    {
-      key: 'attendance',
-      icon: <MdOutlineDateRange className="text-xl" />,
-      label: t('Sidebar.attendance'),
-      url: '/admin/attendance',
+      label: t('Sidebar.class'),
+      url: '/admin/classes',
     },
     {
       key: 'user',

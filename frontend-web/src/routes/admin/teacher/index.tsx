@@ -96,7 +96,7 @@ function RouteComponent() {
     getSortedRowModel: getSortedRowModel(),
   })
 
-  if (loading) return <div>Loading...</div>
+  // if (loading) return <div>Loading...</div>
 
   return (
     <div>
@@ -110,10 +110,11 @@ function RouteComponent() {
             <Flex gap="2">
               {/* Export */}
               <Button variant="outline" style={{ cursor: 'pointer' }}>
-                បោះពុម្ភ
-              </Button>
-              <Button variant="outline" style={{ cursor: 'pointer' }}>
                 Export Excel
+              </Button>
+
+              <Button variant="outline" style={{ cursor: 'pointer' }}>
+                បោះពុម្ភ
               </Button>
 
               <AddTeacher />

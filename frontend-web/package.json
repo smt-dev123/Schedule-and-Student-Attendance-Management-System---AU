@@ -11,7 +11,7 @@
     "lint": "eslint",
     "format": "prettier",
     "check": "prettier --write . && eslint --fix",
-    "server": "json-server --watch data/db.json --port 5000",
+    "server": "json-server --watch data/newData.json --port 5000",
     "server-net": "json-server --watch data/db.json --port 5000 --host 0.0.0.0"
   },
   "dependencies": {
@@ -35,10 +35,12 @@
     "@types/file-saver": "^2.0.7",
     "@types/node": "^24.3.0",
     "axios": "^1.11.0",
+    "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
     "file-saver": "^2.0.5",
     "framer-motion": "^12.23.12",
     "i18next": "^25.3.6",
+    "json-server": "^1.0.0-beta.3",
     "preact": "^10.27.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",

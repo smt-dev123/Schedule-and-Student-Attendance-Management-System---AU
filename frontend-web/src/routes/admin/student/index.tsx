@@ -1,4 +1,3 @@
-import CalendarSchedule from '@/components/CalendarSchedule'
 import { useTitle } from '@/hooks/useTitle'
 import { createFileRoute } from '@tanstack/react-router'
 
@@ -10,7 +9,7 @@ function RouteComponent() {
   useTitle('Student Management')
   return (
     <>
-      <CalendarSchedule />
+      <h1>Hello</h1>
     </>
   )
 }

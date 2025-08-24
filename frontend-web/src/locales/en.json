@@ -24,7 +24,7 @@
     },
     "teacher": "Teacher",
     "student": "Student",
-    "schedule": "Schedule",
+    "class": "Class",
     "attendance": "Attendance",
     "user": "User",
     "setting": "Setting"

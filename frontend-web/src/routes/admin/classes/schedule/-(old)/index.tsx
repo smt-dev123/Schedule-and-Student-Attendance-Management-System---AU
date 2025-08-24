@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { use, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useCalendarApp, ScheduleXCalendar } from '@schedule-x/react'
 import {
   createViewDay,
@@ -19,6 +19,18 @@ export const Route = createFileRoute('/admin/schedule/')({
 })
 
 function RouteComponent() {
+  const [darkMode, setDarkMode] = useState(false)
+
+  useEffect(() => {
+    const observer = new MutationObserver(() => {
+      setDarkMode(document.documentElement.classList.contains('dark'))
+    })
+    observer.observe(document.documentElement, { attributes: true })
+    setDarkMode(document.documentElement.classList.contains('dark')) // initial value
+    return () => observer.disconnect()
+  }, [])
+
+  console.log('darkMode', darkMode)
   useTitle('Schedule Management')
   const eventsService = useState(() => createEventsServicePlugin())[0]
 
@@ -29,6 +41,7 @@ function RouteComponent() {
       createViewMonthGrid(),
       createViewMonthAgenda(),
     ],
+    isDark: darkMode,
     dayBoundaries: {
       start: '07:00',
       end: '22:00',

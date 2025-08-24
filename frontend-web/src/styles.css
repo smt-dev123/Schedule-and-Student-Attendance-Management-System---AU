@@ -5,8 +5,6 @@
 :root {
   --kantumruy-pro: 'Kantumruy Pro', sans-serif;
   --bayon: 'Bayon', sans-serif;
-  --sx-color-bg: #ffffff;
-  --sx-color-text: #111111;
 }
 
 body {
@@ -20,12 +18,36 @@ main {
   font-family: var(--kantumruy-pro), var(--bayon);
 }
 
+html{
+  font-family: var(--kantumruy-pro), var(--bayon);
+}
+
 code {
   font-family:
     source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
 }
 
-.dark {
-  --sx-color-bg: #111827; /* bg-gray-900 */
-  --sx-color-text: #f3f4f6; /* text-gray-100 */
+.sx-react-calendar-wrapper {
+  max-width: 100vw;
+  height: 800px;
+  max-height: 80vh;
+  overflow: auto;
+}
+
+/* table */
+.custom-table {
+  border-collapse: separate;
+  border-spacing: 0;
+  width: 100%;
+  border: 2px solid #888;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.custom-table th,
+.custom-table td {
+  border: 1px solid #888;
+  padding: 10px;
+  text-align: center;
+  background-color: #fff;
 }

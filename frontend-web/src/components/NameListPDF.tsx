@@ -16,9 +16,10 @@ Font.register({
 })
 
 const styles = StyleSheet.create({
-  page: { padding: 20, fontFamily: 'KhmerOS_siemreap' },
+  page: { padding: 20, fontFamily: 'KhmerOS_siemreap', fontSize: 12 },
   table: {
     display: 'flex',
+    borderCollapse: 'collapse',
     width: 'auto',
     borderStyle: 'solid',
     borderWidth: 1,
