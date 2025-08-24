@@ -25,6 +25,7 @@ import { Route as AdminFacultyIndexRouteImport } from './routes/admin/faculty/in
 import { Route as AdminDashboardIndexRouteImport } from './routes/admin/dashboard/index'
 import { Route as AdminClassesIndexRouteImport } from './routes/admin/classes/index'
 import { Route as AdminTeacherTeacherIdRouteImport } from './routes/admin/teacher/$teacherId'
+import { Route as AdminDashboardIndexcopyRouteImport } from './routes/admin/dashboard/index copy'
 import { Route as AdminClassesScheduleScheduleIdRouteImport } from './routes/admin/classes/schedule/$scheduleId'
 import { Route as AdminClassesAttendanceAttendanceIdRouteImport } from './routes/admin/classes/attendance/$attendanceId'
 import { Route as AdminClassesAttendanceReportAttendanceReportIdRouteImport } from './routes/admin/classes/attendance/report/$attendanceReportId'
@@ -109,6 +110,11 @@ const AdminTeacherTeacherIdRoute = AdminTeacherTeacherIdRouteImport.update({
   path: '/teacher/$teacherId',
   getParentRoute: () => AdminRouteRoute,
 } as any)
+const AdminDashboardIndexcopyRoute = AdminDashboardIndexcopyRouteImport.update({
+  id: '/dashboard/index copy',
+  path: '/dashboard/index copy',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
 const AdminClassesScheduleScheduleIdRoute =
   AdminClassesScheduleScheduleIdRouteImport.update({
     id: '/classes/schedule/$scheduleId',
@@ -134,6 +140,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRouteRouteWithChildren
   '/auth/login': typeof AuthLoginRoute
   '/auth/register': typeof AuthRegisterRoute
+  '/admin/dashboard/index copy': typeof AdminDashboardIndexcopyRoute
   '/admin/teacher/$teacherId': typeof AdminTeacherTeacherIdRoute
   '/admin/classes': typeof AdminClassesIndexRoute
   '/admin/dashboard': typeof AdminDashboardIndexRoute
@@ -155,6 +162,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRouteRouteWithChildren
   '/auth/login': typeof AuthLoginRoute
   '/auth/register': typeof AuthRegisterRoute
+  '/admin/dashboard/index copy': typeof AdminDashboardIndexcopyRoute
   '/admin/teacher/$teacherId': typeof AdminTeacherTeacherIdRoute
   '/admin/classes': typeof AdminClassesIndexRoute
   '/admin/dashboard': typeof AdminDashboardIndexRoute
@@ -177,6 +185,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRouteRouteWithChildren
   '/auth/login': typeof AuthLoginRoute
   '/auth/register': typeof AuthRegisterRoute
+  '/admin/dashboard/index copy': typeof AdminDashboardIndexcopyRoute
   '/admin/teacher/$teacherId': typeof AdminTeacherTeacherIdRoute
   '/admin/classes/': typeof AdminClassesIndexRoute
   '/admin/dashboard/': typeof AdminDashboardIndexRoute
@@ -200,6 +209,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/auth/login'
     | '/auth/register'
+    | '/admin/dashboard/index copy'
     | '/admin/teacher/$teacherId'
     | '/admin/classes'
     | '/admin/dashboard'
@@ -221,6 +231,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/auth/login'
     | '/auth/register'
+    | '/admin/dashboard/index copy'
     | '/admin/teacher/$teacherId'
     | '/admin/classes'
     | '/admin/dashboard'
@@ -242,6 +253,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/auth/login'
     | '/auth/register'
+    | '/admin/dashboard/index copy'
     | '/admin/teacher/$teacherId'
     | '/admin/classes/'
     | '/admin/dashboard/'
@@ -378,6 +390,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminTeacherTeacherIdRouteImport
       parentRoute: typeof AdminRouteRoute
     }
+    '/admin/dashboard/index copy': {
+      id: '/admin/dashboard/index copy'
+      path: '/dashboard/index copy'
+      fullPath: '/admin/dashboard/index copy'
+      preLoaderRoute: typeof AdminDashboardIndexcopyRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
     '/admin/classes/schedule/$scheduleId': {
       id: '/admin/classes/schedule/$scheduleId'
       path: '/classes/schedule/$scheduleId'
@@ -403,6 +422,7 @@ declare module '@tanstack/react-router' {
 }
 
 interface AdminRouteRouteChildren {
+  AdminDashboardIndexcopyRoute: typeof AdminDashboardIndexcopyRoute
   AdminTeacherTeacherIdRoute: typeof AdminTeacherTeacherIdRoute
   AdminClassesIndexRoute: typeof AdminClassesIndexRoute
   AdminDashboardIndexRoute: typeof AdminDashboardIndexRoute
@@ -420,6 +440,7 @@ interface AdminRouteRouteChildren {
 }
 
 const AdminRouteRouteChildren: AdminRouteRouteChildren = {
+  AdminDashboardIndexcopyRoute: AdminDashboardIndexcopyRoute,
   AdminTeacherTeacherIdRoute: AdminTeacherTeacherIdRoute,
   AdminClassesIndexRoute: AdminClassesIndexRoute,
   AdminDashboardIndexRoute: AdminDashboardIndexRoute,
