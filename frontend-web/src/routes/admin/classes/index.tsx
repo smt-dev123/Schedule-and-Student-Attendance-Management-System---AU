@@ -42,7 +42,7 @@ function RouteComponent() {
             </Flex>
           </Flex>
           {/* Header */}
-          <Flex justify="between">
+          <Flex justify="between" gap="2">
             {/* Search */}
             <Box width="250px" maxWidth="250px">
               <TextField.Root placeholder="ស្វែងរក...">
@@ -53,7 +53,7 @@ function RouteComponent() {
             </Box>
 
             {/* Sort by */}
-            <Flex gap="2">
+            <div className="flex flex-wrap gap-2">
               <Select.Root size="2" defaultValue="ជ្រើសរើសជំនាន់">
                 <Select.Trigger />
                 <Select.Content>
@@ -107,7 +107,7 @@ function RouteComponent() {
                   <Select.Item value="ព័ត៌មានវិទ្យា">ព័ត៌មានវិទ្យា</Select.Item>
                 </Select.Content>
               </Select.Root>
-            </Flex>
+            </div>
           </Flex>
         </Flex>
         {/* Table */}

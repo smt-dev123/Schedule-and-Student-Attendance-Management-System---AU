@@ -37,7 +37,7 @@ function Login() {
           <label className="flex items-center space-x-2 cursor-pointer">
             <input
               type="checkbox"
-              className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+              className="rounded border-gray-300 text-blue-600 cursor-pointer focus:ring-blue-500"
             />
             <Text size="2" className="text-gray-600">
               Remember me

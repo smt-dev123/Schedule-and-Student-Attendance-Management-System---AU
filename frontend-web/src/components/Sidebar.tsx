@@ -12,7 +12,6 @@ import { LiaChalkboardTeacherSolid } from 'react-icons/lia'
 import { PiStudent } from 'react-icons/pi'
 import { FaRegUser } from 'react-icons/fa'
 import { AiOutlineSchedule } from 'react-icons/ai'
-import { MdOutlineDateRange } from 'react-icons/md'
 import { useTranslation } from 'react-i18next'
 
 interface MenuItem {
@@ -112,7 +111,7 @@ export default function Sidebar() {
   return (
     <aside
       className={`min-h-screen bg-white text-gray-900 dark:bg-gray-900 dark:text-white transition-all duration-300 flex flex-col border-r border-gray-200 dark:border-gray-700 ${
-        collapsed ? 'w-16' : 'w-64'
+        collapsed ? 'w-16' : 'w-64 min-w-64'
       }`}
     >
       {/* Logo / Toggle */}

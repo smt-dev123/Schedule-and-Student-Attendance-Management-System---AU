@@ -3,6 +3,8 @@ import { Link } from '@tanstack/react-router'
 import Language from './ui/Language'
 import DarkMode from './ui/DarkMode'
 import { useTranslation } from 'react-i18next'
+import { Notifications } from './ui/Notifications'
+import Expand from './ui/Expand'
 
 const Navbar = () => {
   const { t } = useTranslation()
@@ -18,8 +20,15 @@ const Navbar = () => {
       <div className="flex gap-4 items-center justify-center">
         {/* Language */}
         <Language />
+
+        {/* Expand */}
+        <Expand />
+
         {/* Dark Mode */}
         <DarkMode />
+
+        {/* Notificatoins */}
+        <Notifications />
 
         {/* User */}
         <DropdownMenu.Root>

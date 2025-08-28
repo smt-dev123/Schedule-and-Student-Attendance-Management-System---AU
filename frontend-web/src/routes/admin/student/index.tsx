@@ -1,3 +1,4 @@
+import { fetchStudents } from '@/api/StudentAPI'
 import { useTitle } from '@/hooks/useTitle'
 import {
   Badge,
@@ -10,6 +11,7 @@ import {
   Text,
   TextField,
 } from '@radix-ui/themes'
+import { useQuery } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
 import { FaRegEdit, FaRegEye, FaRegTrashAlt } from 'react-icons/fa'
 import { IoSearch } from 'react-icons/io5'
@@ -20,6 +22,13 @@ export const Route = createFileRoute('/admin/student/')({
 
 function RouteComponent() {
   useTitle('Student Management')
+  const { data, isLoading, error } = useQuery({
+    queryKey: ['students'],
+    queryFn: fetchStudents,
+  })
+
+  if (isLoading) return <Text>Loading...</Text>
+  if (error) return <Text>Error loading students.</Text>
   return (
     <>
       <Flex direction="column" mb="4">
@@ -44,7 +53,7 @@ function RouteComponent() {
           </Flex>
         </Flex>
         {/* Header */}
-        <Flex justify="between">
+        <Flex justify="between" gap="2">
           {/* Search */}
           <Box width="250px" maxWidth="250px">
             <TextField.Root placeholder="ស្វែងរក...">
@@ -55,7 +64,7 @@ function RouteComponent() {
           </Box>
 
           {/* Sort by */}
-          <Flex gap="2">
+          <div className="flex flex-wrap gap-2">
             <Select.Root size="2" defaultValue="ជ្រើសរើសកម្រិតថ្នាក់">
               <Select.Trigger />
               <Select.Content>
@@ -99,7 +108,7 @@ function RouteComponent() {
                 <Select.Item value="ព័ត៌មានវិទ្យា">ព័ត៌មានវិទ្យា</Select.Item>
               </Select.Content>
             </Select.Root>
-          </Flex>
+          </div>
         </Flex>
       </Flex>
 
@@ -123,47 +132,73 @@ function RouteComponent() {
         </Table.Header>
 
         <Table.Body>
-          <Table.Row>
-            <Table.RowHeaderCell>1</Table.RowHeaderCell>
-            <Table.Cell>0001</Table.Cell>
-            <Table.Cell>លុយ សុមាត្រា</Table.Cell>
-            <Table.Cell>ប្រុស</Table.Cell>
-            <Table.Cell>វិទ្យាសាស្រ្ដកុំព្យូទ័រ</Table.Cell>
-            <Table.Cell>1/2/2003</Table.Cell>
-            <Table.Cell>061 873 789</Table.Cell>
-            <Table.Cell>smt@gmail.com</Table.Cell>
-            <Table.Cell>
-              <Badge> កំពុងសិក្សា</Badge>
-            </Table.Cell>
-            <Table.Cell>
-              <Flex gap="2">
-                <IconButton
-                  color="indigo"
-                  variant="surface"
-                  size="1"
-                  style={{ cursor: 'pointer' }}
-                >
-                  <FaRegEye />
-                </IconButton>
-                <IconButton
-                  color="cyan"
-                  variant="surface"
-                  size="1"
-                  style={{ cursor: 'pointer' }}
-                >
-                  <FaRegEdit />
-                </IconButton>
-                <IconButton
-                  color="crimson"
-                  variant="surface"
-                  size="1"
-                  style={{ cursor: 'pointer' }}
-                >
-                  <FaRegTrashAlt />
-                </IconButton>
-              </Flex>
-            </Table.Cell>
-          </Table.Row>
+          {data.map((student: any, idx: number) => (
+            <Table.Row
+              key={student.id}
+              className="hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors"
+            >
+              <Table.RowHeaderCell className="text-center">
+                {idx + 1}
+              </Table.RowHeaderCell>
+              <Table.Cell className="text-center">
+                {student.cardNumber ?? '-'}
+              </Table.Cell>
+              <Table.Cell className="text-center">
+                {student.name ?? '-'}
+              </Table.Cell>
+              <Table.Cell className="text-center">
+                {student.gender ?? '-'}
+              </Table.Cell>
+              <Table.Cell className="text-center">
+                {student.major ?? '-'}
+              </Table.Cell>
+              <Table.Cell className="text-center">
+                {student.dob ?? '-'}
+              </Table.Cell>
+              <Table.Cell className="text-center">
+                {student.phone ?? '-'}
+              </Table.Cell>
+              <Table.Cell className="text-center">
+                {student.email ?? '-'}
+              </Table.Cell>
+              <Table.Cell className="text-center">
+                <Badge color={student.status === 'active' ? 'green' : 'gray'}>
+                  {student.status === 'active' ? 'កំពុងសិក្សា' : 'បញ្ចប់'}
+                </Badge>
+              </Table.Cell>
+              <Table.Cell>
+                <Flex gap="2" justify="center">
+                  <IconButton
+                    color="indigo"
+                    variant="surface"
+                    size="1"
+                    className="rounded-full"
+                    style={{ cursor: 'pointer' }}
+                  >
+                    <FaRegEye />
+                  </IconButton>
+                  <IconButton
+                    color="cyan"
+                    variant="surface"
+                    size="1"
+                    className="rounded-full"
+                    style={{ cursor: 'pointer' }}
+                  >
+                    <FaRegEdit />
+                  </IconButton>
+                  <IconButton
+                    color="crimson"
+                    variant="surface"
+                    size="1"
+                    className="rounded-full"
+                    style={{ cursor: 'pointer' }}
+                  >
+                    <FaRegTrashAlt />
+                  </IconButton>
+                </Flex>
+              </Table.Cell>
+            </Table.Row>
+          ))}
         </Table.Body>
       </Table.Root>
     </>
