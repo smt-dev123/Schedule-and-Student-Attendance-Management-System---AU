@@ -1,6 +1,7 @@
 import { useTitle } from '@/hooks/useTitle'
+import { useAuth } from '@/stores/auth'
 import { Button, Flex, Spinner, Text, TextField } from '@radix-ui/themes'
-import { createFileRoute, Link } from '@tanstack/react-router'
+import { createFileRoute, Link, useRouter } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
 
 export const Route = createFileRoute('/auth/login')({
@@ -8,7 +9,18 @@ export const Route = createFileRoute('/auth/login')({
 })
 
 function Login() {
+  const { login } = useAuth()
+  const router = useRouter()
   const [loading, setLoading] = useState(false)
+
+  const handleLogin = () => {
+    const success = login('student1', '123')
+    if (success) {
+      router.navigate({ to: '/admin/dashboard' })
+    } else {
+      alert('Username & Password មិនត្រឹមត្រូវ')
+    }
+  }
 
   useTitle('Login')
   return (
@@ -58,15 +70,14 @@ function Login() {
             Login
           </Button>
         ) : (
-          <Link to="/admin/dashboard" className="w-full">
-            <Button
-              color="indigo"
-              variant="solid"
-              style={{ cursor: 'pointer', width: '100%' }}
-            >
-              Login
-            </Button>
-          </Link>
+          <Button
+            onClick={handleLogin}
+            color="indigo"
+            variant="solid"
+            style={{ cursor: 'pointer', width: '100%' }}
+          >
+            Login
+          </Button>
         )}
       </Flex>
       <Flex justify="center" align="center" mt="4" gap="2">

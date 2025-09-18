@@ -9,9 +9,11 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as TestRouteRouteImport } from './routes/test/route'
 import { Route as AuthRouteRouteImport } from './routes/auth/route'
 import { Route as AdminRouteRouteImport } from './routes/admin/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as TestIndexRouteImport } from './routes/test/index'
 import { Route as AuthRegisterRouteImport } from './routes/auth/register'
 import { Route as AuthLoginRouteImport } from './routes/auth/login'
 import { Route as AdminUserIndexRouteImport } from './routes/admin/user/index'
@@ -30,6 +32,11 @@ import { Route as AdminClassesScheduleScheduleIdRouteImport } from './routes/adm
 import { Route as AdminClassesAttendanceAttendanceIdRouteImport } from './routes/admin/classes/attendance/$attendanceId'
 import { Route as AdminClassesAttendanceReportAttendanceReportIdRouteImport } from './routes/admin/classes/attendance/report/$attendanceReportId'
 
+const TestRouteRoute = TestRouteRouteImport.update({
+  id: '/test',
+  path: '/test',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthRouteRoute = AuthRouteRouteImport.update({
   id: '/auth',
   path: '/auth',
@@ -44,6 +51,11 @@ const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const TestIndexRoute = TestIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => TestRouteRoute,
 } as any)
 const AuthRegisterRoute = AuthRegisterRouteImport.update({
   id: '/register',
@@ -138,8 +150,10 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteRouteWithChildren
   '/auth': typeof AuthRouteRouteWithChildren
+  '/test': typeof TestRouteRouteWithChildren
   '/auth/login': typeof AuthLoginRoute
   '/auth/register': typeof AuthRegisterRoute
+  '/test/': typeof TestIndexRoute
   '/admin/dashboard/index copy': typeof AdminDashboardIndexcopyRoute
   '/admin/teacher/$teacherId': typeof AdminTeacherTeacherIdRoute
   '/admin/classes': typeof AdminClassesIndexRoute
@@ -162,6 +176,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRouteRouteWithChildren
   '/auth/login': typeof AuthLoginRoute
   '/auth/register': typeof AuthRegisterRoute
+  '/test': typeof TestIndexRoute
   '/admin/dashboard/index copy': typeof AdminDashboardIndexcopyRoute
   '/admin/teacher/$teacherId': typeof AdminTeacherTeacherIdRoute
   '/admin/classes': typeof AdminClassesIndexRoute
@@ -183,8 +198,10 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteRouteWithChildren
   '/auth': typeof AuthRouteRouteWithChildren
+  '/test': typeof TestRouteRouteWithChildren
   '/auth/login': typeof AuthLoginRoute
   '/auth/register': typeof AuthRegisterRoute
+  '/test/': typeof TestIndexRoute
   '/admin/dashboard/index copy': typeof AdminDashboardIndexcopyRoute
   '/admin/teacher/$teacherId': typeof AdminTeacherTeacherIdRoute
   '/admin/classes/': typeof AdminClassesIndexRoute
@@ -207,8 +224,10 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/auth'
+    | '/test'
     | '/auth/login'
     | '/auth/register'
+    | '/test/'
     | '/admin/dashboard/index copy'
     | '/admin/teacher/$teacherId'
     | '/admin/classes'
@@ -231,6 +250,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/auth/login'
     | '/auth/register'
+    | '/test'
     | '/admin/dashboard/index copy'
     | '/admin/teacher/$teacherId'
     | '/admin/classes'
@@ -251,8 +271,10 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/auth'
+    | '/test'
     | '/auth/login'
     | '/auth/register'
+    | '/test/'
     | '/admin/dashboard/index copy'
     | '/admin/teacher/$teacherId'
     | '/admin/classes/'
@@ -274,10 +296,18 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRouteRoute: typeof AdminRouteRouteWithChildren
   AuthRouteRoute: typeof AuthRouteRouteWithChildren
+  TestRouteRoute: typeof TestRouteRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/test': {
+      id: '/test'
+      path: '/test'
+      fullPath: '/test'
+      preLoaderRoute: typeof TestRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/auth': {
       id: '/auth'
       path: '/auth'
@@ -298,6 +328,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/test/': {
+      id: '/test/'
+      path: '/'
+      fullPath: '/test/'
+      preLoaderRoute: typeof TestIndexRouteImport
+      parentRoute: typeof TestRouteRoute
     }
     '/auth/register': {
       id: '/auth/register'
@@ -477,10 +514,23 @@ const AuthRouteRouteWithChildren = AuthRouteRoute._addFileChildren(
   AuthRouteRouteChildren,
 )
 
+interface TestRouteRouteChildren {
+  TestIndexRoute: typeof TestIndexRoute
+}
+
+const TestRouteRouteChildren: TestRouteRouteChildren = {
+  TestIndexRoute: TestIndexRoute,
+}
+
+const TestRouteRouteWithChildren = TestRouteRoute._addFileChildren(
+  TestRouteRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRouteRoute: AdminRouteRouteWithChildren,
   AuthRouteRoute: AuthRouteRouteWithChildren,
+  TestRouteRoute: TestRouteRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

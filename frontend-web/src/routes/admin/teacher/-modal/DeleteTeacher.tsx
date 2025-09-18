@@ -32,7 +32,7 @@ const DeleteTeacher: React.FC<DeleteTeacherProps> = ({ teachers }) => {
         </IconButton>
       </AlertDialog.Trigger>
       <AlertDialog.Content maxWidth="450px">
-        <AlertDialog.Title>តើអ្នកពិតជាចង់លុបវាមែនទេ?</AlertDialog.Title>
+        <AlertDialog.Title>តើអ្នកពិតជាចង់លុបមែនទេ?</AlertDialog.Title>
         <AlertDialog.Description size="2">
           តើអ្នកពិតជាចង់លុបលោកគ្រូ{' '}
           <b>{teachers?.name ?? `ID ${teachers.id}`}</b> ?

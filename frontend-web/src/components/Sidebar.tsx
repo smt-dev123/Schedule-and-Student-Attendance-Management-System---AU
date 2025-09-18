@@ -1,18 +1,20 @@
-import { useState } from 'react'
-import { Link } from '@tanstack/react-router'
+import * as Collapsible from '@radix-ui/react-collapsible'
+import * as Dialog from '@radix-ui/react-dialog'
+import { VisuallyHidden } from '@radix-ui/react-visually-hidden'
 import {
   RiDashboardLine,
   RiSettings3Line,
-  RiMenu2Line,
+  RiSchoolLine,
   RiArrowDownSLine,
   RiArrowRightSLine,
-  RiSchoolLine,
 } from 'react-icons/ri'
+import { useTranslation } from 'react-i18next'
 import { LiaChalkboardTeacherSolid } from 'react-icons/lia'
+import { AiOutlineSchedule } from 'react-icons/ai'
 import { PiStudent } from 'react-icons/pi'
 import { FaRegUser } from 'react-icons/fa'
-import { AiOutlineSchedule } from 'react-icons/ai'
-import { useTranslation } from 'react-i18next'
+import { Link } from '@tanstack/react-router'
+import { useSidebarStore } from '@/stores/sidebarStore'
 
 interface MenuItem {
   key: string
@@ -22,16 +24,26 @@ interface MenuItem {
   children?: MenuItem[]
 }
 
-export default function Sidebar() {
-  const [collapsed, setCollapsed] = useState(false)
-  const [openKeys, setOpenKeys] = useState<string[]>([])
+type SidebarProps = {
+  mobileOpen?: boolean
+  onMobileOpenChange?: (open: boolean) => void
+}
+
+export default function Sidebar({
+  mobileOpen,
+  onMobileOpenChange,
+}: SidebarProps) {
+  const {
+    isDesktopOpen,
+    isMobileOpen,
+    toggleDesktopSidebar,
+    setMobileSidebar,
+  } = useSidebarStore()
+
   const { t } = useTranslation()
 
-  // --- toggle submenu ---
-  const toggleSubmenu = (key: string) =>
-    setOpenKeys((prev) =>
-      prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key],
-    )
+  const actualMobileOpen = mobileOpen !== undefined ? mobileOpen : isMobileOpen
+  const actualOnMobileOpenChange = onMobileOpenChange || setMobileSidebar
 
   const menuItems: MenuItem[] = [
     {
@@ -109,87 +121,76 @@ export default function Sidebar() {
   ]
 
   return (
-    <aside
-      className={`min-h-screen bg-white text-gray-900 dark:bg-gray-900 dark:text-white transition-all duration-300 flex flex-col border-r border-gray-200 dark:border-gray-700 ${
-        collapsed ? 'w-16' : 'w-64 min-w-64'
-      }`}
-    >
-      {/* Logo / Toggle */}
-      <div className="h-16 flex items-center justify-between px-4 border-b border-gray-100 dark:border-gray-700">
-        {!collapsed && (
-          <Link to="/admin/dashboard" preload="intent">
-            <img
-              className="w-36 h-auto"
-              src="https://www.angkor.edu.kh/images/LogoAu3.png"
-              alt="Angkor University"
-            />
-          </Link>
-        )}
-        <button
-          onClick={() => setCollapsed(!collapsed)}
-          className="ml-auto text-2xl text-gray-600 dark:text-gray-200 dark:hover:text-gray-400 hover:text-gray-800 cursor-pointer transition-all"
-        >
-          <RiMenu2Line />
-        </button>
-      </div>
+    <div className="flex">
+      {/* === Desktop Sidebar === */}
+      <Collapsible.Root
+        open={isDesktopOpen}
+        onOpenChange={toggleDesktopSidebar}
+        className="hidden md:block min-h-screen bg-white text-gray-900 dark:bg-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-700 transition-all"
+      >
+        <div className={`transition-all ${isDesktopOpen ? 'w-64' : 'w-16'}`}>
+          {/* === Header === */}
+          <div className="h-16 flex items-center px-4 border-b border-gray-100 dark:border-gray-700">
+            <Link to="/admin/dashboard" preload="intent">
+              <img
+                className={`${isDesktopOpen ? 'w-36 h-auto' : 'w-9 h-9'}`}
+                src={
+                  isDesktopOpen
+                    ? 'https://www.angkor.edu.kh/images/LogoAu3.png'
+                    : 'https://academics-bucket-sj19asxm-prod.s3.ap-southeast-1.amazonaws.com/884dc87f-2613-47fc-83b3-b138abc386df/884dc87f-2613-47fc-83b3-b138abc386df.png'
+                }
+                alt="Angkor University"
+              />
+            </Link>
+          </div>
 
-      {/* Menu */}
-      <nav className="font-khmer mt-2 flex-1 overflow-auto">
-        <ul className="space-y-1 mx-2">
-          {menuItems.map((menu) => {
-            const isOpen = openKeys.includes(menu.key)
-
-            if (menu.children) {
-              return (
-                <li key={menu.key}>
-                  <button
-                    onClick={() => toggleSubmenu(menu.key)}
-                    className={`flex items-center justify-between w-full px-4 py-2 rounded cursor-pointer transition-colors duration-200 ${
-                      isOpen
-                        ? 'bg-blue-100 text-blue-600 dark:bg-gray-700 dark:text-blue-400'
-                        : 'hover:bg-blue-50 text-gray-700 dark:hover:bg-gray-800 dark:text-gray-300'
-                    }`}
-                  >
-                    <div className="flex items-center gap-2 font-kantumruy-pro">
-                      {menu.icon}
-                      {!collapsed && <span>{menu.label}</span>}
-                    </div>
-                    {!collapsed &&
-                      (isOpen ? <RiArrowDownSLine /> : <RiArrowRightSLine />)}
-                  </button>
-
-                  {isOpen && !collapsed && (
-                    <ul className="ml-8 mt-1 space-y-1">
-                      {menu.children.map((child) => (
-                        <li key={child.key}>
-                          <Link
-                            preload="intent"
-                            to={child.url ?? '#'}
-                            activeProps={{
-                              className:
-                                'bg-blue-100 text-blue-600 dark:bg-gray-700 dark:text-blue-400',
-                            }}
-                            inactiveProps={{
-                              className:
-                                'hover:bg-blue-50 text-gray-700 dark:hover:bg-gray-800 dark:text-gray-300',
-                            }}
-                            className="block px-3 py-2 rounded text-sm transition-colors duration-200"
-                          >
-                            {child.label}
-                          </Link>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                </li>
-              )
-            }
-
-            return (
-              <li key={menu.key}>
+          {/* === Desktop Nav === */}
+          <nav className="flex flex-col gap-1 p-2">
+            {menuItems.map((menu) =>
+              menu.children ? (
+                <Collapsible.Root key={menu.key} className="w-full">
+                  <Collapsible.Trigger asChild>
+                    <button className="flex items-center justify-between w-full p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded">
+                      <div className="flex items-center gap-2">
+                        {menu.icon}
+                        {isDesktopOpen && (
+                          <span className="line-clamp-1">{menu.label}</span>
+                        )}
+                      </div>
+                      {isDesktopOpen && (
+                        <RiArrowDownSLine className="ml-auto" />
+                      )}
+                    </button>
+                  </Collapsible.Trigger>
+                  <Collapsible.Content className="ml-6 flex flex-col">
+                    {menu.children.map((child) => (
+                      <Link
+                        key={child.key}
+                        to={child.url ?? '#'}
+                        preload="intent"
+                        className="flex items-center gap-2 p-2 text-sm rounded"
+                        activeProps={{
+                          className:
+                            'bg-blue-100 text-blue-600 dark:bg-gray-700 dark:text-blue-400',
+                        }}
+                        inactiveProps={{
+                          className:
+                            'hover:bg-blue-50 text-gray-700 dark:hover:bg-gray-800 dark:text-gray-300',
+                        }}
+                      >
+                        {isDesktopOpen && (
+                          <span className="line-clamp-1">{child.label}</span>
+                        )}
+                      </Link>
+                    ))}
+                  </Collapsible.Content>
+                </Collapsible.Root>
+              ) : (
                 <Link
-                  preload="intent"
+                  key={menu.key}
                   to={menu.url ?? '#'}
+                  preload="intent"
+                  className="flex items-center gap-2 p-2 rounded"
                   activeProps={{
                     className:
                       'bg-blue-100 text-blue-600 dark:bg-gray-700 dark:text-blue-400',
@@ -198,16 +199,113 @@ export default function Sidebar() {
                     className:
                       'hover:bg-blue-50 text-gray-700 dark:hover:bg-gray-800 dark:text-gray-300',
                   }}
-                  className="flex items-center gap-2 px-4 py-2 rounded transition-colors duration-200"
                 >
                   {menu.icon}
-                  {!collapsed && <span>{menu.label}</span>}
+                  {isDesktopOpen && (
+                    <span className="line-clamp-1">{menu.label}</span>
+                  )}
                 </Link>
-              </li>
-            )
-          })}
-        </ul>
-      </nav>
-    </aside>
+              ),
+            )}
+          </nav>
+        </div>
+      </Collapsible.Root>
+
+      {/* === Mobile Drawer === */}
+      <div className="md:hidden">
+        <Dialog.Root
+          open={actualMobileOpen}
+          onOpenChange={actualOnMobileOpenChange}
+        >
+          <Dialog.Portal>
+            <Dialog.Overlay className="fixed inset-0 bg-black/50" />
+            <Dialog.Content className="fixed top-0 left-0 h-full w-64 bg-white text-gray-900 dark:bg-gray-900 dark:text-white shadow-lg">
+              <VisuallyHidden>
+                <Dialog.Title>Mobile menu</Dialog.Title>
+                <Dialog.Description>
+                  Navigation menu with links.
+                </Dialog.Description>
+              </VisuallyHidden>
+
+              {/* === Header === */}
+              <div className="h-16 flex items-center px-4 border-b border-gray-100 dark:border-gray-700">
+                <Link to="/admin/dashboard" preload="intent">
+                  <img
+                    className="w-36 h-auto"
+                    src="https://www.angkor.edu.kh/images/LogoAu3.png"
+                    alt="Angkor University"
+                  />
+                </Link>
+              </div>
+
+              <nav className="flex flex-col gap-1 p-4">
+                {menuItems.map((menu) =>
+                  menu.children ? (
+                    <Collapsible.Root key={menu.key} className="w-full">
+                      <Collapsible.Trigger asChild>
+                        <button className="flex items-center justify-between w-full p-2 hover:bg-gray-800 rounded">
+                          <div className="flex items-center gap-2">
+                            {menu.icon}
+                            <span>{menu.label}</span>
+                          </div>
+                          <RiArrowRightSLine className="ml-auto" />
+                        </button>
+                      </Collapsible.Trigger>
+                      <Collapsible.Content className="ml-6 flex flex-col">
+                        {menu.children.map((child) => (
+                          <Link
+                            key={child.key}
+                            to={child.url ?? '#'}
+                            preload="intent"
+                            className="flex items-center gap-2 p-2 text-sm rounded"
+                            activeProps={{
+                              className:
+                                'bg-blue-100 text-blue-600 dark:bg-gray-700 dark:text-blue-400',
+                            }}
+                            inactiveProps={{
+                              className:
+                                'hover:bg-blue-50 text-gray-700 dark:hover:bg-gray-800 dark:text-gray-300',
+                            }}
+                          >
+                            <span className="line-clamp-1">{child.label}</span>
+                          </Link>
+                        ))}
+                      </Collapsible.Content>
+                    </Collapsible.Root>
+                  ) : (
+                    <Link
+                      key={menu.key}
+                      to={menu.url ?? '#'}
+                      preload="intent"
+                      className="flex items-center gap-2 p-2 rounded"
+                      activeProps={{
+                        className:
+                          'bg-blue-100 text-blue-600 dark:bg-gray-700 dark:text-blue-400',
+                      }}
+                      inactiveProps={{
+                        className:
+                          'hover:bg-blue-50 text-gray-700 dark:hover:bg-gray-800 dark:text-gray-300',
+                      }}
+                    >
+                      {menu.icon}
+                      <span>{menu.label}</span>
+                    </Link>
+                  ),
+                )}
+              </nav>
+
+              {/* <Dialog.Close asChild>
+                <button
+                  aria-label="Close menu"
+                  className="absolute top-3 right-3 rounded p-1 hover:bg-white/10"
+                >
+                  ✕
+                </button>
+              </Dialog.Close> */}
+            </Dialog.Content>
+          </Dialog.Portal>
+        </Dialog.Root>
+      </div>
+    </div>
   )
 }

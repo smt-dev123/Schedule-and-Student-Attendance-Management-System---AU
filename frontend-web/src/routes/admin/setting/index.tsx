@@ -17,12 +17,12 @@ export const Route = createFileRoute('/admin/setting/')({
 function RouteComponent() {
   useTitle('Settings')
   return (
-    <>
+    <Card>
       <Flex justify="between" align="center">
         <Text className="text-2xl font-bold">Account</Text>
         <Button>រក្សាទុក</Button>
       </Flex>
-      <p>real time information and activities of your property</p>
+      {/* <p>real time information and activities of your property</p> */}
 
       {/*  */}
       <Separator my="3" size="4" />
@@ -108,6 +108,6 @@ function RouteComponent() {
           </label>
         </Flex>
       </Flex>
-    </>
+    </Card>
   )
 }

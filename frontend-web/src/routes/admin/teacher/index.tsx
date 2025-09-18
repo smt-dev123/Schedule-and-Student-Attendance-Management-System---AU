@@ -30,9 +30,16 @@ import AddTeacher from '@/routes/admin/teacher/-modal/AddTeacher'
 import ViewTeacher from './-modal/ViewTeacher'
 import DeleteTeacher from './-modal/DeleteTeacher'
 import { useTitle } from '@/hooks/useTitle'
+import { useAuth } from '@/stores/auth'
 
 export const Route = createFileRoute('/admin/teacher/')({
   component: RouteComponent,
+  beforeLoad: () => {
+    const { user } = useAuth.getState()
+    if (!user) return { redirect: '/auth/login' }
+    if (user.role !== 'teacher') return { redirect: '/dashboard' }
+    return null
+  },
 })
 
 function RouteComponent() {

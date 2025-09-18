@@ -11,7 +11,7 @@ export function RootTable({
   return (
     <Table.Root
       className={clsx(
-        'rounded-md border border-gray-400 dark:border-gray-600 overflow-hidden',
+        'rounded-md bg-white dark:bg-gray-800 border border-gray-400 dark:border-gray-600 overflow-hidden',
         classname,
       )}
     >

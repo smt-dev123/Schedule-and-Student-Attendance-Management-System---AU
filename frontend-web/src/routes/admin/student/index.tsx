@@ -1,20 +1,11 @@
-import { fetchStudents } from '@/api/StudentAPI'
+import { getStudents } from '@/api/StudentApi'
 import { useTitle } from '@/hooks/useTitle'
-import {
-  Badge,
-  Box,
-  Button,
-  Flex,
-  IconButton,
-  Select,
-  Table,
-  Text,
-  TextField,
-} from '@radix-ui/themes'
+import { Button, Flex, Select, Text, TextField } from '@radix-ui/themes'
 import { useQuery } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
-import { FaRegEdit, FaRegEye, FaRegTrashAlt } from 'react-icons/fa'
 import { IoSearch } from 'react-icons/io5'
+import { useState } from 'react'
+import { StudentTable } from '@/features/student/StudentTable'
 
 export const Route = createFileRoute('/admin/student/')({
   component: RouteComponent,
@@ -22,18 +13,19 @@ export const Route = createFileRoute('/admin/student/')({
 
 function RouteComponent() {
   useTitle('Student Management')
+  const [globalFilter, setGlobalFilter] = useState('')
   const { data, isLoading, error } = useQuery({
     queryKey: ['students'],
-    queryFn: fetchStudents,
+    queryFn: getStudents,
   })
 
   if (isLoading) return <Text>Loading...</Text>
   if (error) return <Text>Error loading students.</Text>
   return (
     <>
-      <Flex direction="column" mb="4">
-        {/*  */}
-        <Flex justify="between" mb="4">
+      <Flex direction="column" gap="2" mb="4">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row justify-between gap-2">
           <Text size="5" className="font-bold">
             តារាងនិស្សិត
           </Text>
@@ -51,20 +43,24 @@ function RouteComponent() {
               បន្ថែមនិស្សិត
             </Button>
           </Flex>
-        </Flex>
-        {/* Header */}
-        <Flex justify="between" gap="2">
+        </div>
+        {/* SortBy */}
+        <div className="flex flex-col md:flex-row justify-between gap-2">
           {/* Search */}
-          <Box width="250px" maxWidth="250px">
-            <TextField.Root placeholder="ស្វែងរក...">
+          <div className="min-w-80">
+            <TextField.Root
+              value={globalFilter}
+              onChange={(e) => setGlobalFilter(e.target.value)}
+              placeholder="ស្វែងរក..."
+            >
               <TextField.Slot>
                 <IoSearch height="16" width="16" />
               </TextField.Slot>
             </TextField.Root>
-          </Box>
+          </div>
 
           {/* Sort by */}
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-col md:flex-row gap-2">
             <Select.Root size="2" defaultValue="ជ្រើសរើសកម្រិតថ្នាក់">
               <Select.Trigger />
               <Select.Content>
@@ -109,98 +105,11 @@ function RouteComponent() {
               </Select.Content>
             </Select.Root>
           </div>
-        </Flex>
+        </div>
       </Flex>
 
       {/* Table */}
-      <Table.Root variant="surface">
-        <Table.Header>
-          <Table.Row>
-            <Table.ColumnHeaderCell>ល.រ</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell>លេខកាត</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell>គោត្តនាម-នាម</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell>ភេទ</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell>មុខជំនាញ</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell>ថ្ងៃ ខែ ឆ្នាំកំណើត</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell>លេខទូរស័ព្ទ</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell>អ៊ីម៉ែល</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell>ស្ថានភាព</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell className="w-36">
-              សកម្មភាព
-            </Table.ColumnHeaderCell>
-          </Table.Row>
-        </Table.Header>
-
-        <Table.Body>
-          {data.map((student: any, idx: number) => (
-            <Table.Row
-              key={student.id}
-              className="hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors"
-            >
-              <Table.RowHeaderCell className="text-center">
-                {idx + 1}
-              </Table.RowHeaderCell>
-              <Table.Cell className="text-center">
-                {student.cardNumber ?? '-'}
-              </Table.Cell>
-              <Table.Cell className="text-center">
-                {student.name ?? '-'}
-              </Table.Cell>
-              <Table.Cell className="text-center">
-                {student.gender ?? '-'}
-              </Table.Cell>
-              <Table.Cell className="text-center">
-                {student.major ?? '-'}
-              </Table.Cell>
-              <Table.Cell className="text-center">
-                {student.dob ?? '-'}
-              </Table.Cell>
-              <Table.Cell className="text-center">
-                {student.phone ?? '-'}
-              </Table.Cell>
-              <Table.Cell className="text-center">
-                {student.email ?? '-'}
-              </Table.Cell>
-              <Table.Cell className="text-center">
-                <Badge color={student.status === 'active' ? 'green' : 'gray'}>
-                  {student.status === 'active' ? 'កំពុងសិក្សា' : 'បញ្ចប់'}
-                </Badge>
-              </Table.Cell>
-              <Table.Cell>
-                <Flex gap="2" justify="center">
-                  <IconButton
-                    color="indigo"
-                    variant="surface"
-                    size="1"
-                    className="rounded-full"
-                    style={{ cursor: 'pointer' }}
-                  >
-                    <FaRegEye />
-                  </IconButton>
-                  <IconButton
-                    color="cyan"
-                    variant="surface"
-                    size="1"
-                    className="rounded-full"
-                    style={{ cursor: 'pointer' }}
-                  >
-                    <FaRegEdit />
-                  </IconButton>
-                  <IconButton
-                    color="crimson"
-                    variant="surface"
-                    size="1"
-                    className="rounded-full"
-                    style={{ cursor: 'pointer' }}
-                  >
-                    <FaRegTrashAlt />
-                  </IconButton>
-                </Flex>
-              </Table.Cell>
-            </Table.Row>
-          ))}
-        </Table.Body>
-      </Table.Root>
+      <StudentTable data={data} />
     </>
   )
 }

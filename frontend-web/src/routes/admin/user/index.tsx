@@ -3,7 +3,7 @@ import { Box, Flex, IconButton, Table, Text, TextField } from '@radix-ui/themes'
 import { createFileRoute } from '@tanstack/react-router'
 import { FaRegEdit, FaRegEye, FaRegTrashAlt } from 'react-icons/fa'
 import { IoSearch } from 'react-icons/io5'
-import AddUser from './-(modal)/addUser'
+import AddUser from './-(modal)/AddUser'
 
 export const Route = createFileRoute('/admin/user/')({
   component: RouteComponent,
