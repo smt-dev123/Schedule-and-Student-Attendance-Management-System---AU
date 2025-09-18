@@ -150,7 +150,7 @@ export default function Sidebar({
               menu.children ? (
                 <Collapsible.Root key={menu.key} className="w-full">
                   <Collapsible.Trigger asChild>
-                    <button className="flex items-center justify-between w-full p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded">
+                    <button className="flex items-center justify-center w-full p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded">
                       <div className="flex items-center gap-2">
                         {menu.icon}
                         {isDesktopOpen && (
@@ -190,7 +190,7 @@ export default function Sidebar({
                   key={menu.key}
                   to={menu.url ?? '#'}
                   preload="intent"
-                  className="flex items-center gap-2 p-2 rounded"
+                  className={`flex items-center gap-2 p-2 rounded ${!isDesktopOpen ? 'justify-center' : ''}`}
                   activeProps={{
                     className:
                       'bg-blue-100 text-blue-600 dark:bg-gray-700 dark:text-blue-400',
