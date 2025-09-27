@@ -1,4 +1,4 @@
-import { getStudents } from '@/api/StudentApi'
+import { getStudents } from '@/api/StudentAPI'
 import { useTitle } from '@/hooks/useTitle'
 import { Button, Flex, Select, Text, TextField } from '@radix-ui/themes'
 import { useQuery } from '@tanstack/react-query'

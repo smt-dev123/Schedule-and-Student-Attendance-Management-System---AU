@@ -11,8 +11,8 @@
     "lint": "eslint",
     "format": "prettier",
     "check": "prettier --write . && eslint --fix",
-    "server": "json-server --watch data/newData.json --port 5000",
-    "server-net": "json-server --watch data/db.json --port 5000 --host 0.0.0.0"
+    "server": "json-server --watch data/data.json --port 5000",
+    "server-net": "json-server --watch data/data.json --port 5000 --host 0.0.0.0"
   },
   "dependencies": {
     "@pdf-viewer/react": "^1.8.2",

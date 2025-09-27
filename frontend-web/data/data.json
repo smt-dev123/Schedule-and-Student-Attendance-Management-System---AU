@@ -1,4 +1,13 @@
 {
+  "users": [
+    { "id": "1", "username": "សេង ស៊ង់", "email": "soung@gmail.com", "role": "admin", "password": "123" },
+    { "id": "2", "username": "លុយ សុមាត្រា", "email": "smt@gmail.com", "role": "student", "password": "123" },
+    { "id": "3", "username": "ស្រៀង លីហួរ", "email": "hour@gmail.com", "role": "student", "password": "123" },
+    { "id": "4", "username": "ធឿង ឡង់ឌី", "email": "longdy@gmail.com", "role": "student", "password": "123" },
+    { "id": "5", "username": "ទូច វិទូរ", "email": "vitu@gmail.com", "role": "student", "password": "123" },
+    { "id": "6", "username": "សិទ្ធ ធារ៉ា", "email": "theara@gmail.com", "role": "student", "password": "123" },
+    { "id": "7", "username": "សិទ្ធ ស្រីនិច", "email": "sreynich@gmail.com", "role": "student", "password": "123" }
+  ],
   "faculties": [
     { "id": "1", "name": "វិទ្យាសាស្រ្ត" },
     { "id": "2", "name": "សិល្បៈ" },

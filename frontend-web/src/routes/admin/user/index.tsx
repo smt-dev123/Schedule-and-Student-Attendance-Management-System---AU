@@ -21,6 +21,8 @@ function RouteComponent() {
             <Text size="5" className="font-bold">
               អ្នកប្រើប្រាស់
             </Text>
+            {/* បង្កើតអ្នកប្រើប្រាស់ */}
+            <AddUser />
           </Flex>
           {/* Header */}
           <Flex justify="between">
@@ -32,9 +34,6 @@ function RouteComponent() {
                 </TextField.Slot>
               </TextField.Root>
             </Box>
-
-            {/* បង្កើតអ្នកប្រើប្រាស់ */}
-            <AddUser />
           </Flex>
         </Flex>
         {/* Table */}
