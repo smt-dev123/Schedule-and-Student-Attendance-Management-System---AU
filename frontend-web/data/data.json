@@ -8,44 +8,43 @@
     { "id": "6", "username": "សិទ្ធ ធារ៉ា", "email": "theara@gmail.com", "role": "student", "password": "123" },
     { "id": "7", "username": "សិទ្ធ ស្រីនិច", "email": "sreynich@gmail.com", "role": "student", "password": "123" }
   ],
+  
+  "classes": [
+    { "id": "1", "facultyId": "1", "gradeLevelId": "2", "generationId": "2", "roomId": "1" },
+    { "id": "2", "facultyId": "1", "gradeLevelId": "1", "generationId": "1", "roomId": "1" }
+  ],
+
   "faculties": [
-    { "id": "1", "name": "វិទ្យាសាស្រ្ត" },
-    { "id": "2", "name": "សិល្បៈ" },
-    { "id": "3", "name": "ពាណិជ្ជកម្ម" },
-    { "id": "4", "name": "វិទ្យាសាស្រ្តសង្គម" },
-    { "id": "5", "name": "សុខាភិបាល" }
+    { "id": "1", "name": "វិទ្យាសាស្រ្ត និងបច្ចេកវិទ្យា" },
+    { "id": "5", "name": "គ្រប់គ្រងពាណិជ្ជកម្ម និងទេសចរណ៍" }
   ],
 
   "departments": [
     { "id": "1", "name": "វិទ្យាសាស្រ្តកុំព្យូទ័រ", "facultyId": "1" },
     { "id": "2", "name": "ភាសាអង់គ្លេស", "facultyId": "2" },
     { "id": "3", "name": "គណនេយ្យ", "facultyId": "3" },
-    { "id": "4", "name": "រដ្ឋបាលសាធារណៈ", "facultyId": "4" },
-    { "id": "5", "name": "វេជ្ជសាស្រ្ត", "facultyId": "5" }
+    { "id": "4", "name": "រដ្ឋបាលសាធារណៈ", "facultyId": "4" }
   ],
 
   "majors": [
-    { "id": "1", "name": "វិបូរណ៍វេបសាយ", "departmentId": "1" },
+    { "id": "1", "name": "អភិវឌ្ឍន៍គេហទំព័រ", "departmentId": "1" },
     { "id": "2", "name": "បកប្រែ", "departmentId": "2" },
     { "id": "3", "name": "គណនេយ្យការិយាល័យ", "departmentId": "3" },
-    { "id": "4", "name": "រដ្ឋបាលសាធារណៈ", "departmentId": "4" },
-    { "id": "5", "name": "វេជ្ជសាស្រ្តទូទៅ", "departmentId": "5" }
+    { "id": "4", "name": "រដ្ឋបាលសាធារណៈ", "departmentId": "4" }
   ],
 
-  "levels": [
-    { "id": "1", "name": "កម្រិតទី១" },
-    { "id": "2", "name": "កម្រិតទី២" },
-    { "id": "3", "name": "កម្រិតទី៣" },
-    { "id": "4", "name": "កម្រិតទី៤" },
-    { "id": "5", "name": "កម្រិតទី៥" }
+  "gradeLevels": [
+    { "id": "1", "name": "បរិញ្ញាបត្ររង" },
+    { "id": "2", "name": "បរិញ្ញាបត្រ" },
+    { "id": "3", "name": "បរិញ្ញាបត្រជាន់ខ្ពស់" }
   ],
 
   "generations": [
-    { "id": "1", "name": "ជំនាន់ទី១" },
-    { "id": "2", "name": "ជំនាន់ទី២" },
-    { "id": "3", "name": "ជំនាន់ទី៣" },
-    { "id": "4", "name": "ជំនាន់ទី៤" },
-    { "id": "5", "name": "ជំនាន់ទី៥" }
+    { "id": "1", "name": "ជំនាន់ទី១៨" },
+    { "id": "2", "name": "ជំនាន់ទី១៩" },
+    { "id": "3", "name": "ជំនាន់ទី២០" },
+    { "id": "4", "name": "ជំនាន់ទី២២" },
+    { "id": "5", "name": "ជំនាន់ទី២៣" }
   ],
 
   "programs": [
@@ -339,19 +338,13 @@
   ],
 
   "rooms": [
-    { "id": "1", "name": "បន្ទប់ 101", "buildingId": "1" },
-    { "id": "2", "name": "បន្ទប់ 102", "buildingId": "1" },
-    { "id": "3", "name": "បន្ទប់ 201", "buildingId": "2" },
-    { "id": "4", "name": "បន្ទប់ 202", "buildingId": "2" },
-    { "id": "5", "name": "បន្ទប់ 301", "buildingId": "3" }
+    { "id": "1", "name": "កងមាស", "buildingId": "1" },
+    { "id": "2", "name": "កោះសុទិន", "buildingId": "1" }
   ],
 
   "buildings": [
-    { "id": "1", "name": "អាគារ A" },
-    { "id": "2", "name": "អាគារ B" },
-    { "id": "3", "name": "អាគារ C" },
-    { "id": "4", "name": "អាគារ D" },
-    { "id": "5", "name": "អាគារ E" }
+    { "id": "1", "name": "សៀង ណាំ" },
+    { "id": "2", "name": "សុខតុញ" }
   ],
 
   "studyDays": [

@@ -14,13 +14,12 @@ export interface RoomType {
     name?: string
   }
 }
-//
-export interface GradeLavelType {
+
+export interface GradeLevelType {
   id?: number
   name: string
-  description?: string
 }
-//
+
 export interface ClassesType {
   id?: number
   name: string
@@ -28,15 +27,24 @@ export interface ClassesType {
   gradeLevelId: number
   roomId: number
   homeroomTeacherId: number
+}
 
-  gradeLevel?: {
-    name?: string
-  }
-  room?: {
-    name?: string
-  }
-  homeroomTeacher?: {
-    name?: string
+export interface GenerationsType{
+  id?: number
+  name: string
+}
+
+export interface FacultiesType{
+  id?: number
+  name: string
+}
+
+export interface MajorsType{
+  id?: number
+  name: string
+  departmentId: string
+  department?:{
+    name: string
   }
 }
 //
@@ -91,4 +99,13 @@ export interface AttendancesType {
   class?: {
     name: string
   }
+}
+
+export interface UsersType{
+  id?: number,
+  username?: string
+  email: string
+  password: string
+  role: string
+  profile?: string
 }
