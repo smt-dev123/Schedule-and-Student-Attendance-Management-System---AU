@@ -1,17 +1,82 @@
 {
   "users": [
-    { "id": "1", "username": "សេង ស៊ង់", "email": "soung@gmail.com", "role": "admin", "password": "123" },
-    { "id": "2", "username": "លុយ សុមាត្រា", "email": "smt@gmail.com", "role": "student", "password": "123" },
-    { "id": "3", "username": "ស្រៀង លីហួរ", "email": "hour@gmail.com", "role": "student", "password": "123" },
-    { "id": "4", "username": "ធឿង ឡង់ឌី", "email": "longdy@gmail.com", "role": "student", "password": "123" },
-    { "id": "5", "username": "ទូច វិទូរ", "email": "vitu@gmail.com", "role": "student", "password": "123" },
-    { "id": "6", "username": "សិទ្ធ ធារ៉ា", "email": "theara@gmail.com", "role": "student", "password": "123" },
-    { "id": "7", "username": "សិទ្ធ ស្រីនិច", "email": "sreynich@gmail.com", "role": "student", "password": "123" }
+    {
+      "id": "1",
+      "username": "សេង ស៊ង់",
+      "email": "soung@gmail.com",
+      "role": "admin",
+      "password": "123"
+    },
+    {
+      "id": "2",
+      "username": "លុយ សុមាត្រា",
+      "email": "smt@gmail.com",
+      "role": "student",
+      "password": "123"
+    },
+    {
+      "id": "3",
+      "username": "ស្រៀង លីហួរ",
+      "email": "hour@gmail.com",
+      "role": "student",
+      "password": "123"
+    },
+    {
+      "id": "4",
+      "username": "ធឿង ឡង់ឌី",
+      "email": "longdy@gmail.com",
+      "role": "student",
+      "password": "123"
+    },
+    {
+      "id": "5",
+      "username": "ទូច វិទូរ",
+      "email": "vitu@gmail.com",
+      "role": "student",
+      "password": "123"
+    },
+    {
+      "id": "6",
+      "username": "សិទ្ធ ធារ៉ា",
+      "email": "theara@gmail.com",
+      "role": "student",
+      "password": "123"
+    },
+    {
+      "id": "7",
+      "username": "សិទ្ធ ស្រីនិច",
+      "email": "sreynich@gmail.com",
+      "role": "student",
+      "password": "123"
+    }
   ],
-  
+
+  "buildings": [
+    { "id": "1", "name": "សៀង ណាំ", "description": "2004" },
+    { "id": "2", "name": "សុខតុញ", "description": "2022" }
+  ],
+
+  "rooms": [
+    { "id": "1", "name": "ស្រុកកងមាស", "floor": "ទី1", "buildingId": "1" },
+    { "id": "2", "name": "ស្រុកកោះសុទិន", "floor": "ទី1", "buildingId": "1" },
+    { "id": "3", "name": "ភូមិតាចេក", "floor": "ផ្ទាល់ដី", "buildingId": "2" }
+  ],
+
   "classes": [
-    { "id": "1", "facultyId": "1", "gradeLevelId": "2", "generationId": "2", "roomId": "1" },
-    { "id": "2", "facultyId": "1", "gradeLevelId": "1", "generationId": "1", "roomId": "1" }
+    {
+      "id": "1",
+      "facultyId": "1",
+      "gradeLevelId": "2",
+      "generationId": "2",
+      "roomId": "1"
+    },
+    {
+      "id": "2",
+      "facultyId": "1",
+      "gradeLevelId": "1",
+      "generationId": "1",
+      "roomId": "1"
+    }
   ],
 
   "faculties": [
@@ -335,16 +400,6 @@
       "dateStart": "2025-09-01",
       "dateEnd": "2025-12-31"
     }
-  ],
-
-  "rooms": [
-    { "id": "1", "name": "កងមាស", "buildingId": "1" },
-    { "id": "2", "name": "កោះសុទិន", "buildingId": "1" }
-  ],
-
-  "buildings": [
-    { "id": "1", "name": "សៀង ណាំ" },
-    { "id": "2", "name": "សុខតុញ" }
   ],
 
   "studyDays": [
