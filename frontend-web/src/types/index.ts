@@ -100,8 +100,27 @@ export interface AttendancesType {
   }
 }
 
+export interface ScheduleType{
+    id?: number
+    gradeLavel: string    // កម្រិតថ្នាក់
+    generations: string   // ជំនាន់
+    year: string          // ឆ្នាំទី
+    programId: string     // ជំនាញ
+    startDay: string      // ថ្ងៃចាប់ផ្ដើម
+    endDay: string        // ថ្ងៃបញ្ចប់
+    sessionId: string     // វេនសិក្សា
+    classId: string       // បន្ទប់
+    buildingId: string    // អគារ
+    floor: string         // ជាន់ទី
+    time: string          // ពេលវេលា 
+    studyDaysId: string   // ច្ងៃ
+    subjectId: string     // មុខវិជ្ជា
+    teacherId: string     // ឈ្មោះគ្រូ
+    phone: string         // លេខគ្រូ
+}
+
 export interface UsersType{
-  id?: number,
+  id?: number
   username?: string
   email: string
   password: string
