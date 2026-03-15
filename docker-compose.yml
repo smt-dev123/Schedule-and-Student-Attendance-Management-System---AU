@@ -32,8 +32,8 @@ services:
       context: ./backend 
       dockerfile: ../docker/backend/Dockerfile 
     container_name: backend_ssams_au
-    ports:
-      - "3000:3000"
+    # ports:
+    #   - "3000:3000"
     command: bun dev
     volumes:
       - ./backend:/app
@@ -57,8 +57,8 @@ services:
       context: ./frontend-web
       dockerfile: ../docker/frontend-web/Dockerfile
     container_name: web_ssams_au
-    ports:
-      - "4000:4000"
+    # ports:
+    #   - "4000:4000"
     command: bun dev
     volumes:
       - ./frontend-web:/app
@@ -72,9 +72,9 @@ services:
     build: 
       context: ./frontend-mobile
       dockerfile: ../docker/frontend-mobile/Dockerfile
-    ports:
-      - "19001:19001"
-      - "19002:19002"
+    # ports:
+    #   - "19001:19001"
+    #   - "19002:19002"
     command: bun dev
     volumes:
       - ./frontend-mobile:/app
