@@ -1,11 +1,14 @@
+import FacultyDelete from '@/routes/admin/faculty/-actions/Delete'
+import FacultyUpdate from '@/routes/admin/faculty/-actions/Update'
 import type { FacultiesType } from '@/types'
 import { Flex, IconButton } from '@radix-ui/themes'
 import type { ColumnDef } from '@tanstack/react-table'
-import { FaRegEdit, FaRegEye, FaRegTrashAlt } from 'react-icons/fa'
+import { FaRegEye } from 'react-icons/fa'
 
 export const FacultiesColumns: ColumnDef<FacultiesType>[] = [
   { accessorKey: 'id', header: 'ID' },
   { accessorKey: 'name', header: 'មហាវិទ្យាល័យ' },
+  { accessorKey: 'description', header: 'ការពិពណ៌នា' },
   {
     id: 'actions',
     header: 'សកម្មភាព',
@@ -21,24 +24,8 @@ export const FacultiesColumns: ColumnDef<FacultiesType>[] = [
           <FaRegEye />
         </IconButton>
 
-        <IconButton
-          size="1"
-          color="cyan"
-          variant="surface"
-          style={{ cursor: 'pointer' }}
-          // onClick={() => handleUpdate(row.original.id)}
-        >
-          <FaRegEdit />
-        </IconButton>
-
-        <IconButton
-          size="1"
-          color="red"
-          variant="surface"
-          style={{ cursor: 'pointer' }}
-        >
-          <FaRegTrashAlt />
-        </IconButton>
+        <FacultyUpdate data={row.original} />
+        <FacultyDelete data={row.original} />
       </Flex>
     ),
   },

@@ -21,4 +21,16 @@ export default defineConfig({
       '@': resolve(__dirname, './src'),
     },
   },
+  server: {
+    host: true,
+    allowedHosts: [
+      'web_ssams_au',
+      'localhost',
+      '127.0.0.1',
+      // Optional: Allow all hosts (useful for Docker, but less secure in production)
+      // allowedHosts: true 
+    ],
+    port: 4000,
+    strictPort: true,
+  }
 })

@@ -2,7 +2,6 @@ import { useTitle } from '@/hooks/useTitle'
 import { Box, Flex, Text, TextField } from '@radix-ui/themes'
 import { createFileRoute } from '@tanstack/react-router'
 import { IoSearch } from 'react-icons/io5'
-import AddUser from './-(modal)/AddUser'
 import { UserTable } from '@/features/user/UserTable'
 import { useQuery } from '@tanstack/react-query'
 import { getUsers } from '@/api/UserAPI'
@@ -32,7 +31,6 @@ function RouteComponent() {
               អ្នកប្រើប្រាស់
             </Text>
             {/* បង្កើតអ្នកប្រើប្រាស់ */}
-            <AddUser />
           </Flex>
           {/* Header */}
           <Flex justify="between">

@@ -2,6 +2,7 @@ import Footer from '@/components/Footer'
 import Navbar from '@/components/Navbar'
 import Sidebar from '@/components/Sidebar'
 import { createFileRoute, Outlet } from '@tanstack/react-router'
+import { Toaster } from 'react-hot-toast'
 
 export const Route = createFileRoute('/admin')({
   component: RouteComponent,
@@ -15,13 +16,14 @@ function RouteComponent() {
         <div className="flex-1 flex flex-col">
           <Navbar />
 
-          <div className="h-full p-4 bg-gray-50 dark:bg-gray-800">
+          <div className="h-full p-4 bg-neutral-50 dark:bg-gray-800">
             <Outlet />
           </div>
 
           <Footer />
         </div>
       </div>
+      <Toaster />
     </>
   )
 }

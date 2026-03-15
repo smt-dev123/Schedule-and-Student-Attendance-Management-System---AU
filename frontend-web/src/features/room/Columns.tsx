@@ -1,3 +1,5 @@
+import RoomDelete from '@/routes/admin/room/-actions/Delete'
+import RoomUpdate from '@/routes/admin/room/-actions/Update'
 import type { RoomType } from '@/types'
 import { Flex, IconButton } from '@radix-ui/themes'
 import type { ColumnDef } from '@tanstack/react-table'
@@ -23,24 +25,8 @@ export const RoomColumns: ColumnDef<RoomType>[] = [
           <FaRegEye />
         </IconButton>
 
-        <IconButton
-          size="1"
-          color="cyan"
-          variant="surface"
-          style={{ cursor: 'pointer' }}
-          // onClick={() => handleUpdate(row.original.id)}
-        >
-          <FaRegEdit />
-        </IconButton>
-
-        <IconButton
-          size="1"
-          color="red"
-          variant="surface"
-          style={{ cursor: 'pointer' }}
-        >
-          <FaRegTrashAlt />
-        </IconButton>
+        <RoomUpdate data={row.original} />
+        <RoomDelete data={row.original} />
       </Flex>
     ),
   },

@@ -1,20 +1,18 @@
-import { Text, View } from 'react-native';
-import { StyleSheet, useUnistyles } from 'react-native-unistyles';
+import React from 'react'
+import { StyleSheet, Text, View } from 'react-native'
 
-export default function HomeScreen() {
-  const { theme } = useUnistyles()
-
-  const styles = StyleSheet.create({
-    title: {
-      fontSize: 20,
-      fontWeight: 'bold',
-      color: theme.colors.primary,
-    },
-  });
-
+const DashboardScreen = () => {
   return (
     <View>
-      <Text style={styles.title}>Hello Theme!</Text>
+      <Text>DashboardScreen</Text>
+      <Text>DashboardScreen</Text>
+      <Text>DashboardScreen</Text>
+      <Text>DashboardScreen</Text>
+      <Text>Home Page</Text>
     </View>
-  );
+  )
 }
+
+export default DashboardScreen
+
+const styles = StyleSheet.create({})

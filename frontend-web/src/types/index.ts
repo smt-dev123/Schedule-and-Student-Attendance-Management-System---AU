@@ -2,21 +2,25 @@ export interface BuildingType {
   id?: number
   name: string
   description?: string
+  isActive?: boolean
 }
-//
+
 export interface RoomType {
   id?: number
   name: string
-  buildingId: string
   floor: string
-  building?: {
-    name?: string
+  buildingId: string
+  building: {
+    id: number
+    name: string
+    description: string
   }
 }
 
 export interface GradeLevelType {
   id?: number
-  name: string
+  level: string
+  description: string
 }
 
 export interface ClassesType {
@@ -28,23 +32,44 @@ export interface ClassesType {
   homeroomTeacherId: number
 }
 
-export interface GenerationsType{
+export interface GenerationsType {
   id?: number
   name: string
+  description: string
 }
 
-export interface FacultiesType{
+export interface FacultiesType {
   id?: number
   name: string
+  description: string
 }
 
-export interface MajorsType{
+export interface DepartmentsType {
   id?: number
   name: string
-  departmentId: string
-  department?:{
+  description: string
+  facultyId: string
+  faculty?: {
+    id?: number
     name: string
   }
+}
+
+export interface MajorsType {
+  id?: number
+  name: string
+  description: string
+  facultyId?: number
+  faculty?: {
+    id?: number
+    name: string
+  }
+}
+
+export interface AcademicYearsType {
+  id?: number
+  name: string
+  description: string
 }
 //
 export interface SubjectsType {
@@ -55,20 +80,24 @@ export interface SubjectsType {
   teacherId: number
 
   gradeLevel?: {
+    id?: number
     name?: string
   }
   teacher?: {
+    id?: number
     name?: string
   }
 }
-//
+
 export interface TeachersType {
   id?: number
   name: string
+  gender: string
+  education_level: 'បរិញ្ញាបត្រ' | 'បរិញ្ញាបត្រជាន់ខ្ពស់' | 'បណ្ឌិត'
   email: string
   phone: string
-  role: string
   address: string
+  profile: string
 }
 
 export interface StudentsType {
@@ -79,8 +108,8 @@ export interface StudentsType {
   pob: string
   phone: string
   email: string
-  statusId: number
-  photo: string
+  status: 'សកម្ម' | 'អសកម្ម' | 'សម្រាក' | 'បោះបង់'
+  profile: string
   programId: number
 }
 //
@@ -100,26 +129,26 @@ export interface AttendancesType {
   }
 }
 
-export interface ScheduleType{
-    id?: number
-    gradeLavel: string    // កម្រិតថ្នាក់
-    generations: string   // ជំនាន់
-    year: string          // ឆ្នាំទី
-    programId: string     // ជំនាញ
-    startDay: string      // ថ្ងៃចាប់ផ្ដើម
-    endDay: string        // ថ្ងៃបញ្ចប់
-    sessionId: string     // វេនសិក្សា
-    classId: string       // បន្ទប់
-    buildingId: string    // អគារ
-    floor: string         // ជាន់ទី
-    time: string          // ពេលវេលា 
-    studyDaysId: string   // ច្ងៃ
-    subjectId: string     // មុខវិជ្ជា
-    teacherId: string     // ឈ្មោះគ្រូ
-    phone: string         // លេខគ្រូ
+export interface ScheduleType {
+  id?: number
+  gradeLavel: string // កម្រិតថ្នាក់
+  generations: string // ជំនាន់
+  year: string // ឆ្នាំទី
+  programId: string // ជំនាញ
+  startDay: string // ថ្ងៃចាប់ផ្ដើម
+  endDay: string // ថ្ងៃបញ្ចប់
+  sessionId: string // វេនសិក្សា
+  classId: string // បន្ទប់
+  buildingId: string // អគារ
+  floor: string // ជាន់ទី
+  time: string // ពេលវេលា
+  studyDaysId: string // ច្ងៃ
+  subjectId: string // មុខវិជ្ជា
+  teacherId: string // ឈ្មោះគ្រូ
+  phone: string // លេខគ្រូ
 }
 
-export interface UsersType{
+export interface UsersType {
   id?: number
   username?: string
   email: string

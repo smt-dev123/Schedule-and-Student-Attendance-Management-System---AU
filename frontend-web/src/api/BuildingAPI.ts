@@ -3,12 +3,12 @@ import type { BuildingType } from '@/types'
 
 export const getBuilding = async () => {
   const res = await api.get('/buildings')
-  return res.data
+  return res.data.data
 }
 
 export const createBuilding = async (newBuilding: BuildingType) => {
   const res = await api.post('/buildings', newBuilding)
-  return res.data
+  return res.data.data
 }
 
 export const updateBuilding = async (
@@ -16,10 +16,10 @@ export const updateBuilding = async (
   updateBuilding: BuildingType,
 ) => {
   const res = await api.put(`/buildings/${id}`, updateBuilding)
-  return res.data
+  return res.data.data
 }
 
 export const deleteBuilding = async (id: number) => {
   const res = await api.delete(`/buildings/${id}`)
-  return res.data
+  return res.data.data
 }

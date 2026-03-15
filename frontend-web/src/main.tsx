@@ -37,7 +37,7 @@ if (rootElement && !rootElement.innerHTML) {
   const root = ReactDOM.createRoot(rootElement)
   root.render(
     <StrictMode>
-      <Theme>
+      <Theme radius="small" accentColor="blue">
         <main>
           <I18nextProvider i18n={i18n}>
             <QueryClientProvider client={queryClient}>

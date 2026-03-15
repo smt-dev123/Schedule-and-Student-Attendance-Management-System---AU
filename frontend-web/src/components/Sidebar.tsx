@@ -74,19 +74,43 @@ export default function Sidebar({
       icon: <RiSchoolLine className="text-xl" />,
       label: t('Sidebar.Study.study'),
       children: [
-        { key: 'level', label: t('Sidebar.Study.level'), url: '/admin/level' },
+        {
+          key: 'faculty',
+          label: t('Sidebar.Study.faculty'),
+          url: '/admin/faculty',
+        },
+        {
+          key: 'major',
+          label: t('Sidebar.Study.major'),
+          url: '/admin/major',
+        },
+        {
+          key: 'department',
+          label: 'តេប៉ាតឺម៉ង់',
+          url: '/admin/department',
+        },
+        {
+          key: 'grade_level',
+          label: t('Sidebar.Study.level'),
+          url: '/admin/grade_level',
+        },
         {
           key: 'generation',
           label: t('Sidebar.Study.generation'),
           url: '/admin/generation',
         },
         {
-          key: 'faculty',
-          label: t('Sidebar.Study.faculty'),
-          url: '/admin/faculty',
+          key: 'academic_year',
+          label: 'ឆ្នាំសិក្សា',
+          url: '/admin/academic_year',
         },
-        { key: 'major', label: t('Sidebar.Study.major'), url: '/admin/major' },
       ],
+    },
+    {
+      key: 'notification',
+      icon: <LiaChalkboardTeacherSolid className="text-xl" />,
+      label: 'ការជូនដំណឹង',
+      url: '/admin/notification',
     },
     {
       key: 'teacher',
@@ -136,7 +160,7 @@ export default function Sidebar({
                 className={`${isDesktopOpen ? 'w-36 h-auto' : 'w-9 h-9'}`}
                 src={
                   isDesktopOpen
-                    ? 'https://www.angkor.edu.kh/images/LogoAu3.png'
+                    ? 'https://www.angkor.edu.kh/assets/images/AU-LOGO.png'
                     : 'https://academics-bucket-sj19asxm-prod.s3.ap-southeast-1.amazonaws.com/884dc87f-2613-47fc-83b3-b138abc386df/884dc87f-2613-47fc-83b3-b138abc386df.png'
                 }
                 alt="Angkor University"
@@ -162,7 +186,7 @@ export default function Sidebar({
                       )}
                     </button>
                   </Collapsible.Trigger>
-                  <Collapsible.Content className="ml-6 flex flex-col">
+                  <Collapsible.Content className="ml-6 flex flex-col gap-1">
                     {menu.children.map((child) => (
                       <Link
                         key={child.key}

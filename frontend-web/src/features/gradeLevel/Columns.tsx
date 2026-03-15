@@ -1,3 +1,5 @@
+import GradeLevleDelete from '@/routes/admin/grade_level/-actions/Delete'
+import GradeLevleUpdate from '@/routes/admin/grade_level/-actions/Update'
 import type { GradeLevelType } from '@/types'
 import { Flex, IconButton } from '@radix-ui/themes'
 import type { ColumnDef } from '@tanstack/react-table'
@@ -5,7 +7,8 @@ import { FaRegEdit, FaRegEye, FaRegTrashAlt } from 'react-icons/fa'
 
 export const GradeLevelColumns: ColumnDef<GradeLevelType>[] = [
   { accessorKey: 'id', header: 'ID' },
-  { accessorKey: 'name', header: 'កម្រិតថ្នាក់' },
+  { accessorKey: 'level', header: 'កម្រិតថ្នាក់' },
+  { accessorKey: 'description', header: 'ការពិពណ៌នា' },
   {
     id: 'actions',
     header: 'សកម្មភាព',
@@ -21,24 +24,8 @@ export const GradeLevelColumns: ColumnDef<GradeLevelType>[] = [
           <FaRegEye />
         </IconButton>
 
-        <IconButton
-          size="1"
-          color="cyan"
-          variant="surface"
-          style={{ cursor: 'pointer' }}
-          // onClick={() => handleUpdate(row.original.id)}
-        >
-          <FaRegEdit />
-        </IconButton>
-
-        <IconButton
-          size="1"
-          color="red"
-          variant="surface"
-          style={{ cursor: 'pointer' }}
-        >
-          <FaRegTrashAlt />
-        </IconButton>
+        <GradeLevleUpdate data={row.original} />
+        <GradeLevleDelete data={row.original} />
       </Flex>
     ),
   },
