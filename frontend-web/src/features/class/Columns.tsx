@@ -10,7 +10,7 @@ export const ClassColumns: ColumnDef<ClassesType>[] = [
   { accessorKey: 'generation.name', header: 'មុខជំនាញ' },
   { accessorKey: 'room.name', header: 'បន្ទប់' },
   {
-    id: 'actions',
+    id: 'class-actions',
     header: 'សកម្មភាព',
     enableSorting: false,
     cell: ({ row }) => (

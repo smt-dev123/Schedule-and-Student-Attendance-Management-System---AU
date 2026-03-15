@@ -10,7 +10,7 @@ export const BuildingColumns: ColumnDef<BuildingType>[] = [
   { accessorKey: 'name', header: 'អាគារសិក្សា' },
   { accessorKey: 'description', header: 'ការពិពណ៌នា' },
   {
-    id: 'actions',
+    id: 'building-actions',
     header: 'សកម្មភាព',
     cell: ({ row }) => (
       <Badge

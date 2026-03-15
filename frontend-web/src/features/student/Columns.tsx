@@ -49,7 +49,7 @@ export const StudentColumns: ColumnDef<StudentsType>[] = [
   { accessorKey: 'phone', header: 'លេខទូរស័ព្ទ' },
 
   {
-    id: 'actions',
+    id: 'student-actions',
     header: 'សកម្មភាព',
     enableSorting: false,
     cell: ({ row }) => (

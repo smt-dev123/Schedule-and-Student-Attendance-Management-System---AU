@@ -11,7 +11,7 @@ export const MajorColumns: ColumnDef<MajorsType>[] = [
   { accessorKey: 'faculty.name', header: 'មហាវិទ្យាល័យ' },
   { accessorKey: 'description', header: 'ការពិពណ៌នា', enableSorting: false },
   {
-    id: 'actions',
+    id: 'major-actions',
     header: 'សកម្មភាព',
     enableSorting: false,
     cell: ({ row }) => (

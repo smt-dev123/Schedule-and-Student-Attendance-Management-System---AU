@@ -10,7 +10,7 @@ export const GradeLevelColumns: ColumnDef<GradeLevelType>[] = [
   { accessorKey: 'level', header: 'កម្រិតថ្នាក់' },
   { accessorKey: 'description', header: 'ការពិពណ៌នា' },
   {
-    id: 'actions',
+    id: 'grade_level-actions',
     header: 'សកម្មភាព',
     enableSorting: false,
     cell: ({ row }) => (

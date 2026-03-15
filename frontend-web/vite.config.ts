@@ -32,5 +32,13 @@ export default defineConfig({
     ],
     port: 4000,
     strictPort: true,
+    hmr: {
+      protocol: 'ws',
+      host: 'localhost',
+      clientPort: 80,
+    },
+    watch: {
+      usePolling: true, // ជួយឱ្យស្គាល់ការកែប្រែ File លើ Windows/WSL
+    },
   }
 })

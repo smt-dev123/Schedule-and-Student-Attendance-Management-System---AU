@@ -10,7 +10,7 @@ export const AcademicYearColumns: ColumnDef<AcademicYearsType>[] = [
   { accessorKey: 'name', header: 'ឆ្នាំសិក្សា' },
   { accessorKey: 'description', header: 'ការពិពណ៌នា' },
   {
-    id: 'actions',
+    id: 'academic-year-actions',
     header: 'សកម្មភាព',
     enableSorting: false,
     cell: ({ row }) => (

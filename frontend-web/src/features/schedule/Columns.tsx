@@ -9,7 +9,7 @@ export const UserColumns: ColumnDef<UsersType>[] = [
   { accessorKey: 'email', header: 'ភេទ' },
   { accessorKey: 'role', header: 'ថ្ងៃ ខែ ឆ្នាំកំណើត' },
   {
-    id: 'actions',
+    id: 'schedule-actions',
     header: 'សកម្មភាព',
     enableSorting: false,
     cell: ({ row }) => (

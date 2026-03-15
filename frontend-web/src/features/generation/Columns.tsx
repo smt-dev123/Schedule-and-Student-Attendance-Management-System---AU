@@ -10,7 +10,7 @@ export const GenerationColumns: ColumnDef<GenerationsType>[] = [
   { accessorKey: 'name', header: 'ជំនាន់' },
   { accessorKey: 'description', header: 'ការពិពណ៌នា' },
   {
-    id: 'actions',
+    id: 'generation-actions',
     header: 'សកម្មភាព',
     enableSorting: false,
     cell: ({ row }) => (

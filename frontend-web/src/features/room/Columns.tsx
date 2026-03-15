@@ -11,7 +11,7 @@ export const RoomColumns: ColumnDef<RoomType>[] = [
   { accessorKey: 'floor', header: 'ជាន់បន្ទប់សិក្សា' },
   { accessorKey: 'building.name', header: 'អាគារសិក្សា' },
   {
-    id: 'actions',
+    id: 'room-actions',
     header: 'សកម្មភាព',
     enableSorting: false,
     cell: ({ row }) => (

@@ -10,7 +10,7 @@ export const FacultiesColumns: ColumnDef<FacultiesType>[] = [
   { accessorKey: 'name', header: 'មហាវិទ្យាល័យ' },
   { accessorKey: 'description', header: 'ការពិពណ៌នា' },
   {
-    id: 'actions',
+    id: 'faculty-actions',
     header: 'សកម្មភាព',
     enableSorting: false,
     cell: ({ row }) => (

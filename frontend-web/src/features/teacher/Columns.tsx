@@ -17,7 +17,7 @@ export const TeachaerColumns: ColumnDef<TeachersType>[] = [
   { accessorKey: 'address', header: 'អាសយដ្ឋាន' },
   // { accessorKey: 'profile', header: 'រូបភាព' },
   {
-    id: 'actions',
+    id: 'teacher-actions',
     header: 'សកម្មភាព',
     enableSorting: false,
     cell: ({ row }) => (
