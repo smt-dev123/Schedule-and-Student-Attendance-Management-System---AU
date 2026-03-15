@@ -9,7 +9,7 @@
     "start": "bun src/main.ts",
     "seed": "bun src/seeder.ts",
     "generate": "drizzle-kit generate",
-    "migrate": "drizzle-kit generate"
+    "migrate": "drizzle-kit migrate"
   },
   "devDependencies": {
     "@types/bun": "latest",
