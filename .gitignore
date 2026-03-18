@@ -2,7 +2,7 @@
 backend/node_modules/
 backend/dist/
 backend/build/
-# backend/.env
+backend/.env
 # backend/.env.*
 backend/uploads/
 backend/logs/
@@ -16,7 +16,7 @@ frontend-web/node_modules/
 frontend-web/dist/
 frontend-web/dist-ssr
 frontend-web/build/
-# frontend-web/.env
+frontend-web/.env
 # frontend-web/.env.*
 frontend-web/*.local/
 frontend-web/.vscode
@@ -26,7 +26,7 @@ frontend-mobile/.expo/
 frontend-mobile/node_modules/
 frontend-mobile/dist/
 frontend-mobile/build/
-# frontend-mobile/.env
+frontend-mobile/.env
 # frontend-mobile/.env.*
 frontend-mobile/web-build/
 frontend-mobile/dist/
@@ -35,6 +35,8 @@ frontend-mobile/dist/
 .expo/
 .expo-shared/
 expo-env.d.ts
+
+.env
 
 # React Native specific
 *.jks

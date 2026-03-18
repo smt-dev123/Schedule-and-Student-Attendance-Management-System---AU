@@ -5,7 +5,6 @@ import { Button, Flex, Text } from '@radix-ui/themes'
 import { useQuery } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
 import RoomCreate from './-actions/Create'
-import { getBuilding } from '@/api/BuildingAPI'
 
 export const Route = createFileRoute('/admin/room/')({
   component: RouteComponent,

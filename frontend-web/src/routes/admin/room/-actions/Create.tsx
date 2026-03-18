@@ -77,7 +77,7 @@ const RoomCreate = () => {
               <TextField.Root
                 {...register('floor')}
                 placeholder="Enter floor number"
-                type="number"
+                type='number'
               />
             </label>
 
