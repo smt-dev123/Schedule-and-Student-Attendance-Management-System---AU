@@ -1,123 +1,100 @@
 services:
   ssams_au_db:
-    image: postgres:16-alpine # ប្រើ alpine version ដើម្បីឱ្យស្រាល
+    image: postgres:16
     container_name: postgres_db
-    restart: unless-stopped
+    restart: always
     environment:
-      POSTGRES_USER: ${DB_USER}       # ប្រើ Environment Variable
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
-      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres123
+      POSTGRES_DB: ssams_db
+    ports:
+      - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
-      interval: 10s
+      test: ["CMD-SHELL", "pg_isready -U postgres -d ssams_db"]
+      interval: 5s
       timeout: 5s
       retries: 5
 
   ssams_au_redis:
-    image: redis:7-alpine
+    image: redis:7
     container_name: redis_cache
-    restart: unless-stopped
+    restart: always
+    ports:
+      - "6379:6379"
     volumes:
       - redis_data:/data
-    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD}
+    command: redis-server --appendonly yes
 
   backend_ssams_au:
-    build:
-      context: ./backend
-      dockerfile: ../docker/backend/Dockerfile
-      target: production
-    container_name: backend_app
-    restart: unless-stopped
+    build: 
+      context: ./backend 
+      dockerfile: ../docker/backend/Dockerfile 
+    container_name: backend_ssams_au
+    # ports:
+    #   - "3000:3000"
+    command: bun dev
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
     depends_on:
       ssams_au_db:
         condition: service_healthy
       ssams_au_redis:
         condition: service_started
-    env_file:
-      - .env
     environment:
-      - NODE_ENV=${NODE_ENV}
-      - DB_HOST=ssams_au_db
-      - REDIS_HOST=ssams_au_redis
-      - DATABASE_URL=${DATABASE_URL}
-      - BETTER_AUTH_SECRET=${BETTER_AUTH_SECRET}
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "3"
-    command: >
-      sh -c "bunx drizzle-kit push && bun run src/main.ts"
+      DB_HOST: ssams_au_db
+      DB_PORT: 5432
+      DB_USER: postgres
+      DB_PASSWORD: postgres123
+      DB_NAME: ssams_db
+      REDIS_HOST: ssams_au_redis
+      REDIS_PORT: 6379
 
   web_ssams_au:
-    build:
+    build: 
       context: ./frontend-web
       dockerfile: ../docker/frontend-web/Dockerfile
-    container_name: web_app
-    restart: unless-stopped
+    container_name: web_ssams_au
+    # ports:
+    #   - "4000:4000"
+    command: bun dev
+    volumes:
+      - ./frontend-web:/app
+      - /app/node_modules
+    depends_on:
+      - backend_ssams_au
+    environment:
+      - VITE_API_BASE_URL=/api
+
+  # mobile_ssams_au:
+  #   build: 
+  #     context: ./frontend-mobile
+  #     dockerfile: ../docker/frontend-mobile/Dockerfile
+    # ports:
+    #   - "19001:19001"
+    #   - "19002:19002"
+    # command: bun dev
+    # volumes:
+    #   - ./frontend-mobile:/app
+    #   - /app/node_modules
+    # depends_on:
+    #   - backend_ssams_au
+    # environment:
+    #   EXPO_DEVTOOLS_LISTEN: "0.0.0.0"
+    #   DANGEROUSLY_DISABLE_HOST_CHECK: "true"
 
   nginx:
-    image: nginx:stable-alpine
+    build:
+      context: .
+      dockerfile: docker/nginx/Dockerfile
     ports:
       - "80:80"
-      - "443:443" # បន្ថែមសម្រាប់ SSL (HTTPS)
-    volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./certs:/etc/nginx/ssl:ro # Certificate SSL
     depends_on:
       - web_ssams_au
       - backend_ssams_au
-    restart: always
-
-  # Monitoring
-  # ១. cAdvisor: មើលការប្រើប្រាស់ CPU/RAM របស់ Container នីមួយៗ
-  cadvisor:
-    image: gcr.io/cadvisor/cadvisor:latest
-    container_name: cadvisor
-    volumes:
-      - /:/rootfs:ro
-      - /var/run:/var/run:rw
-      - /sys:/sys:ro
-      - /var/lib/docker/:/var/lib/docker:ro
-    ports:
-      - "8080:8080"
-
-  # ២. Prometheus: រក្សាទុកទិន្នន័យ Metric (Time-series database)
-  prometheus:
-    image: prom/prometheus:latest
-    container_name: prometheus
-    volumes:
-      - ./prometheus.yml:/etc/prometheus/prometheus.yml
-    command:
-      - '--config.file=/etc/prometheus/prometheus.yml'
-    ports:
-      - "9090:9090"
-    depends_on:
-      - cadvisor
-
-  # ៣. Grafana: មើល Dashboard ស្អាតៗ
-  grafana:
-    image: grafana/grafana:latest
-    container_name: grafana
-    ports:
-      - "3001:3000"
-    environment:
-      - GF_SECURITY_ADMIN_PASSWORD=admin
-    volumes:
-      - grafana_data:/var/lib/grafana
-  
-  # Monitoring Logs
-  dozzle:
-    image: amir20/dozzle:latest
-    container_name: dozzle
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-    ports:
-      - "8888:8080"
 
 volumes:
   postgres_data:
   redis_data:
-  grafana_data:

@@ -6,9 +6,9 @@ import type { ColumnDef } from '@tanstack/react-table'
 import { FaRegEdit, FaRegEye, FaRegTrashAlt } from 'react-icons/fa'
 
 export const RoomColumns: ColumnDef<RoomType>[] = [
-  { accessorKey: 'id', header: 'ID' },
+  { accessorKey: 'id', header: 'ល.រ' },
   { accessorKey: 'name', header: 'បន្ទប់សិក្សា' },
-  { accessorKey: 'floor', header: 'ជាន់បន្ទប់សិក្សា' },
+  { accessorKey: 'number', header: 'ជាន់បន្ទប់សិក្សា' },
   { accessorKey: 'building.name', header: 'អាគារសិក្សា' },
   {
     id: 'room-actions',

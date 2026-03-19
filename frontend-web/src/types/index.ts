@@ -8,7 +8,7 @@ export interface BuildingType {
 export interface RoomType {
   id?: number
   name: string
-  floor: number
+  number: number
   buildingId: string
   building: {
     id: number

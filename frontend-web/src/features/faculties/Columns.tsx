@@ -6,7 +6,7 @@ import type { ColumnDef } from '@tanstack/react-table'
 import { FaRegEye } from 'react-icons/fa'
 
 export const FacultiesColumns: ColumnDef<FacultiesType>[] = [
-  { accessorKey: 'id', header: 'ID' },
+  { accessorKey: 'id', header: 'ល.រ' },
   { accessorKey: 'name', header: 'មហាវិទ្យាល័យ' },
   { accessorKey: 'description', header: 'ការពិពណ៌នា' },
   {

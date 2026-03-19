@@ -4,7 +4,7 @@ import type { ColumnDef } from '@tanstack/react-table'
 import { FaRegEdit, FaRegEye, FaRegTrashAlt } from 'react-icons/fa'
 
 export const ClassColumns: ColumnDef<ClassesType>[] = [
-  { accessorKey: 'id', header: 'ID' },
+  { accessorKey: 'id', header: 'ល.រ' },
   { accessorKey: 'faculty.name', header: 'មហាវិទ្យាល័យ' },
   { accessorKey: 'gradeLevel.name', header: 'កម្រិតថ្នាក់' },
   { accessorKey: 'generation.name', header: 'មុខជំនាញ' },

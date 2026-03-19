@@ -6,7 +6,7 @@ import type { ColumnDef } from '@tanstack/react-table'
 import { FaRegEdit, FaRegEye, FaRegTrashAlt } from 'react-icons/fa'
 
 export const GradeLevelColumns: ColumnDef<GradeLevelType>[] = [
-  { accessorKey: 'id', header: 'ID' },
+  { accessorKey: 'id', header: 'ល.រ' },
   { accessorKey: 'level', header: 'កម្រិតថ្នាក់' },
   { accessorKey: 'description', header: 'ការពិពណ៌នា' },
   {

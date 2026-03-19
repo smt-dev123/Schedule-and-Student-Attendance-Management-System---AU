@@ -4,7 +4,7 @@ import type { ColumnDef } from '@tanstack/react-table'
 import { FaRegEdit, FaRegEye, FaRegTrashAlt } from 'react-icons/fa'
 
 export const UserColumns: ColumnDef<UsersType>[] = [
-  { accessorKey: 'id', header: 'ID' },
+  { accessorKey: 'id', header: 'ល.រ' },
   { accessorKey: 'username', header: 'ឈ្មោះ' },
   { accessorKey: 'email', header: 'ភេទ' },
   { accessorKey: 'role', header: 'ថ្ងៃ ខែ ឆ្នាំកំណើត' },

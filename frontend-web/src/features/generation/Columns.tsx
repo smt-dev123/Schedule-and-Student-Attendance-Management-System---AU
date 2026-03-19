@@ -6,7 +6,7 @@ import type { ColumnDef } from '@tanstack/react-table'
 import { FaRegEye, FaRegTrashAlt } from 'react-icons/fa'
 
 export const GenerationColumns: ColumnDef<GenerationsType>[] = [
-  { accessorKey: 'id', header: 'ID' },
+  { accessorKey: 'id', header: 'ល.រ' },
   { accessorKey: 'name', header: 'ជំនាន់' },
   { accessorKey: 'description', header: 'ការពិពណ៌នា' },
   {

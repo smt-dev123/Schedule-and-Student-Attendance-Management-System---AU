@@ -95,6 +95,29 @@ function RouteComponent() {
     }))
   }
 
+  const handleSelectAll = (status: string) => {
+    const activeStudents = students.filter((s) => s.status === 'កំពុងសិក្សា')
+
+    // ឆែកមើលថា តើសិស្សដែលកំពុងសិក្សាទាំងអស់ សុទ្ធតែមាន status ហ្នឹងហើយឬនៅ?
+    const isAllSelected = activeStudents.every(
+      (student) => selected[student.id] === status
+    )
+
+    const newSelection = { ...selected }
+
+    activeStudents.forEach((student) => {
+      if (isAllSelected) {
+        // បើជ្រើសរើសរួចអស់ហើយ ពេលចុចម្ដងទៀត គឺដោះវិញ (set ទៅ null)
+        newSelection[student.id] = null
+      } else {
+        // បើមិនទាន់គ្រប់ទេ គឺកំណត់ឲ្យទៅជា status ហ្នឹងទាំងអស់
+        newSelection[student.id] = status
+      }
+    })
+
+    setSelected(newSelection)
+  }
+
   return (
     <div className="mx-auto">
       <Flex direction="column" gap="4">
@@ -142,7 +165,7 @@ function RouteComponent() {
           {/* First header row */}
           <RowTable isHeader>
             <CellTable className="w-16" isHeader rowSpan={2}>
-              Id
+              ល.រ
             </CellTable>
             <CellTable className="w-28" isHeader rowSpan={2}>
               អត្តលេខនិស្សិត
@@ -180,6 +203,28 @@ function RouteComponent() {
         </HeaderTable>
 
         <Table.Body>
+
+          {/* ជ្រើសរើសទាំងអស់ */}
+          <Table.Row style={{ backgroundColor: 'var(--gray-3)' }}>
+            <CellTable columSpan={5} className="font-bold">
+              ជ្រើសរើសទាំងអស់ (សម្រាប់អ្នកកំពុងសិក្សា)
+            </CellTable>
+
+            {['present', 'late', 'permission', 'absent'].map((status, index) => {
+              const activeStudents = students.filter(s => s.status === 'កំពុងសិក្សា');
+              const isChecked = activeStudents.length > 0 &&
+                activeStudents.every(s => selected[s.id] === status);
+
+              return (
+                <CellTable key={status} noRightBorder={index === 3}>
+                  <Checkbox
+                    checked={isChecked}
+                    onCheckedChange={() => handleSelectAll(status)}
+                  />
+                </CellTable>
+              );
+            })}
+          </Table.Row>
           {students.map((student) => (
             <Table.Row key={student.id}>
               <CellTable>{student.id}</CellTable>
@@ -187,47 +232,21 @@ function RouteComponent() {
               <CellTable className="text-left">{student.name}</CellTable>
               <CellTable>{student.gender}</CellTable>
               <CellTable>
-                <Badge
-                  color={
-                    student.status == 'កំពុងសិក្សា'
-                      ? 'blue'
-                      : student.status == 'ឈប់រៀន'
-                        ? 'red'
-                        : 'orange'
-                  }
-                >
+                <Badge color={student.status === 'កំពុងសិក្សា' ? 'blue' : student.status === 'ឈប់រៀន' ? 'red' : 'orange'}>
                   {student.status}
                 </Badge>
               </CellTable>
 
-              <CellTable>
-                <Checkbox
-                  disabled={student.status !== 'កំពុងសិក្សា'}
-                  checked={selected[student.id] === 'present'}
-                  onCheckedChange={() => handleSelect(student.id, 'present')}
-                />
-              </CellTable>
-              <CellTable>
-                <Checkbox
-                  disabled={student.status !== 'កំពុងសិក្សា'}
-                  checked={selected[student.id] === 'late'}
-                  onCheckedChange={() => handleSelect(student.id, 'late')}
-                />
-              </CellTable>
-              <CellTable>
-                <Checkbox
-                  disabled={student.status !== 'កំពុងសិក្សា'}
-                  checked={selected[student.id] === 'permission'}
-                  onCheckedChange={() => handleSelect(student.id, 'permission')}
-                />
-              </CellTable>
-              <CellTable noRightBorder>
-                <Checkbox
-                  disabled={student.status !== 'កំពុងសិក្សា'}
-                  checked={selected[student.id] === 'absent'}
-                  onCheckedChange={() => handleSelect(student.id, 'absent')}
-                />
-              </CellTable>
+              {/* Checkboxes សម្រាប់សិស្សម្នាក់ៗ */}
+              {['present', 'late', 'permission', 'absent'].map((status, index) => (
+                <CellTable key={status} noRightBorder={index === 3}>
+                  <Checkbox
+                    disabled={student.status !== 'កំពុងសិក្សា'}
+                    checked={selected[student.id] === status}
+                    onCheckedChange={() => handleSelect(student.id, status)}
+                  />
+                </CellTable>
+              ))}
             </Table.Row>
           ))}
         </Table.Body>
