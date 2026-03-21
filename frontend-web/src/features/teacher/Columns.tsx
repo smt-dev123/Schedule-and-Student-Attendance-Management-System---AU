@@ -6,7 +6,13 @@ import type { ColumnDef } from '@tanstack/react-table'
 import { FaRegEye } from 'react-icons/fa'
 
 export const TeachaerColumns: ColumnDef<TeachersType>[] = [
-  { accessorKey: 'id', header: 'ល.រ' },
+  {
+    accessorKey: 'no',
+    header: 'ល.រ',
+    cell: ({ row }) => {
+      return <span>{row.index + 1}</span>
+    }
+  },
   { accessorKey: 'name', header: 'គោត្តនាម-នាម' },
   { accessorKey: 'gender', header: 'ភេទ' },
   // { accessorKey: 'name', header: 'អាយុ' },

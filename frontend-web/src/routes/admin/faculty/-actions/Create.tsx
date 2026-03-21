@@ -37,12 +37,12 @@ const FacultyCreate = () => {
     <Dialog.Root open={open} onOpenChange={setOpen}>
       <Dialog.Trigger>
         <Button variant="solid" style={{ cursor: 'pointer' }}>
-          បន្ថែមបន្ទប់សិក្សា
+          បន្ថែមមហាវិទ្យាល័យ
         </Button>
       </Dialog.Trigger>
 
       <Dialog.Content maxWidth="450px">
-        <Dialog.Title>បន្ថែមបន្ទប់សិក្សា</Dialog.Title>
+        <Dialog.Title>បន្ថែមមហាវិទ្យាល័យ</Dialog.Title>
 
         <form onSubmit={handleSubmit(onSubmit)}>
           <Flex direction="column" gap="3">
@@ -52,7 +52,7 @@ const FacultyCreate = () => {
               </Text>
               <TextField.Root
                 {...register('name', { required: 'Name is required' })}
-                placeholder="Enter room name"
+                placeholder="Enter faculty name"
               />
               {errors.name && (
                 <Text size="2" color="red">

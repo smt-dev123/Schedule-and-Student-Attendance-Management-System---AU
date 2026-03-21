@@ -16,6 +16,8 @@ function RouteComponent() {
   const { data, isLoading, error } = useQuery({
     queryKey: ['users'],
     queryFn: getUsers,
+    staleTime: 1000 * 60 * 5,
+    gcTime: 1000 * 60 * 10,
   })
 
   if (isLoading) return <Text>Loading...</Text>

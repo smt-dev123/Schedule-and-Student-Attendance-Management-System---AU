@@ -8,7 +8,7 @@ export interface BuildingType {
 export interface RoomType {
   id?: number
   name: string
-  number: number
+  classroomNumber: number
   buildingId: string
   building: {
     id: number
@@ -41,6 +41,10 @@ export interface GenerationsType {
 export interface FacultiesType {
   id?: number
   name: string
+  faculty?: {
+    id?: number
+    name: string
+  }
   description: string
 }
 

@@ -93,11 +93,11 @@ const DepartmentUpdate = ({ data }: Props) => {
             <Flex direction="column" gap="3">
               <label>
                 <Text as="div" size="2" mb="1" weight="bold">
-                  បន្ទប់សិក្សា
+                  ដេប៉ាតេម៉ង់
                 </Text>
                 <TextField.Root
                   {...register('name', { required: 'Name is required' })}
-                  placeholder="Enter room name"
+                  placeholder="Enter department name"
                 />
                 {errors.name && (
                   <Text size="2" color="red">

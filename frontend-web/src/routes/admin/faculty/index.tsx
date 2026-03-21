@@ -1,10 +1,12 @@
 import { getFaculties } from '@/api/FacultyAPI'
 import { FacultiesTable } from '@/features/faculties/FacultyTable'
 import { useTitle } from '@/hooks/useTitle'
-import { Button, Flex, Text } from '@radix-ui/themes'
+import { Flex, Text } from '@radix-ui/themes'
 import { useQuery } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
 import FacultyCreate from './-actions/Create'
+import ExportExcel from './-exports/ExportExcel'
+import ExportPDF from './-exports/ExportPDF'
 
 export const Route = createFileRoute('/admin/faculty/')({
   component: RouteComponent,
@@ -16,6 +18,9 @@ function RouteComponent() {
   const { data, isLoading, error } = useQuery({
     queryKey: ['faculties'],
     queryFn: getFaculties,
+    staleTime: 1000 * 60 * 60 * 24,
+    gcTime: 1000 * 60 * 60 * 24,
+    refetchOnWindowFocus: false,
   })
 
   if (isLoading) return <Text>Loading...</Text>
@@ -29,14 +34,8 @@ function RouteComponent() {
             តារាងមហាវិទ្យាល័យ
           </Text>
           <Flex gap="2">
-            {/* Export */}
-            <Button variant="outline" style={{ cursor: 'pointer' }}>
-              Export Excel
-            </Button>
-
-            <Button variant="outline" style={{ cursor: 'pointer' }}>
-              បោះពុម្ភ
-            </Button>
+            <ExportExcel data={data} />
+            <ExportPDF data={data} />
 
             <FacultyCreate />
           </Flex>

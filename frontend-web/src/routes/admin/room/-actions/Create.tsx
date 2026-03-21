@@ -75,16 +75,16 @@ const RoomCreate = () => {
                 ជាន់បន្ទប់សិក្សា
               </Text>
               <TextField.Root
-                {...register('number', {
-                  valueAsNumber: true, 
+                {...register('classroomNumber', {
+                  valueAsNumber: true,
                   required: 'សូមបញ្ចូលលេខជាន់'
                 })}
                 placeholder="Enter floor number"
                 type="number"
               />
-              {errors.number && (
+              {errors.classroomNumber && (
                 <Text size="2" color="red">
-                  {errors.number.message}
+                  {errors.classroomNumber.message}
                 </Text>
               )}
             </label>

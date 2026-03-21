@@ -16,6 +16,9 @@ function RouteComponent() {
   const { data, isLoading, error } = useQuery({
     queryKey: ['academic_years'],
     queryFn: getAcademicYear,
+    staleTime: 1000 * 60 * 60 * 24,
+    gcTime: 1000 * 60 * 60 * 24,
+    refetchOnWindowFocus: false,
   })
 
   if (isLoading) return <Text>Loading...</Text>

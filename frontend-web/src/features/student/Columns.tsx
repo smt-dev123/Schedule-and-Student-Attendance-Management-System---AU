@@ -26,7 +26,13 @@ const getStatusColor = (status: string) => {
 }
 
 export const StudentColumns: ColumnDef<StudentsType>[] = [
-  { accessorKey: 'id', header: 'ល.រ' },
+  {
+    accessorKey: 'no',
+    header: 'ល.រ',
+    cell: ({ row }) => {
+      return <span>{row.index + 1}</span>
+    }
+  },
   { accessorKey: 'name', header: 'ឈ្មោះ' },
   { accessorKey: 'gender', header: 'ភេទ' },
   { accessorKey: 'dob', header: 'ថ្ងៃ ខែ ឆ្នាំកំណើត' },

@@ -1,15 +1,12 @@
 import { getBuilding } from '@/api/BuildingAPI'
 import { BuildingTable } from '@/features/building/BuildingTable'
 import { useTitle } from '@/hooks/useTitle'
-import { Button, Flex, Text } from '@radix-ui/themes'
+import { Flex, Text } from '@radix-ui/themes'
 import { useQuery } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
 import BuildingCreate from './-actions/Create'
-import type { BuildingType } from '@/types'
-import * as XLSX from 'xlsx';
-import jsPDF from 'jspdf';
-import autoTable from 'jspdf-autotable';
-import { KhmerOSsiemreap } from '@/fonts/KhmerOSsiemreap'
+import ExportExcel from './-exports/ExportExcel'
+import ExportPDF from './-exports/ExportPDF'
 
 export const Route = createFileRoute('/admin/building/')({
   component: RouteComponent,
@@ -21,82 +18,10 @@ function RouteComponent() {
   const { data, isLoading, error } = useQuery({
     queryKey: ['buildings'],
     queryFn: getBuilding,
+    staleTime: 1000 * 60 * 60 * 24,
+    gcTime: 1000 * 60 * 60 * 24,
+    refetchOnWindowFocus: false,
   })
-
-  // --- Export Excel ---
-  const handleExportExcel = () => {
-    if (!data) return
-    try {
-      const formattedData = data.map((item: BuildingType, index: number) => ({
-        "ល.រ": index + 1,
-        "អាគារសិក្សា": item.name,
-        "ការពិពណ៌នា": item.description || '',
-        "ស្ថានភាព": item.isActive ? "សកម្ម" : "មិនសកម្ម",
-      }));
-
-      const worksheet = XLSX.utils.json_to_sheet(formattedData);
-      const workbook = XLSX.utils.book_new();
-      const fileName = `តារាងអាគារសិក្សា_${new Date().toLocaleDateString('kh-KH')}.xlsx`;
-      XLSX.utils.book_append_sheet(workbook, worksheet, "Buildings");
-      XLSX.writeFile(workbook, fileName);
-    } catch (err) {
-      console.error(err);
-      alert("មានបញ្ហាក្នុងការ Export Excel");
-    }
-  };
-
-  // --- Export PDF ---
-  const handleExportPDF = () => {
-    if (!data) return;
-
-    try {
-      KhmerOSsiemreap();
-
-      const doc = new jsPDF();
-
-      const tableColumn = ["ល.រ", "អាគារសិក្សា", "ការពិពណ៌នា", "ស្ថានភាព"];
-      const tableRows = data.map((item: BuildingType, index: number) => [
-        index + 1,
-        item.name,
-        item.description || '',
-        item.isActive ? "សកម្ម" : "មិនសកម្ម",
-      ]);
-
-      // បង្កើត Table
-      autoTable(doc, {
-        startY: 25,
-        head: [tableColumn],
-        body: tableRows,
-        styles: {
-          font: "KhmerOSsiemreap",
-          fontStyle: "normal",
-          fontSize: 10,
-          cellPadding: 3,
-        },
-        headStyles: {
-          font: "KhmerOSsiemreap",
-          fillColor: [225, 29, 72],
-          halign: 'center',
-        },
-        columnStyles: {
-          0: { halign: 'center', cellWidth: 15 },
-          3: { halign: 'center', cellWidth: 25 },
-        },
-        didDrawPage: (dataArg) => {
-          doc.setFont("KhmerOSsiemreap");
-          doc.setFontSize(14);
-          doc.text("តារាងអាគារសិក្សា", dataArg.settings.margin.left, 15);
-        },
-      });
-
-      const fileName = `តារាងអាគារសិក្សា_${new Date().toLocaleDateString('kh-KH')}.pdf`;
-      doc.save(fileName);
-    } catch (err) {
-      console.error(err);
-      alert("មានបញ្ហាក្នុងការ Export PDF");
-    }
-  };
-
 
   if (isLoading) return <Text>Loading...</Text>
   if (error) return <Text>Error loading data.</Text>
@@ -109,24 +34,8 @@ function RouteComponent() {
             តារាងអាគារសិក្សា
           </Text>
           <Flex gap="2">
-            <Button
-              variant="outline"
-              onClick={handleExportExcel}
-              style={{ cursor: 'pointer' }}
-              color="violet"
-            >
-              Export Excel
-            </Button>
-
-            <Button
-              variant="outline"
-              onClick={handleExportPDF}
-              style={{ cursor: 'pointer' }}
-              color="green"
-            >
-              Export PDF
-            </Button>
-
+            <ExportExcel data={data} />
+            <ExportPDF data={data} />
             <BuildingCreate />
           </Flex>
         </div>

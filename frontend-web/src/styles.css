@@ -2,6 +2,16 @@
 @import 'tailwindcss';
 @custom-variant dark (&:where(.dark, .dark *));
 
+@theme {
+  --font-sans: 'Kantumruy Pro', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+  --font-khmer: 'Kantumruy Pro', sans-serif;
+  --font-bayon: 'Bayon', sans-serif;
+}
+
+.radix-themes {
+  --default-font-family: 'Kantumruy Pro', sans-serif;
+}
+
 :root {
   --kantumruy-pro: 'Kantumruy Pro', sans-serif;
   --bayon: 'Bayon', sans-serif;

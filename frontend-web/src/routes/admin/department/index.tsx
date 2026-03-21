@@ -1,10 +1,12 @@
 import { getDepartments } from '@/api/DepartmentAPI'
 import { DepartmentTable } from '@/features/department/DepartmentTable'
 import { useTitle } from '@/hooks/useTitle'
-import { Button, Flex, Text } from '@radix-ui/themes'
+import { Flex, Text } from '@radix-ui/themes'
 import { useQuery } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
 import DepartmentCreate from './-actions/Create'
+import ExportExcel from './-exports/ExportExcel'
+import ExportPDF from './-exports/ExportPDF'
 
 export const Route = createFileRoute('/admin/department/')({
   component: RouteComponent,
@@ -16,6 +18,9 @@ function RouteComponent() {
   const { data, isLoading, error } = useQuery({
     queryKey: ['departments'],
     queryFn: getDepartments,
+    staleTime: 1000 * 60 * 60 * 24,
+    gcTime: 1000 * 60 * 60 * 24,
+    refetchOnWindowFocus: false,
   })
 
   if (isLoading) return <Text>Loading...</Text>
@@ -26,17 +31,11 @@ function RouteComponent() {
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between gap-2">
           <Text size="5" className="font-bold">
-            តារាងមហាវិទ្យាល័យ
+            តារាងតេប៉ាតឺម៉ង់
           </Text>
           <Flex gap="2">
-            {/* Export */}
-            <Button variant="outline" style={{ cursor: 'pointer' }}>
-              Export Excel
-            </Button>
-
-            <Button variant="outline" style={{ cursor: 'pointer' }}>
-              បោះពុម្ភ
-            </Button>
+            <ExportExcel data={data} />
+            <ExportPDF data={data} />
 
             <DepartmentCreate />
           </Flex>

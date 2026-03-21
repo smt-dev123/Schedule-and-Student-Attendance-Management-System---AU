@@ -28,8 +28,6 @@ router.get("/me", authentication, async (c) => {
 
 router.post(
   "/",
-  authentication,
-  roleMiddleware("admin"),
   zValidator("json", studentSchema),
   async (c) => {
     const { studentService } = c.var.container;
