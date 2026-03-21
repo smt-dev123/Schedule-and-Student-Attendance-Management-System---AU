@@ -30,7 +30,7 @@ function RouteComponent() {
       const formattedData = data.map((item: BuildingType, index: number) => ({
         "ល.រ": index + 1,
         "អាគារសិក្សា": item.name,
-        "ការពិពណ៌នា": item.description || 'គ្មាន',
+        "ការពិពណ៌នា": item.description || '',
         "ស្ថានភាព": item.isActive ? "សកម្ម" : "មិនសកម្ម",
       }));
 
@@ -58,7 +58,7 @@ function RouteComponent() {
       const tableRows = data.map((item: BuildingType, index: number) => [
         index + 1,
         item.name,
-        item.description || 'គ្មាន',
+        item.description || '',
         item.isActive ? "សកម្ម" : "មិនសកម្ម",
       ]);
 
@@ -89,7 +89,8 @@ function RouteComponent() {
         },
       });
 
-      doc.save("តារាងអាគារសិក្សា.pdf");
+      const fileName = `តារាងអាគារសិក្សា_${new Date().toLocaleDateString('kh-KH')}.pdf`;
+      doc.save(fileName);
     } catch (err) {
       console.error(err);
       alert("មានបញ្ហាក្នុងការ Export PDF");
@@ -112,7 +113,7 @@ function RouteComponent() {
               variant="outline"
               onClick={handleExportExcel}
               style={{ cursor: 'pointer' }}
-              color="green"
+              color="violet"
             >
               Export Excel
             </Button>
@@ -121,7 +122,7 @@ function RouteComponent() {
               variant="outline"
               onClick={handleExportPDF}
               style={{ cursor: 'pointer' }}
-              color="violet"
+              color="green"
             >
               Export PDF
             </Button>

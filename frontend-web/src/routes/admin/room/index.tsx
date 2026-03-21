@@ -57,12 +57,12 @@ function RouteComponent() {
               variant="outline"
               onClick={handleExportExcel}
               style={{ cursor: 'pointer' }}
-              color="green"
+              color="violet"
             >
               Export Excel
             </Button>
 
-            <Button variant="outline" style={{ cursor: 'pointer' }}>
+            <Button variant="outline" style={{ cursor: 'pointer' }} color="green">
               បោះពុម្ភ
             </Button>
 

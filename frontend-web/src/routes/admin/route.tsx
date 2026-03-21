@@ -11,16 +11,22 @@ export const Route = createFileRoute('/admin')({
 function RouteComponent() {
   return (
     <>
-      <div className="min-h-screen flex">
+      <div className="flex h-screen overflow-hidden">
+
         <Sidebar />
-        <div className="flex-1 flex flex-col">
+        <div className="flex-1 flex flex-col min-h-0">
           <Navbar />
 
-          <div className="h-full p-4 bg-neutral-50 dark:bg-gray-800">
-            <Outlet />
-          </div>
+          {/* Content Area */}
+          <main className="flex-1 overflow-y-auto bg-neutral-50 dark:bg-gray-800 custom-scrollbar">
+            <div className="min-h-full flex flex-col">
+              <div className="flex-1 p-4">
+                <Outlet />
+              </div>
 
-          <Footer />
+              <Footer />
+            </div>
+          </main>
         </div>
       </div>
       <Toaster />

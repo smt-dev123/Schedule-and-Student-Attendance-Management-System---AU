@@ -1,160 +1,9 @@
 {
-  "id": "b4d1eebe-1091-42f0-ba6d-2b3848404060",
+  "id": "54b2432d-8991-432b-8ad8-33cdd66d377b",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
-    "public.attendance_records": {
-      "name": "attendance_records",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "serial",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "course_id": {
-          "name": "course_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "student_id": {
-          "name": "student_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "date": {
-          "name": "date",
-          "type": "date",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "status": {
-          "name": "status",
-          "type": "attendance_status",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'absent'"
-        },
-        "session": {
-          "name": "session",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "notes": {
-          "name": "notes",
-          "type": "varchar(500)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "recorded_by": {
-          "name": "recorded_by",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        }
-      },
-      "indexes": {
-        "unique_attendance_record": {
-          "name": "unique_attendance_record",
-          "columns": [
-            {
-              "expression": "course_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "student_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "date",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "session",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": true,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {
-        "attendance_records_course_id_courses_id_fk": {
-          "name": "attendance_records_course_id_courses_id_fk",
-          "tableFrom": "attendance_records",
-          "tableTo": "courses",
-          "columnsFrom": [
-            "course_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        },
-        "attendance_records_student_id_students_id_fk": {
-          "name": "attendance_records_student_id_students_id_fk",
-          "tableFrom": "attendance_records",
-          "tableTo": "students",
-          "columnsFrom": [
-            "student_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        },
-        "attendance_records_recorded_by_teachers_id_fk": {
-          "name": "attendance_records_recorded_by_teachers_id_fk",
-          "tableFrom": "attendance_records",
-          "tableTo": "teachers",
-          "columnsFrom": [
-            "recorded_by"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
     "public.academic_levels": {
       "name": "academic_levels",
       "schema": "",
@@ -246,7 +95,7 @@
         },
         "teacher_id": {
           "name": "teacher_id",
-          "type": "integer",
+          "type": "text",
           "primaryKey": false,
           "notNull": true
         },
@@ -262,8 +111,8 @@
           "primaryKey": false,
           "notNull": true
         },
-        "classroom_number": {
-          "name": "classroom_number",
+        "classroom_id": {
+          "name": "classroom_id",
           "type": "integer",
           "primaryKey": false,
           "notNull": true
@@ -382,7 +231,7 @@
               "nulls": "last"
             },
             {
-              "expression": "classroom_number",
+              "expression": "classroom_id",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -440,15 +289,15 @@
           "onDelete": "no action",
           "onUpdate": "no action"
         },
-        "courses_classroom_number_classrooms_number_fk": {
-          "name": "courses_classroom_number_classrooms_number_fk",
+        "courses_classroom_id_classrooms_classroom_id_fk": {
+          "name": "courses_classroom_id_classrooms_classroom_id_fk",
           "tableFrom": "courses",
           "tableTo": "classrooms",
           "columnsFrom": [
-            "classroom_number"
+            "classroom_id"
           ],
           "columnsTo": [
-            "number"
+            "classroom_id"
           ],
           "onDelete": "no action",
           "onUpdate": "no action"
@@ -481,8 +330,8 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.skills": {
-      "name": "skills",
+    "public.departments": {
+      "name": "departments",
       "schema": "",
       "columns": {
         "id": {
@@ -519,8 +368,8 @@
         }
       },
       "indexes": {
-        "unique_faculty_skill": {
-          "name": "unique_faculty_skill",
+        "unique_faculty_department": {
+          "name": "unique_faculty_department",
           "columns": [
             {
               "expression": "faculty_id",
@@ -542,9 +391,9 @@
         }
       },
       "foreignKeys": {
-        "skills_faculty_id_faculties_id_fk": {
-          "name": "skills_faculty_id_faculties_id_fk",
-          "tableFrom": "skills",
+        "departments_faculty_id_faculties_id_fk": {
+          "name": "departments_faculty_id_faculties_id_fk",
+          "tableFrom": "departments",
           "tableTo": "faculties",
           "columnsFrom": [
             "faculty_id"
@@ -558,8 +407,8 @@
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
-        "skills_name_unique": {
-          "name": "skills_name_unique",
+        "departments_name_unique": {
+          "name": "departments_name_unique",
           "nullsNotDistinct": false,
           "columns": [
             "name"
@@ -744,45 +593,6 @@
           "method": "btree",
           "with": {}
         },
-        "idx_schedule_filter": {
-          "name": "idx_schedule_filter",
-          "columns": [
-            {
-              "expression": "faculty_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "academic_level_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "generation",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "semester",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "year",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
         "idx_schedule_faculty_generation": {
           "name": "idx_schedule_faculty_generation",
           "columns": [
@@ -794,51 +604,6 @@
             },
             {
               "expression": "generation",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "idx_schedule_academic_level": {
-          "name": "idx_schedule_academic_level",
-          "columns": [
-            {
-              "expression": "academic_level_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "idx_schedule_semester": {
-          "name": "idx_schedule_semester",
-          "columns": [
-            {
-              "expression": "semester",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "idx_schedule_year": {
-          "name": "idx_schedule_year",
-          "columns": [
-            {
-              "expression": "year",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -877,10 +642,10 @@
           "onDelete": "no action",
           "onUpdate": "no action"
         },
-        "schedules_department_id_skills_id_fk": {
-          "name": "schedules_department_id_skills_id_fk",
+        "schedules_department_id_departments_id_fk": {
+          "name": "schedules_department_id_departments_id_fk",
           "tableFrom": "schedules",
-          "tableTo": "skills",
+          "tableTo": "departments",
           "columnsFrom": [
             "department_id"
           ],
@@ -969,7 +734,26 @@
       "indexes": {},
       "foreignKeys": {},
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
+      "uniqueConstraints": {
+        "session_times_shift_unique": {
+          "name": "session_times_shift_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "shift"
+          ]
+        },
+        "unique_session_time": {
+          "name": "unique_session_time",
+          "nullsNotDistinct": false,
+          "columns": [
+            "shift",
+            "first_session_start_time",
+            "first_session_end_time",
+            "second_session_start_time",
+            "second_session_end_time"
+          ]
+        }
+      },
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
@@ -980,15 +764,9 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "serial",
+          "type": "text",
           "primaryKey": true,
           "notNull": true
-        },
-        "user_id": {
-          "name": "user_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
         },
         "name": {
           "name": "name",
@@ -1122,17 +900,17 @@
         }
       },
       "foreignKeys": {
-        "students_user_id_user_id_fk": {
-          "name": "students_user_id_user_id_fk",
+        "students_id_user_id_fk": {
+          "name": "students_id_user_id_fk",
           "tableFrom": "students",
           "tableTo": "user",
           "columnsFrom": [
-            "user_id"
+            "id"
           ],
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
+          "onDelete": "cascade",
           "onUpdate": "no action"
         },
         "students_faculty_id_faculties_id_fk": {
@@ -1148,10 +926,10 @@
           "onDelete": "no action",
           "onUpdate": "no action"
         },
-        "students_department_id_skills_id_fk": {
-          "name": "students_department_id_skills_id_fk",
+        "students_department_id_departments_id_fk": {
+          "name": "students_department_id_departments_id_fk",
           "tableFrom": "students",
-          "tableTo": "skills",
+          "tableTo": "departments",
           "columnsFrom": [
             "department_id"
           ],
@@ -1177,13 +955,6 @@
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
-        "students_user_id_unique": {
-          "name": "students_user_id_unique",
-          "nullsNotDistinct": false,
-          "columns": [
-            "user_id"
-          ]
-        },
         "students_phone_unique": {
           "name": "students_phone_unique",
           "nullsNotDistinct": false,
@@ -1209,15 +980,9 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "serial",
+          "type": "text",
           "primaryKey": true,
           "notNull": true
-        },
-        "user_id": {
-          "name": "user_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
         },
         "name": {
           "name": "name",
@@ -1296,17 +1061,17 @@
         }
       },
       "foreignKeys": {
-        "teachers_user_id_user_id_fk": {
-          "name": "teachers_user_id_user_id_fk",
+        "teachers_id_user_id_fk": {
+          "name": "teachers_id_user_id_fk",
           "tableFrom": "teachers",
           "tableTo": "user",
           "columnsFrom": [
-            "user_id"
+            "id"
           ],
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
+          "onDelete": "cascade",
           "onUpdate": "no action"
         },
         "teachers_academic_level_id_academic_levels_id_fk": {
@@ -1338,13 +1103,6 @@
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
-        "teachers_user_id_unique": {
-          "name": "teachers_user_id_unique",
-          "nullsNotDistinct": false,
-          "columns": [
-            "user_id"
-          ]
-        },
         "teachers_phone_unique": {
           "name": "teachers_phone_unique",
           "nullsNotDistinct": false,
@@ -1360,6 +1118,157 @@
           ]
         }
       },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.attendance_records": {
+      "name": "attendance_records",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "course_id": {
+          "name": "course_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "student_id": {
+          "name": "student_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "date": {
+          "name": "date",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "status": {
+          "name": "status",
+          "type": "attendance_status",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'absent'"
+        },
+        "session": {
+          "name": "session",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "notes": {
+          "name": "notes",
+          "type": "varchar(500)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "recorded_by": {
+          "name": "recorded_by",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "unique_attendance_record": {
+          "name": "unique_attendance_record",
+          "columns": [
+            {
+              "expression": "course_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "student_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "date",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "session",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "attendance_records_course_id_courses_id_fk": {
+          "name": "attendance_records_course_id_courses_id_fk",
+          "tableFrom": "attendance_records",
+          "tableTo": "courses",
+          "columnsFrom": [
+            "course_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "attendance_records_student_id_students_id_fk": {
+          "name": "attendance_records_student_id_students_id_fk",
+          "tableFrom": "attendance_records",
+          "tableTo": "students",
+          "columnsFrom": [
+            "student_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "attendance_records_recorded_by_teachers_id_fk": {
+          "name": "attendance_records_recorded_by_teachers_id_fk",
+          "tableFrom": "attendance_records",
+          "tableTo": "teachers",
+          "columnsFrom": [
+            "recorded_by"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
@@ -1859,6 +1768,247 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
+    "public.buildings": {
+      "name": "buildings",
+      "schema": "",
+      "columns": {
+        "building_id": {
+          "name": "building_id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "is_active": {
+          "name": "is_active",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "buildings_name_unique": {
+          "name": "buildings_name_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "name"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.classrooms": {
+      "name": "classrooms",
+      "schema": "",
+      "columns": {
+        "classroom_id": {
+          "name": "classroom_id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "classroom_number": {
+          "name": "classroom_number",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "building_id": {
+          "name": "building_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "is_available": {
+          "name": "is_available",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "unique_building_classroom_number": {
+          "name": "unique_building_classroom_number",
+          "columns": [
+            {
+              "expression": "building_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "classroom_number",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "classrooms_building_id_buildings_building_id_fk": {
+          "name": "classrooms_building_id_buildings_building_id_fk",
+          "tableFrom": "classrooms",
+          "tableTo": "buildings",
+          "columnsFrom": [
+            "building_id"
+          ],
+          "columnsTo": [
+            "building_id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "classrooms_name_unique": {
+          "name": "classrooms_name_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "name"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.translation": {
+      "name": "translation",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "namespace": {
+          "name": "namespace",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "language": {
+          "name": "language",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "key": {
+          "name": "key",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "value": {
+          "name": "value",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "CURRENT_TIMESTAMP"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "CURRENT_TIMESTAMP"
+        }
+      },
+      "indexes": {
+        "unique_namespace_language_key": {
+          "name": "unique_namespace_language_key",
+          "columns": [
+            {
+              "expression": "namespace",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "language",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "key",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
     "public.notification_recipients": {
       "name": "notification_recipients",
       "schema": "",
@@ -1877,7 +2027,7 @@
         },
         "student_id": {
           "name": "student_id",
-          "type": "integer",
+          "type": "text",
           "primaryKey": false,
           "notNull": true
         },
@@ -2008,275 +2158,6 @@
           "onUpdate": "no action"
         }
       },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.buildings": {
-      "name": "buildings",
-      "schema": "",
-      "columns": {
-        "building_id": {
-          "name": "building_id",
-          "type": "serial",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "name": {
-          "name": "name",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "is_active": {
-          "name": "is_active",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": false,
-          "default": true
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": false,
-          "default": "now()"
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": false,
-          "default": "now()"
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {},
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {
-        "buildings_name_unique": {
-          "name": "buildings_name_unique",
-          "nullsNotDistinct": false,
-          "columns": [
-            "name"
-          ]
-        }
-      },
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.classrooms": {
-      "name": "classrooms",
-      "schema": "",
-      "columns": {
-        "classroom_id": {
-          "name": "classroom_id",
-          "type": "serial",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "number": {
-          "name": "number",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "name": {
-          "name": "name",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "building_id": {
-          "name": "building_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "is_available": {
-          "name": "is_available",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": false,
-          "default": true
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false,
-          "default": "now()"
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false,
-          "default": "now()"
-        }
-      },
-      "indexes": {
-        "unique_building_classroom_number": {
-          "name": "unique_building_classroom_number",
-          "columns": [
-            {
-              "expression": "building_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "number",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": true,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {
-        "classrooms_building_id_buildings_building_id_fk": {
-          "name": "classrooms_building_id_buildings_building_id_fk",
-          "tableFrom": "classrooms",
-          "tableTo": "buildings",
-          "columnsFrom": [
-            "building_id"
-          ],
-          "columnsTo": [
-            "building_id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {
-        "classrooms_number_unique": {
-          "name": "classrooms_number_unique",
-          "nullsNotDistinct": false,
-          "columns": [
-            "number"
-          ]
-        },
-        "classrooms_name_unique": {
-          "name": "classrooms_name_unique",
-          "nullsNotDistinct": false,
-          "columns": [
-            "name"
-          ]
-        }
-      },
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.translation": {
-      "name": "translation",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "serial",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "namespace": {
-          "name": "namespace",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "language": {
-          "name": "language",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "key": {
-          "name": "key",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "value": {
-          "name": "value",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "CURRENT_TIMESTAMP"
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "CURRENT_TIMESTAMP"
-        }
-      },
-      "indexes": {
-        "unique_namespace_language_key": {
-          "name": "unique_namespace_language_key",
-          "columns": [
-            {
-              "expression": "namespace",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "language",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "key",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": true,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "idx_namespace_language": {
-          "name": "idx_namespace_language",
-          "columns": [
-            {
-              "expression": "namespace",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "language",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
       "policies": {},

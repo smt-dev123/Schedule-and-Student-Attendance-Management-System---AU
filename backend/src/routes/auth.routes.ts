@@ -21,12 +21,13 @@ router.post(
       },
     });
     await db.insert(students).values({
-      userId: result.user?.id,
+      id: result.user?.id,
       name,
       email,
     });
     return c.json({
       message: "Student registered successfully",
+      result,
     });
   },
 );
@@ -45,12 +46,13 @@ router.post(
       },
     });
     await db.insert(teachers).values({
-      userId: result.user?.id,
+      id: result.user?.id,
       name,
       email,
     });
     return c.json({
       message: "Teacher registered successfully",
+      result,
     });
   },
 );

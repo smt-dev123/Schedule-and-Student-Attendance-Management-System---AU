@@ -169,7 +169,7 @@ export default function Sidebar({
           </div>
 
           {/* === Desktop Nav === */}
-          <nav className="flex flex-col gap-1 p-2">
+          <nav className="flex flex-col gap-1 p-2 max-h-[calc(100vh-64px)] overflow-y-auto custom-scrollbar">
             {menuItems.map((menu) =>
               menu.children ? (
                 <Collapsible.Root key={menu.key} className="w-full">
@@ -237,22 +237,12 @@ export default function Sidebar({
 
       {/* === Mobile Drawer === */}
       <div className="md:hidden">
-        <Dialog.Root
-          open={actualMobileOpen}
-          onOpenChange={actualOnMobileOpenChange}
-        >
+        <Dialog.Root open={actualMobileOpen} onOpenChange={actualOnMobileOpenChange}>
           <Dialog.Portal>
             <Dialog.Overlay className="fixed inset-0 bg-black/50" />
-            <Dialog.Content className="fixed top-0 left-0 h-full w-64 bg-white text-gray-900 dark:bg-gray-900 dark:text-white shadow-lg">
-              <VisuallyHidden>
-                <Dialog.Title>Mobile menu</Dialog.Title>
-                <Dialog.Description>
-                  Navigation menu with links.
-                </Dialog.Description>
-              </VisuallyHidden>
-
-              {/* === Header === */}
-              <div className="h-16 flex items-center px-4 border-b border-gray-100 dark:border-gray-700">
+            <Dialog.Content className="fixed top-0 left-0 h-full w-64 bg-white dark:bg-gray-900 shadow-lg flex flex-col">
+              {/* Header */}
+              <div className="h-16 flex-shrink-0 flex items-center px-4 border-b border-gray-700">
                 <Link to="/admin/dashboard" preload="intent">
                   <img
                     className="w-36 h-auto"
@@ -262,7 +252,7 @@ export default function Sidebar({
                 </Link>
               </div>
 
-              <nav className="flex flex-col gap-1 p-4">
+              <nav className="flex-1 overflow-y-auto p-4 flex flex-col gap-1">
                 {menuItems.map((menu) =>
                   menu.children ? (
                     <Collapsible.Root key={menu.key} className="w-full">
@@ -281,7 +271,7 @@ export default function Sidebar({
                             key={child.key}
                             to={child.url ?? '#'}
                             preload="intent"
-                            className="flex items-center gap-2 p-2 text-sm rounded"
+                            className="flex items-center gap-2 p-2 text-sm rounded text-white dark:text-gray-300 hover:bg-gray-800"
                             activeProps={{
                               className:
                                 'bg-blue-100 text-blue-600 dark:bg-gray-700 dark:text-blue-400',

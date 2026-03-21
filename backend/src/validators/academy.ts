@@ -56,7 +56,7 @@ export type DepartmentUpdateInput = z.infer<typeof departmentUpdateSchema>;
  * Student Schemas
  */
 export const studentSchema = z.object({
-  userId: z.string().optional(),
+  id: z.string().min(1, "Student ID is required"),
   name: z.string().min(1, "Student name is required"),
   phone: z.string().min(10).max(15),
   email: z.email("Invalid email format"),
@@ -79,7 +79,7 @@ export type StudentUpdateInput = z.infer<typeof studentUpdateSchema>;
  * Teacher Schemas
  */
 export const teacherSchema = z.object({
-  userId: z.string().optional(),
+  id: z.string().min(1, "Teacher ID is required"),
   name: z.string().min(1, "Teacher name is required"),
   phone: z.string().min(10).max(15),
   email: z.email("Invalid email format"),
@@ -102,10 +102,10 @@ export const courseSchema = z.object({
   credits: z.number().int().positive(),
   description: z.string().optional(),
   day: dayEnum,
-  teacherId: z.number().int().positive(),
+  teacherId: z.string(),
   scheduleId: z.number().int().positive(),
   buildingId: z.number().int().positive(),
-  classroomNumber: z.number().int().positive(),
+  classroomId: z.number().int().positive(),
   sessionTimeId: z.number().int().positive(),
   firstSessionNote: z.string().optional(),
   secondSessionNote: z.string().optional(),
@@ -168,6 +168,14 @@ export const scheduleUniqueKeySchema = z.object({
 });
 export const scheduleUpdateSchema = scheduleSchema.partial();
 
+export const scheduleWithCoursesSchema = z.object({
+  schedule: scheduleSchema,
+  courses: z.array(courseSchema.omit({ scheduleId: true })),
+});
+
 export type ScheduleInput = z.infer<typeof scheduleSchema>;
 export type ScheduleUpdateInput = z.infer<typeof scheduleUpdateSchema>;
 export type ScheduleUniqueKeyInput = z.infer<typeof scheduleUniqueKeySchema>;
+export type ScheduleWithCoursesInput = z.infer<
+  typeof scheduleWithCoursesSchema
+>;

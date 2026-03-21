@@ -28,6 +28,9 @@ export function DataTable<TData, TValue>({
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
   })
+
+  const { rows } = table.getRowModel()
+
   return (
     <>
       <Table.Root variant="surface">
@@ -49,30 +52,40 @@ export function DataTable<TData, TValue>({
                         asc: <HiArrowUp />,
                         desc: <HiArrowDown />,
                       }[header.column.getIsSorted() as string] ?? (
-                        <HiArrowsUpDown />
-                      ))}
+                          <HiArrowsUpDown />
+                        ))}
                   </div>
                 </Table.ColumnHeaderCell>
               ))}
             </Table.Row>
           ))}
         </Table.Header>
+
         <Table.Body>
-          {table.getRowModel().rows.map((row) => (
-            <Table.Row key={row.id}>
-              {row.getVisibleCells().map((cell) => (
-                <Table.Cell key={cell.id} className="hover:bg-gray-200">
-                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                </Table.Cell>
-              ))}
+          {rows.length > 0 ? (
+            rows.map((row) => (
+              <Table.Row key={row.id}>
+                {row.getVisibleCells().map((cell) => (
+                  <Table.Cell key={cell.id} className="hover:bg-gray-200">
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </Table.Cell>
+                ))}
+              </Table.Row>
+            ))
+          ) : (
+            <Table.Row>
+              <Table.Cell
+                colSpan={columns.length}
+                className="text-center py-10 text-gray-500"
+              >
+                គ្មានទិន្នន័យ (No results).
+              </Table.Cell>
             </Table.Row>
-          ))}
+          )}
         </Table.Body>
       </Table.Root>
 
-      {/* Pagination */}
-
-      <DataTablePagination table={table} />
+      {rows.length > 0 && <DataTablePagination table={table} />}
     </>
   )
 }

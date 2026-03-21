@@ -7,18 +7,28 @@ export class StudentService {
   constructor(private readonly studentRepo: StudentRepository) {}
 
   async create(data: StudentInput): Promise<Student> {
-    return await this.studentRepo.create(data);
+    return this.studentRepo.create(data);
   }
 
-  async update(id: number, data: StudentUpdateInput): Promise<Student> {
-    const student = await this.studentRepo.update(id, data);
-    if (!student) {
+  async update(id: string, data: StudentUpdateInput): Promise<Student> {
+    if (Object.keys(data).length === 0) {
+      throw new HTTPException(400, {
+        message: "Update requires at least one field",
+      });
+    }
+    let update: Student | undefined;
+    try {
+      update = await this.studentRepo.update(id, data);
+    } catch (error) {
+      throw new HTTPException(500, { message: "Failed to update student" });
+    }
+    if (!update) {
       throw new HTTPException(404, { message: "Student not found" });
     }
-    return student;
+    return update;
   }
 
-  async delete(id: number): Promise<Student> {
+  async delete(id: string): Promise<Student> {
     const student = await this.studentRepo.delete(id);
     if (!student) {
       throw new HTTPException(404, { message: "Student not found" });
@@ -26,7 +36,7 @@ export class StudentService {
     return student;
   }
 
-  async findById(id: number): Promise<Student> {
+  async findById(id: string): Promise<Student> {
     const student = await this.studentRepo.findById(id);
     if (!student) {
       throw new HTTPException(404, { message: "Student not found" });
@@ -35,6 +45,6 @@ export class StudentService {
   }
 
   async findAll(): Promise<Student[]> {
-    return await this.studentRepo.findAll();
+    return this.studentRepo.findAll();
   }
 }
