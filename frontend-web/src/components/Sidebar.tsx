@@ -41,7 +41,6 @@ export default function Sidebar({
 
   const { t } = useTranslation()
 
-  const academicYears = ["2023-2024", "2024-2025", "2025-2026"]
   const actualMobileOpen = mobileOpen !== undefined ? mobileOpen : isMobileOpen
   const actualOnMobileOpenChange = onMobileOpenChange || setMobileSidebar
 

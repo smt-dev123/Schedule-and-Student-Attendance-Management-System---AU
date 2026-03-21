@@ -5,7 +5,6 @@ import {
   Button,
   Card,
   Flex,
-  Section,
   Select,
   Separator,
   Switch,
