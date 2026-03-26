@@ -8,8 +8,9 @@ interface Props {
 }
 
 export const ProtectedLayout: React.FC<Props> = ({ children, policy }) => {
-  const { user } = useAuth()
+  const { user, isPending } = useAuth()
 
+  if (isPending) return null // or a spinner
   if (!user) return <Navigate to="/auth/login" />
   if (policy && !policy(user)) return <h2>Access Denied</h2>
 

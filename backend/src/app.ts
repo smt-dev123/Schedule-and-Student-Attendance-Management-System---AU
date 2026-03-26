@@ -20,7 +20,10 @@ import { cors } from "hono/cors";
 
 const app = new Hono().basePath("/api");
 
-app.use("*", cors());
+app.use("*", cors({
+  origin: (origin) => origin, // Allows the requesting origin
+  credentials: true,
+}));
 app.use("*", logger());
 app.use("*", diMiddleware);
 

@@ -3,9 +3,11 @@ import type { StudentsType } from '@/types'
 
 const ENDPOINT = '/students'
 
-export const getStudents = async () => {
-  const res = await api.get(ENDPOINT)
-  return res.data
+export const getStudents = async (name?: string, faculty?: string, department?: string, academicLevel?: string, page?: number, limit?: number) => {
+  const res = await api.get(ENDPOINT, {
+    params: { name, faculty, department, academicLevel, page, limit },
+  })
+  return res.data.data
 }
 
 export const createStudent = async (data: StudentsType) => {

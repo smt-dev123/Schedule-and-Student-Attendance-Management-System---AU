@@ -5,9 +5,10 @@
   "private": true,
   "scripts": {
     "test": "vitest",
+    "build": "bun build ./src/main.ts --outdir ./dist --target bun",
+    "start": "bun ./dist/main.js",
     "dev": "bun --watch src/main.ts",
-    "start": "bun src/main.ts",
-    "seed": "bun src/seeder.ts",
+    "seed": "bun ./dist/seeder.js",
     "generate": "drizzle-kit generate",
     "migrate": "drizzle-kit migrate"
   },

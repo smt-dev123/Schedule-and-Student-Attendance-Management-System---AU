@@ -1,10 +1,12 @@
 import { useState } from 'react'
 import { Button, Dialog, Flex, Select, Text, TextField } from '@radix-ui/themes'
 import { Controller, useForm } from 'react-hook-form'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
 import type { TeachersType } from '@/types'
 import { createTeachers } from '@/api/TeacherAPI'
+import { getAcademicLevels } from '@/api/AcademicLevelAPI'
+import { getFaculties } from '@/api/FacultyAPI'
 
 const TeacherCreate = () => {
   const {
@@ -17,6 +19,16 @@ const TeacherCreate = () => {
 
   const queryClient = useQueryClient()
   const [open, setOpen] = useState(false)
+
+  const { data: academicLevels } = useQuery({
+    queryKey: ['academicLevels'],
+    queryFn: getAcademicLevels,
+  })
+
+  const { data: faculties } = useQuery({
+    queryKey: ['faculties'],
+    queryFn: getFaculties,
+  })
 
   const mutation = useMutation({
     mutationFn: (formData: TeachersType) => createTeachers(formData),
@@ -32,7 +44,11 @@ const TeacherCreate = () => {
   })
 
   const onSubmit = (formData: TeachersType) => {
-    mutation.mutate(formData)
+    mutation.mutate({
+      ...formData,
+      academicLevelId: Number(formData.academicLevelId),
+      facultyId: Number(formData.facultyId),
+    })
   }
 
   return (
@@ -43,11 +59,27 @@ const TeacherCreate = () => {
         </Button>
       </Dialog.Trigger>
 
-      <Dialog.Content maxWidth="450px">
+      <Dialog.Content maxWidth="450px" style={{ maxHeight: '80vh', overflowY: 'auto' }}>
         <Dialog.Title>បន្ថែមគ្រូថ្មី</Dialog.Title>
 
         <form onSubmit={handleSubmit(onSubmit)}>
           <Flex direction="column" gap="3">
+            {/* ID */}
+            <label>
+              <Text as="div" size="2" mb="1" weight="bold">
+                អត្តលេខគ្រូ (ID)
+              </Text>
+              <TextField.Root
+                {...register('id', { required: 'ត្រូវបញ្ចូលអត្តលេខគ្រូ' })}
+                placeholder="បញ្ចូលអត្តលេខគ្រូ (ឧ. T-001)"
+              />
+              {errors.id && (
+                <Text size="2" color="red">
+                  {errors.id.message}
+                </Text>
+              )}
+            </label>
+
             {/* Name */}
             <label>
               <Text as="div" size="2" mb="1" weight="bold">
@@ -83,8 +115,8 @@ const TeacherCreate = () => {
                       style={{ width: '100%' }}
                     />
                     <Select.Content className="w-[var(--radix-select-trigger-width)]">
-                      <Select.Item value="ប្រុស">ប្រុស</Select.Item>
-                      <Select.Item value="ស្រី">ស្រី</Select.Item>
+                      <Select.Item value="male">ប្រុស</Select.Item>
+                      <Select.Item value="female">ស្រី</Select.Item>
                     </Select.Content>
                   </Select.Root>
                 )}
@@ -96,34 +128,74 @@ const TeacherCreate = () => {
               )}
             </label>
 
-            {/* Education level */}
+            {/* Academic Level */}
             <label>
               <Text as="div" size="2" mb="1" weight="bold">
                 កម្រិតវប្បធម៌
               </Text>
               <Controller
-                name="education_level"
+                name="academicLevelId"
                 control={control}
                 rules={{ required: 'ត្រូវជ្រើសរើសកម្រិតវប្បធម៌' }}
                 render={({ field }) => (
                   <Select.Root
-                    value={field.value || ''}
-                    onValueChange={(val) => field.onChange(val)}
+                    value={field.value ? String(field.value) : ''}
+                    onValueChange={(val) => field.onChange(Number(val))}
                   >
                     <Select.Trigger
-                      placeholder="ជ្រើសរើសភេទ"
+                      placeholder="ជ្រើសរើសកម្រិតវប្បធម៌"
                       style={{ width: '100%' }}
                     />
                     <Select.Content className="w-[var(--radix-select-trigger-width)]">
-                      <Select.Item value="បរិញ្ញាបត្រ">បរិញ្ញាបត្រ</Select.Item>
-                      <Select.Item value="បរិញ្ញាបត្រជាន់ខ្ពស់">
-                        បរិញ្ញាបត្រជាន់ខ្ពស់
-                      </Select.Item>
-                      <Select.Item value="បណ្ឌិត">បណ្ឌិត</Select.Item>
+                      {academicLevels?.map((level: { id: number; level: string }) => (
+                        <Select.Item key={level.id} value={String(level.id)}>
+                          {level.level}
+                        </Select.Item>
+                      ))}
                     </Select.Content>
                   </Select.Root>
                 )}
               />
+              {errors.academicLevelId && (
+                <Text size="2" color="red">
+                  {errors.academicLevelId.message}
+                </Text>
+              )}
+            </label>
+
+            {/* Faculty */}
+            <label>
+              <Text as="div" size="2" mb="1" weight="bold">
+                មហាវិទ្យាល័យ
+              </Text>
+              <Controller
+                name="facultyId"
+                control={control}
+                rules={{ required: 'ត្រូវជ្រើសរើសមហាវិទ្យាល័យ' }}
+                render={({ field }) => (
+                  <Select.Root
+                    value={field.value ? String(field.value) : ''}
+                    onValueChange={(val) => field.onChange(Number(val))}
+                  >
+                    <Select.Trigger
+                      placeholder="ជ្រើសរើសមហាវិទ្យាល័យ"
+                      style={{ width: '100%' }}
+                    />
+                    <Select.Content className="w-[var(--radix-select-trigger-width)]">
+                      {faculties?.map((faculty: { id: number; name: string }) => (
+                        <Select.Item key={faculty.id} value={String(faculty.id)}>
+                          {faculty.name}
+                        </Select.Item>
+                      ))}
+                    </Select.Content>
+                  </Select.Root>
+                )}
+              />
+              {errors.facultyId && (
+                <Text size="2" color="red">
+                  {errors.facultyId.message}
+                </Text>
+              )}
             </label>
 
             {/* Email */}
@@ -132,9 +204,20 @@ const TeacherCreate = () => {
                 អ៊ីម៉ែល
               </Text>
               <TextField.Root
-                {...register('email')}
+                {...register('email', { 
+                  required: 'ត្រូវបញ្ចូលអ៊ីម៉ែល',
+                  pattern: {
+                    value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                    message: "អ៊ីម៉ែលមិនត្រឹមត្រូវ"
+                  }
+                })}
                 placeholder="បញ្ចូលអ៊ីម៉ែល"
               />
+               {errors.email && (
+                <Text size="2" color="red">
+                  {errors.email.message}
+                </Text>
+              )}
             </label>
 
             {/* Phone */}
@@ -143,37 +226,24 @@ const TeacherCreate = () => {
                 លេខទូរស័ព្ទ
               </Text>
               <TextField.Root
-                {...register('phone')}
+                {...register('phone', { 
+                  required: 'ត្រូវបញ្ចូលលេខទូរស័ព្ទ',
+                  minLength: { value: 10, message: 'យ៉ាងហោចណាស់ ១០ ខ្ទង់' },
+                  maxLength: { value: 15, message: 'មិនលើសពី ១៥ ខ្ទង់' }
+                })}
                 placeholder="បញ្ចូលលេខទូរស័ព្ទ"
               />
-            </label>
-
-            {/* Address */}
-            <label>
-              <Text as="div" size="2" mb="1" weight="bold">
-                អាសយដ្ឋាន
-              </Text>
-              <TextField.Root
-                {...register('address')}
-                placeholder="បញ្ចូលអាសយដ្ឋាន"
-              />
-            </label>
-
-            {/* Profile */}
-            <label>
-              <Text as="div" size="2" mb="1" weight="bold">
-                រូបភាព
-              </Text>
-              <TextField.Root
-                {...register('profile')}
-                placeholder="បញ្ចូល URL រូបភាព"
-              />
+               {errors.phone && (
+                <Text size="2" color="red">
+                  {errors.phone.message}
+                </Text>
+              )}
             </label>
           </Flex>
 
           <Flex gap="3" mt="4" justify="end">
             <Dialog.Close>
-              <Button variant="soft" color="gray">
+              <Button variant="soft" color="gray" type="button">
                 ចាកចេញ
               </Button>
             </Dialog.Close>

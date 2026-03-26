@@ -6,176 +6,158 @@ import {
   RowTable,
 } from '@/components/ui/tables/table'
 import api from '@/lib/axios'
-import { Button, Flex, Text } from '@radix-ui/themes'
+import { Button, Flex, Text, Spinner, Badge } from '@radix-ui/themes'
 import { useQuery } from '@tanstack/react-query'
 import { createFileRoute, Link, useRouter } from '@tanstack/react-router'
-import { FaArrowLeft } from 'react-icons/fa'
+import { FaArrowLeft, FaEdit, FaFileExport, FaPrint } from 'react-icons/fa'
 
 export const Route = createFileRoute('/admin/classes/schedule/$scheduleId/')({
   component: RouteComponent,
 })
 
-type Course = {
-  id: number
-  name: string
-  code: string
-  day: string
-  teacher: { name: string }
-  firstSessionNote: string
-  secondSessionNote: string
-}
-
-type ScheduleData = {
-  id: string
-  classroom: { name: string }
-  sessionTime: {
-    firstSessionStartTime: string
-    firstSessionEndTime: string
-    secondSessionStartTime: string
-    secondSessionEndTime: string
-  }
-  courses: Course[]
-}
+// Definition នៃ Days
+const DAYS_OF_WEEK = [
+  { key: 'monday', label: 'ចន្ទ' },
+  { key: 'tuesday', label: 'អង្គារ' },
+  { key: 'wednesday', label: 'ពុធ' },
+  { key: 'thursday', label: 'ព្រហស្បតិ៍' },
+  { key: 'friday', label: 'សុក្រ' },
+  { key: 'saturday', label: 'សៅរ៍' },
+]
 
 function RouteComponent() {
   const router = useRouter()
+  const { scheduleId } = Route.useParams() // ទាញ ID ពី URL
 
-  const { data, isLoading, error } = useQuery({
-    queryKey: ['schedules'],
+  // ទាញទិន្នន័យពី Backend
+  const { data: schedule, isLoading, error } = useQuery({
+    queryKey: ['schedule', scheduleId],
     queryFn: async () => {
-      const res = await api.get('http://localhost:5000/schedules')
-      return res.data as ScheduleData[]
+      // កែ URL ឱ្យត្រូវនឹង Backend របស់អ្នក (ឧទាហរណ៍: /schedules/1)
+      const res = await api.get(`/schedules/${scheduleId}`)
+      return res.data
     },
   })
 
-  if (isLoading) return <Text>Loading...</Text>
-  if (error) return <Text color="red">Failed to load schedule</Text>
-
-  const schedule = data?.[0]
-  if (!schedule) return <Text>No schedule found</Text>
-
-  // Map courses by day for easier lookup
-  const coursesByDay = schedule.courses.reduce<Record<string, Course>>(
-    (acc, course) => {
-      acc[course.day.toLowerCase()] = course
-      return acc
-    },
-    {},
+  if (isLoading) return (
+    <Flex justify="center" align="center" py="9">
+      <Spinner size="3" /> <Text ml="2">កំពុងទាញយកទិន្នន័យ...</Text>
+    </Flex>
   )
 
+  if (error || !schedule) return (
+    <Flex justify="center" p="5">
+      <Text color="red">មិនអាចទាញយកកាលវិភាគបានទេ ឬមិនមានទិន្នន័យ</Text>
+    </Flex>
+  )
+
+  // រៀបចំមុខវិជ្ជាតាមថ្ងៃ (Group courses by day)
+  const coursesByDay = schedule.courses?.reduce((acc: any, course: any) => {
+    acc[course.day.toLowerCase()] = course
+    return acc
+  }, {})
+
+  // រៀបចំ Sessions តាមទិន្នន័យពី Backend
   const sessions = [
     {
-      id: 1,
-      time: `${schedule.sessionTime.firstSessionStartTime} - ${schedule.sessionTime.firstSessionEndTime}`,
-      note: 'Session 1',
+      label: 'Session 1',
+      time: `${schedule.firstSessionStartTime || '00:00'} - ${schedule.firstSessionEndTime || '00:00'}`,
     },
     {
-      id: 2,
-      time: `${schedule.sessionTime.secondSessionStartTime} - ${schedule.sessionTime.secondSessionEndTime}`,
-      note: 'Session 2',
+      label: 'Session 2',
+      time: `${schedule.secondSessionStartTime || '00:00'} - ${schedule.secondSessionEndTime || '00:00'}`,
     },
   ]
 
   return (
-    <div className="mx-auto">
+    <div className="mx-auto p-4">
       <Flex direction="column" gap="4">
-        {/* Header */}
-        <Flex direction="row" justify="between">
-          <Flex gap="2" align="center">
+        {/* Header Actions */}
+        <Flex direction="row" justify="between" align="center">
+          <Flex gap="3" align="center">
             <button
               onClick={() => router.history.back()}
-              className="cursor-pointer hover:text-xl transition-all"
+              className="cursor-pointer hover:scale-110 transition-transform p-2 bg-gray-100 rounded-full"
             >
               <FaArrowLeft />
             </button>
-            <Text size="5" className="font-bold">
-              កាលវិភាគសិក្សា
-            </Text>
+            <Text size="5" weight="bold">កាលវិភាគសិក្សា</Text>
           </Flex>
           <Flex gap="2">
-            <Button variant="outline">Export Excel</Button>
-            <Button variant="outline">បោះពុម្ភ</Button>
-
+            <Button variant="outline" color="gray"><FaFileExport /> Export</Button>
+            <Button variant="outline" onClick={() => window.print()}><FaPrint /> បោះពុម្ភ</Button>
             <Button variant="solid" asChild>
-              <Link
-                to="/admin/classes/schedule/$scheduleId/edit"
-                params={Number(schedule.id)}
-              >
-                កែប្រែកាលវិភាគ
+              <Link to="/admin/classes/schedule/$scheduleId/edit" params={{ scheduleId: schedule.id }}>
+                <FaEdit /> កែប្រែ
               </Link>
             </Button>
           </Flex>
         </Flex>
 
-        {/* Schedule Info */}
-        <Flex direction="column" gap="2" className="text-center mb-4 font-bold">
-          <Text>កាលវិភាគសិក្សាថ្នាក់បរិញ្ញាបត្រ</Text>
-          <Text>ជំនាន់ទី១៩ ឆ្នាំទី៤ ឆមាស១ ឆ្នាំសិក្សា២០២៥-២០២៦</Text>
-          <Text>មុខជំនាញ៖ វិទ្យាសាស្រ្ដកុំព្យូទ័រ</Text>
-          <Text>
-            ចាប់ផ្ដើមពីថ្ងៃទី២១ ខែកក្ដដា ឆ្នាំ២០២៥ បញ្ចប់ត្រឹម ថ្ងៃទី២៩
-            ខែវិច្ឆិកា ឆ្នាំ២០២៥
+        {/* Schedule Info Card */}
+        <Flex direction="column" gap="1" className="text-center mb-4 bg-blue-50 p-6 rounded-lg border-2 border-dashed border-blue-200">
+          <Text size="5" weight="bold" color="indigo">កាលវិភាគសិក្សាថ្នាក់បរិញ្ញាបត្រ</Text>
+          <Text weight="medium">
+            ជំនាន់ទី{schedule.generation} ឆ្នាំទី{schedule.year} ឆមាស{schedule.semester} ឆ្នាំសិក្សា២០២៥-២០២៦
           </Text>
-          <Text>
-            វេនសិក្សា៖ ពេល
-            {schedule.sessionTime?.shift?.toLowerCase() === 'morning'
-              ? 'ព្រឹក'
-              : 'យប់'}{' '}
-            បន្ទប់៖ {schedule.classroom?.name}
+          <Text color="gray">វេនសិក្សា៖
+            <Badge variant="soft" color="blue" ml="2">
+              {schedule.studyShift === 'morning' ? 'ពេលព្រឹក' : 'ពេលយប់'}
+            </Badge>
           </Text>
+          <Text size="2">បន្ទប់៖ <span className="font-bold">{schedule.classroom?.name || 'មិនទាន់កំណត់'}</span></Text>
         </Flex>
-      </Flex>
 
-      {/* Schedule Table */}
-      <RootTable>
-        <HeaderTable>
-          <RowTable isHeader>
-            <CellTable isHeader>ពេលវេលា / Sessions</CellTable>
-            <CellTable isHeader>ចន្ទ</CellTable>
-            <CellTable isHeader>អង្គារ</CellTable>
-            <CellTable isHeader>ពុធ</CellTable>
-            <CellTable isHeader>ព្រហស្បតិ៍</CellTable>
-            <CellTable isHeader>សុក្រ</CellTable>
-            <CellTable isHeader noRightBorder>
-              សៅរ៍
-            </CellTable>
-          </RowTable>
-        </HeaderTable>
-
-        <BodyTable>
-          {sessions.map((session) => (
-            <RowTable key={session.id}>
-              <CellTable>
-                <div className="font-bold">{session.note}</div>
-                <div>{session.time}</div>
-              </CellTable>
-
-              {[
-                'monday',
-                'tuesday',
-                'wednesday',
-                'thursday',
-                'friday',
-                'saturday',
-              ].map((day) => {
-                const course = coursesByDay[day]
-                return (
-                  <CellTable key={day}>
-                    {course ? (
-                      <div className="text-sm">
-                        <div className="font-bold">{course.name}</div>
-                        <div>{course.teacher?.name}</div>
-                      </div>
-                    ) : (
-                      '-'
-                    )}
+        {/* Schedule Grid Table */}
+        <div className="overflow-x-auto rounded-lg shadow-sm border">
+          <RootTable>
+            <HeaderTable>
+              <RowTable isHeader>
+                <CellTable isHeader className="w-40 bg-gray-50">Sessions</CellTable>
+                {DAYS_OF_WEEK.map((day) => (
+                  <CellTable key={day.key} isHeader className="min-w-[150px]">
+                    {day.label}
                   </CellTable>
-                )
-              })}
-            </RowTable>
-          ))}
-        </BodyTable>
-      </RootTable>
+                ))}
+              </RowTable>
+            </HeaderTable>
+
+            <BodyTable>
+              {sessions.map((session, sIdx) => (
+                <RowTable key={sIdx}>
+                  <CellTable className="bg-gray-50/50">
+                    <Text weight="bold" size="2">{session.label}</Text>
+                    <div className="text-[10px] text-gray-500">{session.time}</div>
+                  </CellTable>
+
+                  {DAYS_OF_WEEK.map((day) => {
+                    const course = coursesByDay?.[day.key]
+                    return (
+                      <CellTable key={day.key} className="h-24 align-top">
+                        {course ? (
+                          <Flex direction="column" gap="1" align="start">
+                            <Text weight="bold" size="2" className="text-blue-700 leading-tight">
+                              {course.name}
+                            </Text>
+                            <Text size="1" color="gray">
+                              ID: {course.code}
+                            </Text>
+                            <div className="mt-2 py-1 px-2 bg-blue-50 rounded text-[10px] w-full text-left">
+                              👨‍🏫 {course.teacher?.name || 'TBA'}
+                            </div>
+                          </Flex>
+                        ) : (
+                          <Text color="gray" size="1" align="center">-</Text>
+                        )}
+                      </CellTable>
+                    )
+                  })}
+                </RowTable>
+              ))}
+            </BodyTable>
+          </RootTable>
+        </div>
+      </Flex>
     </div>
   )
 }

@@ -5,6 +5,7 @@ import { IoSearch } from 'react-icons/io5'
 import { UserTable } from '@/features/user/UserTable'
 import { useQuery } from '@tanstack/react-query'
 import { getUsers } from '@/api/UserAPI'
+import FetchData from '@/components/FetchData'
 
 export const Route = createFileRoute('/admin/user/')({
   component: RouteComponent,
@@ -20,8 +21,9 @@ function RouteComponent() {
     gcTime: 1000 * 60 * 10,
   })
 
-  if (isLoading) return <Text>Loading...</Text>
-  if (error) return <Text>Error loading students.</Text>
+  if (isLoading || error) {
+    return <FetchData isLoading={isLoading} error={error} data={data} />
+  }
 
   return (
     <div>

@@ -1,16 +1,18 @@
 import { useTitle } from '@/hooks/useTitle'
+import { signUp } from '@/lib/auth-client'
 import { Button, Flex, Spinner, Text, TextField } from '@radix-ui/themes'
-import { createFileRoute, Link, useRouter } from '@tanstack/react-router'
+import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { useState } from 'react'
+import toast from 'react-hot-toast'
 
 export const Route = createFileRoute('/auth/register')({
   component: Register,
 })
 
 function Register() {
-  const router = useRouter()
+  const navigate = useNavigate()
   const [loading, setLoading] = useState(false)
-  
+
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -20,111 +22,130 @@ function Register() {
 
   useTitle('Register')
 
-  const handleRegister = async () => {
+  const handleRegister = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault()
+
     const { name, email, password, confirmPassword } = formData
 
     if (!name || !email || !password) {
-      alert('សូមបំពេញព័ត៌មានឱ្យបានគ្រប់គ្រាន់')
+      toast.error('សូមបំពេញព័ត៌មានឱ្យបានគ្រប់គ្រាន់')
       return
     }
 
     if (password !== confirmPassword) {
-      alert('Password ទាំងពីរមិនដូចគ្នាទេ!')
+      toast.error('Password ទាំងពីរមិនដូចគ្នាទេ!')
+      return
+    }
+
+    if (password.length < 6) {
+      toast.error('Password ត្រូវមានយ៉ាងតិច ៦ ខ្ទង់')
       return
     }
 
     setLoading(true)
 
-    // Simulate ការផ្ញើទិន្នន័យទៅ Server
-    setTimeout(() => {
-      console.log('Register Data:', formData)
-      alert('ចុះឈ្មោះបានជោគជ័យ!')
+    try {
+      const { error } = await signUp.email({
+        name,
+        email,
+        password,
+        callbackURL: '/auth/login'
+      })
+
+      if (error) {
+        toast.error(error.message || 'ចុះឈ្មោះមិនបានជោគជ័យ')
+      } else {
+        toast.success('ចុះឈ្មោះបានជោគជ័យ! សូមចូលប្រើប្រាស់')
+        navigate({ to: '/auth/login' })
+      }
+    } catch (err) {
+      toast.error('មានបញ្ហាបច្ចេកទេស សូមព្យាយាមម្ដងទៀត')
+      console.error(err)
+    } finally {
       setLoading(false)
-      router.navigate({ to: '/auth/login' })
-    }, 1000)
+    }
   }
 
-  // Function សម្រាប់ Handle ការវាយអក្សរចូល Input
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>, field: string) => {
     setFormData(prev => ({ ...prev, [field]: e.target.value }))
   }
 
   return (
     <>
-      {/* ផ្នែក Logo និង ចំណងជើង */}
       <Flex direction="column" align="center" justify="center" mb="5" gap="2">
-        <img 
-          src="https://academics-bucket-sj19asxm-prod.s3.ap-southeast-1.amazonaws.com/884dc87f-2613-47fc-83b3-b138abc386df/884dc87f-2613-47fc-83b3-b138abc386df.png" 
-          alt="App Logo" 
-          style={{ 
-            height: '110px',
-            width: 'auto',
-            objectFit: 'contain' 
-          }} 
+        <img
+          src="https://academics-bucket-sj19asxm-prod.s3.ap-southeast-1.amazonaws.com/884dc87f-2613-47fc-83b3-b138abc386df/884dc87f-2613-47fc-83b3-b138abc386df.png"
+          alt="App Logo"
+          className="h-[110px] w-auto object-contain"
         />
         <Text size="6" weight="bold" color="indigo">
           Register
         </Text>
       </Flex>
 
-      <Flex direction="column" gap="3">
-        <label>
-          <Text as="div" size="2" mb="1" weight="bold">Name</Text>
-          <TextField.Root 
-            placeholder="Enter your full name" 
-            value={formData.name}
-            onChange={(e) => handleChange(e, 'name')}
-          />
-        </label>
+      {/* ប្រើ Tag Form ដើម្បីឱ្យ User ងាយស្រួលចុច Enter នៅលើ Keyboard */}
+      <form onSubmit={handleRegister}>
+        <Flex direction="column" gap="3">
+          <label>
+            <Text as="div" size="2" mb="1" weight="bold">Name</Text>
+            <TextField.Root
+              placeholder="Enter your full name"
+              required
+              value={formData.name}
+              onChange={(e) => handleChange(e, 'name')}
+            />
+          </label>
 
-        <label>
-          <Text as="div" size="2" mb="1" weight="bold">Email</Text>
-          <TextField.Root 
-            placeholder="Enter your email" 
-            value={formData.email}
-            onChange={(e) => handleChange(e, 'email')}
-          />
-        </label>
+          <label>
+            <Text as="div" size="2" mb="1" weight="bold">Email</Text>
+            <TextField.Root
+              type="email"
+              placeholder="Enter your email"
+              required
+              value={formData.email}
+              onChange={(e) => handleChange(e, 'email')}
+            />
+          </label>
 
-        <label>
-          <Text as="div" size="2" mb="1" weight="bold">Password</Text>
-          <TextField.Root 
-            type="password" 
-            placeholder="Enter your password" 
-            value={formData.password}
-            onChange={(e) => handleChange(e, 'password')}
-          />
-        </label>
+          <label>
+            <Text as="div" size="2" mb="1" weight="bold">Password</Text>
+            <TextField.Root
+              type="password"
+              placeholder="Enter your password"
+              required
+              value={formData.password}
+              onChange={(e) => handleChange(e, 'password')}
+            />
+          </label>
 
-        <label>
-          <Text as="div" size="2" mb="1" weight="bold">Confirm Password</Text>
-          <TextField.Root 
-            type="password" 
-            placeholder="Confirm your password" 
-            value={formData.confirmPassword}
-            onChange={(e) => handleChange(e, 'confirmPassword')}
-          />
-        </label>
+          <label>
+            <Text as="div" size="2" mb="1" weight="bold">Confirm Password</Text>
+            <TextField.Root
+              type="password"
+              placeholder="Confirm your password"
+              required
+              value={formData.confirmPassword}
+              onChange={(e) => handleChange(e, 'confirmPassword')}
+            />
+          </label>
 
-        {/* Button Register */}
-        <Button 
-          onClick={handleRegister}
-          disabled={loading}
-          color="indigo" 
-          variant="solid" 
-          size="3"
-          style={{ cursor: loading ? 'not-allowed' : 'pointer', width: '100%' }}
-        >
-          {loading && <Spinner size="2" />}
-          {loading ? 'Creating account...' : 'Register'}
-        </Button>
-      </Flex>
+          <Button
+            type="submit"
+            disabled={loading}
+            color="indigo"
+            variant="solid"
+            size="3"
+            className="w-full cursor-pointer disabled:cursor-not-allowed"
+          >
+            {loading ? <Spinner size="2" /> : 'Register'}
+          </Button>
+        </Flex>
+      </form>
 
       <Flex justify="center" align="center" mt="4" gap="2">
         <Text size="2">Already have an account?</Text>
         <Link
-          className="text-indigo-600 font-medium hover:underline"
-          style={{ fontSize: '14px' }}
+          className="text-indigo-600 font-medium hover:underline text-[14px]"
           to="/auth/login"
         >
           Signin

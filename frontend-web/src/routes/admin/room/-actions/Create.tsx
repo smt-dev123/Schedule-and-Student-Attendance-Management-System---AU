@@ -59,7 +59,10 @@ const RoomCreate = () => {
                 បន្ទប់សិក្សា
               </Text>
               <TextField.Root
-                {...register('name', { required: 'Name is required' })}
+                {...register('name', {
+                  required: 'សូមបញ្ចូលបន្ទប់សិក្សា',
+                  minLength: { value: 3, message: 'យ៉ាងហោចណាស់ ៣ខ្ទង់' },
+                })}
                 placeholder="Enter room name"
               />
               {errors.name && (

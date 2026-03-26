@@ -6,10 +6,12 @@ import { useTranslation } from 'react-i18next'
 import { Notifications } from './ui/Notifications'
 import Expand from './ui/Expand'
 import { useSidebarStore } from '@/stores/sidebarStore'
+import { useAuth } from '@/stores/auth'
 import { RiMenu2Line } from 'react-icons/ri'
 
 const Navbar = () => {
   const { toggleMobileSidebar, toggleDesktopSidebar } = useSidebarStore()
+  const { user, logout } = useAuth()
 
   const { t } = useTranslation()
 
@@ -39,9 +41,9 @@ const Navbar = () => {
 
         {/* Name */}
         <h2 className="hidden min-[480px]:block font-khmer text-lg font-medium text-gray-800 dark:text-white">
-          {t('Navbar.hello')} {', '}
+          {t('Navbar.hello')}{', '}
           <b className="font-semibold text-gray-900 dark:text-white">
-            លុយ សុមាត្រា
+            {user?.name || 'User'}
           </b>
         </h2>
       </div>
@@ -64,8 +66,8 @@ const Navbar = () => {
           <DropdownMenu.Trigger style={{ cursor: 'pointer' }}>
             <Avatar
               size="2"
-              src="https://academics-bucket-sj19asxm-prod.s3.ap-southeast-1.amazonaws.com/884dc87f-2613-47fc-83b3-b138abc386df/884dc87f-2613-47fc-83b3-b138abc386df.png"
-              fallback="A"
+              src={user?.image || "https://ui-avatars.com/api/?name=" + encodeURIComponent(user?.name || 'User')}
+              fallback={user?.name?.[0]?.toUpperCase() || "U"}
               radius="full"
             />
           </DropdownMenu.Trigger>
@@ -73,8 +75,8 @@ const Navbar = () => {
             <DropdownMenu.Item>
               <Link to="/admin/setting">ការកំណត់</Link>
             </DropdownMenu.Item>
-            <DropdownMenu.Item>
-              <Link to="/auth/login">ចាកចេញ</Link>
+            <DropdownMenu.Item onClick={logout} style={{ color: 'red', cursor: 'pointer' }}>
+              ចាកចេញ
             </DropdownMenu.Item>
           </DropdownMenu.Content>
         </DropdownMenu.Root>

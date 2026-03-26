@@ -5,6 +5,7 @@ import { Button, Flex, Text } from '@radix-ui/themes'
 import { useQuery } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
 import GradeLevleCreate from './-actions/Create'
+import FetchData from '@/components/FetchData'
 
 export const Route = createFileRoute('/admin/grade_level/')({
   component: RouteComponent,
@@ -21,8 +22,9 @@ function RouteComponent() {
     refetchOnWindowFocus: false,
   })
 
-  if (isLoading) return <Text>Loading...</Text>
-  if (error) return <Text>Error loading students.</Text>
+  if (isLoading || error) {
+    return <FetchData isLoading={isLoading} error={error} data={data} />
+  }
   return (
     <>
       <Flex direction="column" gap="2" mb="4">

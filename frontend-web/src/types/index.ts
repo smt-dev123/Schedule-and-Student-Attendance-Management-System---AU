@@ -94,14 +94,17 @@ export interface SubjectsType {
 }
 
 export interface TeachersType {
-  id?: number
+  id?: string
   name: string
   gender: string
-  education_level: 'បរិញ្ញាបត្រ' | 'បរិញ្ញាបត្រជាន់ខ្ពស់' | 'បណ្ឌិត'
+  academicLevelId: number
+  facultyId: number
   email: string
   phone: string
-  address: string
-  profile: string
+  education_level?: string
+  address?: string
+  profile?: string
+  departmentId?: number
 }
 
 export interface StudentsType {

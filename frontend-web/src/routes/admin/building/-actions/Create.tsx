@@ -51,8 +51,8 @@ const BuildingCreate = () => {
                 អាគារសិក្សា
               </Text>
               <TextField.Root
-                {...register('name', { required: 'Name is required' })}
-                placeholder="Enter your full name"
+                {...register('name', { required: 'សូមបំពេញឈ្មោះអាគារសិក្សា' })}
+                placeholder="សូមបំពេញឈ្មោះអាគារសិក្សា"
                 required
               />
               {errors.name && (
@@ -67,7 +67,7 @@ const BuildingCreate = () => {
               </Text>
               <TextField.Root
                 {...register('description')}
-                placeholder="Enter your description"
+                placeholder="សូមបំពេញការពិពណ៌នា"
               />
             </label>
           </Flex>

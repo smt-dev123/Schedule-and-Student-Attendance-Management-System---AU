@@ -84,8 +84,8 @@ const BuildingUpdate = ({ data }: Props) => {
                 អាគារសិក្សា
               </Text>
               <TextField.Root
-                {...register('name', { required: 'Name is required' })}
-                placeholder="Enter your full name"
+                {...register('name', { required: 'សូមបំពេញឈ្មោះអាគារសិក្សា' })}
+                placeholder="សូមបំពេញឈ្មោះអាគារសិក្សា"
               />
               {errors.name && <span>{errors.name.message}</span>}
             </label>
@@ -95,7 +95,7 @@ const BuildingUpdate = ({ data }: Props) => {
               </Text>
               <TextField.Root
                 {...register('description')}
-                placeholder="Enter your description"
+                placeholder="សូមបំពេញការពិពណ៌នា"
               />
             </label>
           </Flex>

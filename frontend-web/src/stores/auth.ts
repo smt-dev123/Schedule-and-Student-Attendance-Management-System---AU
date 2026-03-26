@@ -1,41 +1,13 @@
-import { create } from 'zustand'
+import { useSession, signOut as betterSignOut } from '@/lib/auth-client'
 
-interface User {
-  username: string
-  role: 'admin' | 'staff' | 'teacher' | 'student'
-  department?: string
-  grade?: string
-}
-
-interface AuthState {
-  user: User | null
-  login: (username: string, password: string) => boolean
-  logout: () => void
-}
-
-const mockUsers: (User & { password: string })[] = [
-  { username: 'admin1', password: '123', role: 'admin' },
-  { username: 'staff1', password: '123', role: 'staff', department: 'hr' },
-  {
-    username: 'teacher1',
-    password: '123',
-    role: 'teacher',
-    department: 'math',
-  },
-  { username: 'student1', password: '123', role: 'student', grade: '10' },
-]
-
-export const useAuth = create<AuthState>((set) => ({
-  user: null,
-  login: (username, password) => {
-    const found = mockUsers.find(
-      (u) => u.username === username && u.password === password,
-    )
-    if (found) {
-      set({ user: found })
-      return true
+export const useAuth = () => {
+  const { data, isPending } = useSession()
+  return {
+    user: data?.user || null,
+    isPending,
+    logout: async () => {
+      await betterSignOut()
+      window.location.href = '/auth/login'
     }
-    return false
-  },
-  logout: () => set({ user: null }),
-}))
+  }
+}
