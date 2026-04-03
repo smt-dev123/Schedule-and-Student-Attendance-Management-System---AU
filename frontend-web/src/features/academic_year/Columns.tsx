@@ -8,7 +8,9 @@ import { FaRegEye } from 'react-icons/fa'
 export const AcademicYearColumns: ColumnDef<AcademicYearsType>[] = [
   { accessorKey: 'id', header: 'ល.រ' },
   { accessorKey: 'name', header: 'ឆ្នាំសិក្សា' },
-  { accessorKey: 'description', header: 'ការពិពណ៌នា' },
+  { accessorKey: 'startDate', header: 'ថ្ងៃចាប់ផ្ដើម' },
+  { accessorKey: 'endDate', header: 'ថ្ងៃបញ្ចប់' },
+  { accessorKey: 'is_current', header: 'ស្ថានភាព' },
   {
     id: 'academic-year-actions',
     header: 'សកម្មភាព',

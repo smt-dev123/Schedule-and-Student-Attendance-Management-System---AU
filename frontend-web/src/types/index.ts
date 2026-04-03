@@ -9,6 +9,7 @@ export interface RoomType {
   id?: number
   name: string
   classroomNumber: number
+  floor: number
   buildingId: string
   building: {
     id: number
@@ -21,6 +22,23 @@ export interface GradeLevelType {
   id?: number
   level: string
   description: string
+}
+
+export interface AcademicLevelType {
+  id?: number
+  level: ['Associate', 'Bachelor', 'Master', 'PhD']
+  description?: string
+}
+
+export interface SessionTimeType {
+  id?: number
+  shift: 'morning' | 'afternoon' | 'evening'
+  firstSessionStartTime: string
+  firstSessionEndTime: string
+  secondSessionStartTime: string
+  secondSessionEndTime: string
+  description?: string
+  isActive?: boolean
 }
 
 export interface ClassesType {
@@ -73,7 +91,9 @@ export interface MajorsType {
 export interface AcademicYearsType {
   id?: number
   name: string
-  description: string
+  startDate: string
+  endDate: string
+  is_current: boolean
 }
 //
 export interface SubjectsType {
@@ -107,18 +127,22 @@ export interface TeachersType {
   departmentId?: number
 }
 
-export interface StudentsType {
-  id?: number
-  name: string
-  gender: string
-  dob: string
-  pob: string
-  phone: string
-  email: string
-  status: 'សកម្ម' | 'អសកម្ម' | 'សម្រាក' | 'បោះបង់'
-  profile: string
-  programId: number
-}
+export type StudentsType = {
+  id?: string;
+  name: string;
+  phone: string | null;
+  email: string | null;
+  facultyId: number | null;
+  departmentId: number | null;
+  academicLevelId: number | null;
+  academicYearId: number | null;
+  educationalStatus: string | null;
+  year: number | null;
+  gender: string | null;
+  generation: number | null;
+  semester: number | null;
+  isActive: boolean;
+};
 //
 export interface AttendancesType {
   id?: number

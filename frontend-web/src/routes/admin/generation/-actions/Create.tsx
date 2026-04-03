@@ -3,7 +3,7 @@ import { Button, Dialog, Flex, Text, TextField } from '@radix-ui/themes'
 import { useForm } from 'react-hook-form'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
-import type { GenerationsType } from '@/types'
+import type { AcademicLevelType } from '@/types'
 import { createGeneration } from '@/api/GenerationAPI'
 
 const GenerationCreate = () => {
@@ -12,14 +12,14 @@ const GenerationCreate = () => {
     handleSubmit,
     reset,
     formState: { errors },
-  } = useForm<GenerationsType>()
+  } = useForm<AcademicLevelType>()
   const queryClient = useQueryClient()
   const [open, setOpen] = useState(false)
 
   const mutation = useMutation({
-    mutationFn: (formData: GenerationsType) => createGeneration(formData),
+    mutationFn: (formData: AcademicLevelType) => createGeneration(formData),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['generations'] })
+      queryClient.invalidateQueries({ queryKey: ['academic-levels'] })
       toast.success('បង្កើតជោគជ័យ')
       setOpen(false)
       reset()
@@ -29,7 +29,7 @@ const GenerationCreate = () => {
     },
   })
 
-  const onSubmit = (formData: GenerationsType) => {
+  const onSubmit = (formData: AcademicLevelType) => {
     mutation.mutate(formData)
   }
 
@@ -37,12 +37,12 @@ const GenerationCreate = () => {
     <Dialog.Root open={open} onOpenChange={setOpen}>
       <Dialog.Trigger>
         <Button variant="solid" style={{ cursor: 'pointer' }}>
-          បន្ថែមបន្ទប់សិក្សា
+          បន្ថែមជំនាន់សិក្សា
         </Button>
       </Dialog.Trigger>
 
       <Dialog.Content maxWidth="450px">
-        <Dialog.Title>បន្ថែមបន្ទប់សិក្សា</Dialog.Title>
+        <Dialog.Title>បន្ថែមជំនាន់សិក្សា</Dialog.Title>
 
         <form onSubmit={handleSubmit(onSubmit)}>
           <Flex direction="column" gap="3">
@@ -51,26 +51,16 @@ const GenerationCreate = () => {
                 ជំនាន់
               </Text>
               <TextField.Root
-                {...register('name', { required: 'Name is required' })}
+                {...register('level', { required: 'Name is required' })}
                 placeholder="Enter name"
                 type="number"
                 min="1"
               />
-              {errors.name && (
+              {errors.level && (
                 <Text size="2" color="red">
-                  {errors.name.message}
+                  {errors.level.message}
                 </Text>
               )}
-            </label>
-
-            <label>
-              <Text as="div" size="2" mb="1" weight="bold">
-                ការពិពណ៌នា
-              </Text>
-              <TextField.Root
-                {...register('description')}
-                placeholder="Enter description"
-              />
             </label>
           </Flex>
 

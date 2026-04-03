@@ -10,7 +10,7 @@ interface Props {
   data: AcademicYearsType
 }
 
-const AcademicYearDelete = ({ data }: Props) => {
+const SessionTimeDelete = ({ data }: Props) => {
   const queryClient = useQueryClient()
 
   const deleteMutation = useMutation({
@@ -47,4 +47,4 @@ const AcademicYearDelete = ({ data }: Props) => {
   )
 }
 
-export default AcademicYearDelete
+export default SessionTimeDelete

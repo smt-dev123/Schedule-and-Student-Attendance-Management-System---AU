@@ -39,7 +39,7 @@ const GradeLevleDelete = ({ data }: Props) => {
 
       <DeleteDialog
         title="ព្រមាន"
-        description={`តើអ្នកពិតជាចង់លុបកម្រិតថ្នាក់${data.name} មែនទេ?`}
+        description={`តើអ្នកពិតជាចង់លុបកម្រិតថ្នាក់${data.level} មែនទេ?`}
         onConfirm={() => deleteMutation.mutate()}
         isLoading={deleteMutation.isPending}
       />

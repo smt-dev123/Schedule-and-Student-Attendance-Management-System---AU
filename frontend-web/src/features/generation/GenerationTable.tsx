@@ -1,9 +1,9 @@
 import { DataTable } from '@/components/table/DataTable'
-import type { GenerationsType } from '@/types'
+import type { AcademicLevelType } from '@/types'
 import { GenerationColumns } from './Columns'
 
 interface Props {
-  data: GenerationsType[]
+  data: AcademicLevelType[]
 }
 
 export function GenerationTable({ data }: Props) {

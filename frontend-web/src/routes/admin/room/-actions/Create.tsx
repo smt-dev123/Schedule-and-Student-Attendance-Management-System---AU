@@ -20,7 +20,7 @@ const RoomCreate = () => {
 
   const { data: buildings } = useQuery<BuildingType[]>({
     queryKey: ['buildings'],
-    queryFn: getBuilding,
+    queryFn: () => getBuilding('all'),
   })
 
   const mutation = useMutation({
@@ -82,12 +82,31 @@ const RoomCreate = () => {
                   valueAsNumber: true,
                   required: 'សូមបញ្ចូលលេខជាន់'
                 })}
-                placeholder="Enter floor number"
+                placeholder="Enter room number"
                 type="number"
               />
               {errors.classroomNumber && (
                 <Text size="2" color="red">
                   {errors.classroomNumber.message}
+                </Text>
+              )}
+            </label>
+
+            <label>
+              <Text as="div" size="2" mb="1" weight="bold">
+                ជាន់បន្ទប់សិក្សា
+              </Text>
+              <TextField.Root
+                {...register('floor', {
+                  valueAsNumber: true,
+                  required: 'សូមបញ្ចូលលេខជាន់'
+                })}
+                placeholder="Enter floor number"
+                type="number"
+              />
+              {errors.floor && (
+                <Text size="2" color="red">
+                  {errors.floor.message}
                 </Text>
               )}
             </label>

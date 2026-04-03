@@ -1,4 +1,3 @@
-import { getGeneration } from '@/api/GenerationAPI'
 import { GenerationTable } from '@/features/generation/GenerationTable'
 import { useTitle } from '@/hooks/useTitle'
 import { Button, Flex, Text } from '@radix-ui/themes'
@@ -6,6 +5,7 @@ import { useQuery } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
 import GenerationCreate from './-actions/Create'
 import FetchData from '@/components/FetchData'
+import { getAcademicLevels } from '@/api/AcademicLevelAPI'
 
 export const Route = createFileRoute('/admin/generation/')({
   component: RouteComponent,
@@ -15,8 +15,8 @@ function RouteComponent() {
   useTitle('Generation Management')
 
   const { data, isLoading, error } = useQuery({
-    queryKey: ['generations'],
-    queryFn: getGeneration,
+    queryKey: ['academic-levels'],
+    queryFn: getAcademicLevels,
     staleTime: 1000 * 60 * 60 * 24,
     gcTime: 1000 * 60 * 60 * 24,
     refetchOnWindowFocus: false,
@@ -31,7 +31,7 @@ function RouteComponent() {
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between gap-2">
           <Text size="5" className="font-bold">
-            តារាងអាគារសិក្សា
+            តារាងជំនាន់សិក្សា
           </Text>
           <Flex gap="2">
             {/* Export */}
@@ -47,7 +47,7 @@ function RouteComponent() {
           </Flex>
         </div>
       </Flex>
-      <GenerationTable data={data} />
+      <GenerationTable data={data ?? []} />
     </>
   )
 }

@@ -3,6 +3,7 @@ import { IoNotificationsOutline } from 'react-icons/io5'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { getNotifications, getMyNotifications, markNotificationAsRead } from '@/api/NotificationAPI'
 import { useAuth } from '@/stores/auth'
+import { Link } from '@tanstack/react-router'
 
 export function Notifications() {
   const { user } = useAuth()
@@ -155,9 +156,11 @@ export function Notifications() {
         {/* Footer */}
         {notifications.length > 0 && (
           <Box mt="3" style={{ textAlign: 'center', borderTop: '1px solid #eaeaea', paddingTop: '12px' }} className="dark:border-gray-700">
-            <Text size="2" className="text-sky-600 dark:text-sky-400 hover:text-sky-700 font-medium" style={{ cursor: 'pointer' }}>
-              View all notifications
-            </Text>
+            <Link to="/admin/notification">
+              <Text size="2" className="text-sky-600 dark:text-sky-400 hover:text-sky-700 font-medium" style={{ cursor: 'pointer' }}>
+                View all notifications
+              </Text>
+            </Link>
           </Box>
         )}
       </Popover.Content>

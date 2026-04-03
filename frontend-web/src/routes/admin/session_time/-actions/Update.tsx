@@ -1,31 +1,56 @@
-import { useState } from 'react'
-import { Button, Dialog, Flex, Text, TextField } from '@radix-ui/themes'
+import {
+  Button,
+  Dialog,
+  Flex,
+  IconButton,
+  Text,
+  TextField,
+} from '@radix-ui/themes'
+import { FaRegEdit } from 'react-icons/fa'
 import { useForm } from 'react-hook-form'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
+import { useEffect, useState } from 'react'
 import type { AcademicYearsType } from '@/types'
-import { createAcademicYear } from '@/api/AcademicYearAPI'
+import { updateAcademicYear } from '@/api/AcademicYearAPI'
 
-const AcademicYearCreate = () => {
+interface Props {
+  data: AcademicYearsType
+}
+
+const formatDateForInput = (dateString: string | undefined) => {
+  if (!dateString) return ''
+  return dateString.split('T')[0]
+}
+
+const SessionTimeUpdate = ({ data }: Props) => {
   const {
     register,
     handleSubmit,
     reset,
     formState: { errors },
-  } = useForm<AcademicYearsType>()
+  } = useForm<AcademicYearsType>({
+    defaultValues: {
+      name: data.name,
+      startDate: formatDateForInput(data.startDate),
+      endDate: formatDateForInput(data.endDate),
+    },
+  })
+
   const queryClient = useQueryClient()
   const [open, setOpen] = useState(false)
 
   const mutation = useMutation({
-    mutationFn: (formData: AcademicYearsType) => createAcademicYear(formData),
+    mutationFn: (formData: AcademicYearsType) =>
+      updateAcademicYear(Number(data.id), formData),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['academic_years'] })
-      toast.success('បង្កើតជោគជ័យ')
+      toast.success('កែប្រែជោគជ័យ')
       setOpen(false)
       reset()
     },
     onError: () => {
-      toast.error('បង្កើតមិនជោគជ័យ')
+      toast.error('កែប្រែមិនជោគជ័យ')
     },
   })
 
@@ -33,26 +58,44 @@ const AcademicYearCreate = () => {
     mutation.mutate(formData)
   }
 
+  useEffect(() => {
+    if (open) {
+      reset({
+        name: data.name,
+        startDate: formatDateForInput(data.startDate),
+        endDate: formatDateForInput(data.endDate),
+      })
+    }
+  }, [open, data, reset])
+
   return (
     <Dialog.Root open={open} onOpenChange={setOpen}>
       <Dialog.Trigger>
-        <Button variant="solid" style={{ cursor: 'pointer' }}>
-          បន្ថែមបន្ទប់សិក្សា
-        </Button>
+        <IconButton
+          size="1"
+          color="blue"
+          variant="surface"
+          style={{ cursor: 'pointer' }}
+        >
+          <FaRegEdit />
+        </IconButton>
       </Dialog.Trigger>
 
       <Dialog.Content maxWidth="450px">
-        <Dialog.Title>បន្ថែមបន្ទប់សិក្សា</Dialog.Title>
+        <Dialog.Title>កែប្រែឆ្នាំសិក្សា</Dialog.Title>
 
         <form onSubmit={handleSubmit(onSubmit)}>
           <Flex direction="column" gap="3">
+            {/* Name */}
             <label>
               <Text as="div" size="2" mb="1" weight="bold">
                 ឆ្នាំសិក្សា
               </Text>
               <TextField.Root
-                {...register('name', { required: 'Name is required' })}
-                placeholder="Enter name"
+                {...register('name', {
+                  required: 'ត្រូវបញ្ចូលឈ្មោះឆ្នាំសិក្សា',
+                })}
+                placeholder="បញ្ចូលឈ្មោះឆ្នាំសិក្សា"
               />
               {errors.name && (
                 <Text size="2" color="red">
@@ -67,19 +110,17 @@ const AcademicYearCreate = () => {
               </Text>
               <TextField.Root
                 {...register('startDate')}
-                placeholder="Enter startDate"
-                type='date'
+                type="date"
               />
             </label>
 
             <label>
-              <Text as="div" size="2" mb="1" weight="bold" typeof='date'>
+              <Text as="div" size="2" mb="1" weight="bold">
                 ថ្ងៃបញ្ចប់
               </Text>
               <TextField.Root
                 {...register('endDate')}
-                placeholder="Enter endDate"
-                type='date'
+                type="date"
               />
             </label>
           </Flex>
@@ -90,7 +131,10 @@ const AcademicYearCreate = () => {
                 ចាកចេញ
               </Button>
             </Dialog.Close>
-            <Button type="submit">រក្សាទុក</Button>
+
+            <Button type="submit" loading={mutation.isPending}>
+              រក្សាទុក
+            </Button>
           </Flex>
         </form>
       </Dialog.Content>
@@ -98,4 +142,4 @@ const AcademicYearCreate = () => {
   )
 }
 
-export default AcademicYearCreate
+export default SessionTimeUpdate

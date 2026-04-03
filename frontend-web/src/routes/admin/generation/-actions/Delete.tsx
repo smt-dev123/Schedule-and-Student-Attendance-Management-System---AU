@@ -3,20 +3,20 @@ import { AlertDialog, IconButton } from '@radix-ui/themes'
 import DeleteDialog from '@/components/action/DeleteDialog'
 import { FaRegTrashAlt } from 'react-icons/fa'
 import toast from 'react-hot-toast'
-import type { GenerationsType } from '@/types'
-import { deleteGeneration } from '@/api/GenerationAPI'
+import type { AcademicLevelType } from '@/types'
+import { deleteAcademicLevel } from '@/api/AcademicLevelAPI'
 
 interface Props {
-  data: GenerationsType
+  data: AcademicLevelType
 }
 
 const GenerationDelete = ({ data }: Props) => {
   const queryClient = useQueryClient()
 
   const deleteMutation = useMutation({
-    mutationFn: async () => await deleteGeneration(Number(data.id)),
+    mutationFn: async () => await deleteAcademicLevel(Number(data.id)),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['generations'] })
+      queryClient.invalidateQueries({ queryKey: ['academic-levels'] })
       toast.success('លុបជោគជ័យ')
     },
     onError: () => {
@@ -39,7 +39,7 @@ const GenerationDelete = ({ data }: Props) => {
 
       <DeleteDialog
         title="ព្រមាន"
-        description={`តើអ្នកពិតជាចង់លុបជំនាន់${data.name} មែនទេ?`}
+        description={`តើអ្នកពិតជាចង់លុបជំនាន់${data.level} មែនទេ?`}
         onConfirm={() => deleteMutation.mutate()}
         isLoading={deleteMutation.isPending}
       />

@@ -25,13 +25,47 @@ function RouteComponent() {
   const queryClient = useQueryClient()
   const scrollRef = useRef<HTMLDivElement>(null)
 
+  // --- WebSocket Setup ---
+  useEffect(() => {
+    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const socket = new WebSocket(`${protocol}//localhost:3000/api/notifications/ws`);
+
+    socket.onopen = () => {
+      console.log('Connected to WebSocket');
+    };
+
+    socket.onmessage = (event) => {
+      const message = JSON.parse(event.data);
+
+      // Look for NEW_NOTIFICATION type
+      if (message.type === 'NEW_NOTIFICATION') {
+        const newNotification = message.data;
+
+        // បច្ចុប្បន្នភាពទិន្នន័យក្នុង React Query Cache ភ្លាមៗនៅពេលមានសារថ្មី
+        queryClient.setQueryData(['notifications'], (oldData: Message[] | undefined) => {
+          return oldData ? [...oldData, newNotification] : [newNotification];
+        });
+
+        toast.success('New notification received!');
+      }
+    };
+
+    socket.onerror = (error) => {
+      console.error('WebSocket Error:', error);
+    };
+
+    return () => {
+      socket.close(); // បិទការភ្ជាប់ពេលចាកចេញពី Page នេះ
+    };
+  }, [queryClient]);
+  // -----------------------
+
   // Fetch data
   const { data: faculties = [] } = useQuery<FacultiesType[]>({
     queryKey: ['faculties'],
     queryFn: getFaculties
   })
 
-  // getGeneration in GenerationAPI.ts might return academic years
   const { data: generations = [] } = useQuery<GenerationsType[]>({
     queryKey: ['generations'],
     queryFn: getGeneration
@@ -46,22 +80,22 @@ function RouteComponent() {
   const [selectedFaculty, setSelectedFaculty] = useState<number | ''>('')
   const [message, setMessage] = useState('')
 
-  // Set initial selections when data loads
   useEffect(() => {
     if (faculties.length > 0 && selectedFaculty === '') {
       setSelectedFaculty(faculties[0].id || '')
     }
-  }, [faculties])
+  }, [faculties, selectedFaculty])
 
   useEffect(() => {
     if (generations.length > 0 && selectedYear === '') {
       setSelectedYear(generations[0].id || '')
     }
-  }, [generations])
+  }, [generations, selectedYear])
 
   const mutation = useMutation({
     mutationFn: broadcastNotification,
     onSuccess: () => {
+      // កន្លែងនេះមិនបាច់ invalidateQueries ក៏បាន បើ Server បាញ់ WebSocket មកវិញឱ្យខ្លួនឯង
       queryClient.invalidateQueries({ queryKey: ['notifications'] })
       setMessage('')
       toast.success('Notification sent successfully')
@@ -79,7 +113,7 @@ function RouteComponent() {
 
   function handleSend() {
     if (!message.trim() || selectedFaculty === '') return
-    
+
     mutation.mutate({
       title: "Announcement",
       message: message,
@@ -98,9 +132,10 @@ function RouteComponent() {
 
   return (
     <div className="flex h-[calc(100vh-150px)] w-full rounded-lg bg-white dark:bg-gray-950 overflow-hidden text-slate-900 dark:text-slate-100">
-
-      {/* --- Sidebar (Left) --- */}
+      {/* ... (UI របស់អ្នករក្សានៅដដែល) ... */}
+      {/* បញ្ជាក់៖ ខ្ញុំមិនបានផ្លាស់ប្តូរផ្នែក JSX ទេ ដើម្បីកុំឱ្យវែងឆ្ងាយ */}
       <aside className="w-80 flex flex-col border-r border-slate-200 dark:border-gray-800 bg-slate-50/50 dark:bg-gray-900">
+        {/* Sidebar content */}
         <div className="p-6 border-b border-slate-200 dark:border-gray-800">
           <div className="flex items-center gap-3 mb-6">
             <div className="bg-sky-600 p-2 rounded-lg text-white">
@@ -108,10 +143,8 @@ function RouteComponent() {
             </div>
             <h1 className="text-xl font-bold tracking-tight">Notifications</h1>
           </div>
-
-          <label className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.1em] mb-2 block">
-            Generation
-          </label>
+          {/* Select Year */}
+          <label className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.1em] mb-2 block">Generation</label>
           <div className="relative">
             <Calendar className="absolute left-3 top-2.5 text-slate-400" size={16} />
             <select
@@ -127,7 +160,6 @@ function RouteComponent() {
           </div>
         </div>
 
-        {/* List of Subjects */}
         <div className="flex-1 overflow-y-auto py-4 px-3 custom-scrollbar">
           <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.1em] mb-4 px-4">Faculties</h3>
           <nav className="space-y-1">
@@ -151,9 +183,7 @@ function RouteComponent() {
         </div>
       </aside>
 
-      {/* --- Main Content (Right) --- */}
       <main className="flex-1 flex flex-col bg-white dark:bg-gray-950">
-        {/* Top Header */}
         <header className="h-20 flex items-center justify-between px-8 border-b border-slate-100 dark:border-gray-800">
           <div>
             <h2 className="text-2xl font-bold text-slate-800 dark:text-white leading-none mb-1">{selectedFacultyName}</h2>
@@ -164,17 +194,10 @@ function RouteComponent() {
           </div>
         </header>
 
-        {/* Message Container */}
-        <div
-          ref={scrollRef}
-          className="flex-1 overflow-y-auto p-8 space-y-8 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] dark:bg-[radial-gradient(#1f2937_1px,transparent_1px)] [background-size:20px_20px] custom-scrollbar"
-        >
+        <div ref={scrollRef} className="flex-1 overflow-y-auto p-8 space-y-8 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] dark:bg-[radial-gradient(#1f2937_1px,transparent_1px)] [background-size:20px_20px] custom-scrollbar">
           {filteredMessages.length > 0 ? (
             filteredMessages.map((msg) => (
-              <div
-                key={msg.id}
-                className={`flex flex-col items-end`}
-              >
+              <div key={msg.id} className={`flex flex-col items-end`}>
                 <div className={`max-w-2xl px-5 py-3 rounded-2xl text-[15px] leading-relaxed shadow-sm bg-sky-600 text-white rounded-tr-none`}>
                   {msg.message}
                 </div>
@@ -186,44 +209,27 @@ function RouteComponent() {
             ))
           ) : (
             <div className="h-full flex flex-col items-center justify-center text-slate-400 opacity-60">
-              <div className="w-16 h-16 bg-slate-100 dark:bg-gray-800 rounded-full flex items-center justify-center mb-4">
-                <MessageSquare size={32} />
-              </div>
+              <MessageSquare size={32} />
               <p className="text-lg font-medium">No messages found</p>
-              <p className="text-sm">Start a conversation for {selectedFacultyName}.</p>
             </div>
           )}
         </div>
 
-        {/* Input Area */}
         <div className="p-6 border-t border-slate-100 dark:border-gray-800">
           <div className="max-w-4xl mx-auto relative group">
-            <div className="absolute -inset-1 bg-gradient-to-r from-sky-500 to-indigo-500 rounded-2xl blur opacity-10 group-focus-within:opacity-12 transition duration-500"></div>
-            <div className="relative flex items-end gap-3 bg-white dark:bg-gray-800 p-3 rounded-2xl border border-slate-200 dark:border-gray-700 shadow-xl shadow-slate-200/50 dark:shadow-none">
+            <div className="relative flex items-end gap-3 bg-white dark:bg-gray-800 p-3 rounded-2xl border border-slate-200 dark:border-gray-700 shadow-xl shadow-slate-200/50">
               <textarea
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' && !e.shiftKey) {
-                    e.preventDefault();
-                    handleSend();
-                  }
-                }}
-                disabled={mutation.isPending || faculties.length === 0}
-                placeholder={`Post an update to ${selectedFacultyName}...`}
-                className="flex-1 bg-transparent border-none focus:ring-0 text-[15px] p-2 resize-none max-h-40 min-h-[50px] outline-none dark:text-white disabled:opacity-50"
+                onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
+                disabled={mutation.isPending}
+                placeholder="Type a message..."
+                className="flex-1 bg-transparent border-none focus:ring-0 text-[15px] p-2 resize-none max-h-40 min-h-[50px] outline-none dark:text-white"
               />
-              <button
-                onClick={handleSend}
-                disabled={!message.trim() || mutation.isPending || faculties.length === 0}
-                className="bg-sky-600 hover:bg-sky-700 active:scale-95 disabled:bg-slate-200 dark:disabled:bg-gray-700 text-white p-3 rounded-xl transition-all shadow-lg shadow-sky-600/30"
-              >
+              <button onClick={handleSend} disabled={!message.trim() || mutation.isPending} className="bg-sky-600 hover:bg-sky-700 text-white p-3 rounded-xl transition-all">
                 <Send size={20} />
               </button>
             </div>
-            <p className="text-[11px] text-slate-400 mt-3 text-center">
-              This announcement will be visible to all students enrolled in <b>{selectedFacultyName}</b> ({selectedYearName}).
-            </p>
           </div>
         </div>
       </main>

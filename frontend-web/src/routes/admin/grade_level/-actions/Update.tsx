@@ -3,11 +3,12 @@ import {
   Dialog,
   Flex,
   IconButton,
+  Select,
   Text,
   TextField,
 } from '@radix-ui/themes'
 import { FaRegEdit } from 'react-icons/fa'
-import { useForm } from 'react-hook-form'
+import { Controller, useForm } from 'react-hook-form'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
 import { useEffect, useState } from 'react'
@@ -21,12 +22,13 @@ interface Props {
 const GradeLevleUpdate = ({ data }: Props) => {
   const {
     register,
+    control,
     handleSubmit,
     reset,
     formState: { errors },
   } = useForm<GradeLevelType>({
     defaultValues: {
-      name: data.name,
+      level: data.level,
       description: data?.description,
     },
   })
@@ -55,7 +57,7 @@ const GradeLevleUpdate = ({ data }: Props) => {
   useEffect(() => {
     if (open) {
       reset({
-        name: data.name,
+        level: data.level,
         description: data.description,
       })
     }
@@ -78,41 +80,50 @@ const GradeLevleUpdate = ({ data }: Props) => {
         <Dialog.Content maxWidth="450px">
           <Dialog.Title>កែប្រែ</Dialog.Title>
 
+
           <form onSubmit={handleSubmit(onSubmit)}>
             <Flex direction="column" gap="3">
+              {/* Level Field - Now a Select Dropdown */}
               <label>
-                <Text as="div" size="2" mb="1" weight="bold">
-                  កម្រិតថ្នាក់
-                </Text>
-                <TextField.Root
-                  {...register('name', { required: 'Name is required' })}
-                  placeholder="Enter name"
+                <Text as="div" size="2" mb="1" weight="bold">កម្រិតសិក្សា</Text>
+                <Controller
+                  control={control}
+                  name="level"
+                  rules={{ required: 'សូមជ្រើសរើសកម្រិតសិក្សា' }}
+                  render={({ field }) => (
+                    <Select.Root
+                      onValueChange={field.onChange}
+                      value={field.value}
+                    >
+                      <Select.Trigger placeholder="ជ្រើសរើសកម្រិត..." style={{ width: '100%' }} />
+                      <Select.Content>
+                        <Select.Item value="Associate">Associate</Select.Item>
+                        <Select.Item value="Bachelor">Bachelor</Select.Item>
+                        <Select.Item value="Master">Master</Select.Item>
+                        <Select.Item value="PhD">PhD</Select.Item>
+                      </Select.Content>
+                    </Select.Root>
+                  )}
                 />
-                {errors.name && (
-                  <Text size="2" color="red">
-                    {errors.name.message}
-                  </Text>
+                {errors.level && (
+                  <Text size="2" color="red">{errors.level.message}</Text>
                 )}
               </label>
 
               <label>
-                <Text as="div" size="2" mb="1" weight="bold">
-                  ការពិពណ៌នា
-                </Text>
+                <Text as="div" size="2" mb="1" weight="bold">ការពិពណ៌នា</Text>
                 <TextField.Root
                   {...register('description')}
-                  placeholder="Enter description"
+                  placeholder="បញ្ចូលការពិពណ៌នា"
                 />
               </label>
             </Flex>
 
             <Flex gap="3" mt="4" justify="end">
               <Dialog.Close>
-                <Button variant="soft" color="gray">
-                  ចាកចេញ
-                </Button>
+                <Button variant="soft" color="gray">ចាកចេញ</Button>
               </Dialog.Close>
-              <Button type="submit">រក្សាទុក</Button>
+              <Button type="submit" loading={mutation.isPending}>រក្សាទុក</Button>
             </Flex>
           </form>
         </Dialog.Content>

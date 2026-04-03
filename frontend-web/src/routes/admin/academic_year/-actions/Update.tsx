@@ -18,6 +18,11 @@ interface Props {
   data: AcademicYearsType
 }
 
+const formatDateForInput = (dateString: string | undefined) => {
+  if (!dateString) return ''
+  return dateString.split('T')[0]
+}
+
 const AcademicYearUpdate = ({ data }: Props) => {
   const {
     register,
@@ -27,7 +32,8 @@ const AcademicYearUpdate = ({ data }: Props) => {
   } = useForm<AcademicYearsType>({
     defaultValues: {
       name: data.name,
-      description: data.description,
+      startDate: formatDateForInput(data.startDate),
+      endDate: formatDateForInput(data.endDate),
     },
   })
 
@@ -56,7 +62,8 @@ const AcademicYearUpdate = ({ data }: Props) => {
     if (open) {
       reset({
         name: data.name,
-        description: data.description,
+        startDate: formatDateForInput(data.startDate),
+        endDate: formatDateForInput(data.endDate),
       })
     }
   }, [open, data, reset])
@@ -97,14 +104,23 @@ const AcademicYearUpdate = ({ data }: Props) => {
               )}
             </label>
 
-            {/* Description */}
             <label>
               <Text as="div" size="2" mb="1" weight="bold">
-                ការពិពណ៌នា
+                ថ្ងៃចាប់ផ្ដើម
               </Text>
               <TextField.Root
-                {...register('description')}
-                placeholder="បញ្ចូលការពិពណ៌នា"
+                {...register('startDate')}
+                type="date"
+              />
+            </label>
+
+            <label>
+              <Text as="div" size="2" mb="1" weight="bold">
+                ថ្ងៃបញ្ចប់
+              </Text>
+              <TextField.Root
+                {...register('endDate')}
+                type="date"
               />
             </label>
           </Flex>

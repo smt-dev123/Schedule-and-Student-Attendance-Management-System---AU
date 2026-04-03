@@ -1,4 +1,3 @@
-import { getGradeLevel } from '@/api/GradeLevelAPI'
 import { GradeLevelTable } from '@/features/gradeLevel/GradeLevelTable'
 import { useTitle } from '@/hooks/useTitle'
 import { Button, Flex, Text } from '@radix-ui/themes'
@@ -6,6 +5,7 @@ import { useQuery } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
 import GradeLevleCreate from './-actions/Create'
 import FetchData from '@/components/FetchData'
+import { getAcademicLevels } from '@/api/AcademicLevelAPI'
 
 export const Route = createFileRoute('/admin/grade_level/')({
   component: RouteComponent,
@@ -15,8 +15,8 @@ function RouteComponent() {
   useTitle('Level Management')
 
   const { data, isLoading, error } = useQuery({
-    queryKey: ['gradeLevels'],
-    queryFn: getGradeLevel,
+    queryKey: ['academic_levels'],
+    queryFn: getAcademicLevels,
     staleTime: 1000 * 60 * 60 * 24,
     gcTime: 1000 * 60 * 60 * 24,
     refetchOnWindowFocus: false,
@@ -48,7 +48,7 @@ function RouteComponent() {
         </div>
       </Flex>
 
-      <GradeLevelTable data={data} />
+      <GradeLevelTable data={data ?? []} />
     </>
   )
 }

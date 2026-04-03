@@ -1,22 +1,22 @@
-import { getAcademicYear } from '@/api/AcademicYearAPI'
-import { AcademicYearTable } from '@/features/academic_year/GenerationTable'
 import { useTitle } from '@/hooks/useTitle'
 import { Button, Flex, Text } from '@radix-ui/themes'
 import { useQuery } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
-import AcademicYearCreate from './-actions/Create'
 import FetchData from '@/components/FetchData'
+import { getSessionTime } from '@/api/SessionTime'
+import SessionTimeCreate from './-actions/Create'
+import { AcademicYearTable } from '@/features/academic_year/GenerationTable'
 
-export const Route = createFileRoute('/admin/academic_year/')({
+export const Route = createFileRoute('/admin/session_time/')({
   component: RouteComponent,
 })
 
 function RouteComponent() {
-  useTitle('Generation Management')
+  useTitle('Session Time Management')
 
   const { data, isLoading, error } = useQuery({
-    queryKey: ['academic_years'],
-    queryFn: getAcademicYear,
+    queryKey: ['session_times'],
+    queryFn: getSessionTime,
     staleTime: 1000 * 60 * 60 * 24,
     gcTime: 1000 * 60 * 60 * 24,
     refetchOnWindowFocus: false,
@@ -32,7 +32,7 @@ function RouteComponent() {
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between gap-2">
           <Text size="5" className="font-bold">
-            តារាងឆ្នាំសិក្សា
+            តារាងម៉ោងសិក្សា
           </Text>
           <Flex gap="2">
             {/* Export */}
@@ -44,7 +44,7 @@ function RouteComponent() {
               បោះពុម្ភ
             </Button>
 
-            <AcademicYearCreate />
+            <SessionTimeCreate />
           </Flex>
         </div>
       </Flex>

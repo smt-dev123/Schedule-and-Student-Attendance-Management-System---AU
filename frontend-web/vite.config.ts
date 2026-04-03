@@ -37,8 +37,19 @@ export default defineConfig({
       host: 'localhost',
       clientPort: 80,
     },
+    proxy: {
+      '/api/notifications/ws': {
+        target: 'ws://localhost:3000',
+        ws: true,
+        changeOrigin: true
+      },
+      '/api': {
+        target: 'http://localhost:3000',
+        changeOrigin: true
+      }
+    },
     watch: {
-      usePolling: true, // ជួយឱ្យស្គាល់ការកែប្រែ File លើ Windows/WSL
+      usePolling: true, 
     },
   }
 })

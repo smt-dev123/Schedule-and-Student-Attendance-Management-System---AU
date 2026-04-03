@@ -1,7 +1,7 @@
 import { getBuilding } from '@/api/BuildingAPI'
 import { BuildingTable } from '@/features/building/BuildingTable'
 import { useTitle } from '@/hooks/useTitle'
-import { Flex, Spinner, Text } from '@radix-ui/themes'
+import { Flex, Text } from '@radix-ui/themes'
 import { useQuery } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
 import BuildingCreate from './-actions/Create'
@@ -9,6 +9,7 @@ import ExportExcel from './-exports/ExportExcel'
 import ExportPDF from './-exports/ExportPDF'
 import { useState } from 'react'
 import FetchData from '@/components/FetchData'
+import BuildingCard from '@/components/ui/Card'
 
 export const Route = createFileRoute('/admin/building/')({
   component: RouteComponent,
@@ -47,6 +48,13 @@ function RouteComponent() {
       </Flex>
 
       <BuildingTable data={data} />
+      {/* <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {
+          data.map((building: any) => (
+            <BuildingCard key={building.id} building={building} onEdit={() => { }} onDelete={() => { }} onView={() => { }} />
+          ))
+        }
+      </div> */}
     </>
   )
 }

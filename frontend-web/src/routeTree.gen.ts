@@ -18,6 +18,7 @@ import { Route as AdminUserIndexRouteImport } from './routes/admin/user/index'
 import { Route as AdminTeacherIndexRouteImport } from './routes/admin/teacher/index'
 import { Route as AdminStudentIndexRouteImport } from './routes/admin/student/index'
 import { Route as AdminSettingIndexRouteImport } from './routes/admin/setting/index'
+import { Route as AdminSession_timeIndexRouteImport } from './routes/admin/session_time/index'
 import { Route as AdminRoomIndexRouteImport } from './routes/admin/room/index'
 import { Route as AdminNotificationIndexRouteImport } from './routes/admin/notification/index'
 import { Route as AdminMajorIndexRouteImport } from './routes/admin/major/index'
@@ -78,6 +79,11 @@ const AdminStudentIndexRoute = AdminStudentIndexRouteImport.update({
 const AdminSettingIndexRoute = AdminSettingIndexRouteImport.update({
   id: '/setting/',
   path: '/setting/',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+const AdminSession_timeIndexRoute = AdminSession_timeIndexRouteImport.update({
+  id: '/session_time/',
+  path: '/session_time/',
   getParentRoute: () => AdminRouteRoute,
 } as any)
 const AdminRoomIndexRoute = AdminRoomIndexRouteImport.update({
@@ -183,6 +189,7 @@ export interface FileRoutesByFullPath {
   '/admin/major': typeof AdminMajorIndexRoute
   '/admin/notification': typeof AdminNotificationIndexRoute
   '/admin/room': typeof AdminRoomIndexRoute
+  '/admin/session_time': typeof AdminSession_timeIndexRoute
   '/admin/setting': typeof AdminSettingIndexRoute
   '/admin/student': typeof AdminStudentIndexRoute
   '/admin/teacher': typeof AdminTeacherIndexRoute
@@ -210,6 +217,7 @@ export interface FileRoutesByTo {
   '/admin/major': typeof AdminMajorIndexRoute
   '/admin/notification': typeof AdminNotificationIndexRoute
   '/admin/room': typeof AdminRoomIndexRoute
+  '/admin/session_time': typeof AdminSession_timeIndexRoute
   '/admin/setting': typeof AdminSettingIndexRoute
   '/admin/student': typeof AdminStudentIndexRoute
   '/admin/teacher': typeof AdminTeacherIndexRoute
@@ -238,6 +246,7 @@ export interface FileRoutesById {
   '/admin/major/': typeof AdminMajorIndexRoute
   '/admin/notification/': typeof AdminNotificationIndexRoute
   '/admin/room/': typeof AdminRoomIndexRoute
+  '/admin/session_time/': typeof AdminSession_timeIndexRoute
   '/admin/setting/': typeof AdminSettingIndexRoute
   '/admin/student/': typeof AdminStudentIndexRoute
   '/admin/teacher/': typeof AdminTeacherIndexRoute
@@ -267,6 +276,7 @@ export interface FileRouteTypes {
     | '/admin/major'
     | '/admin/notification'
     | '/admin/room'
+    | '/admin/session_time'
     | '/admin/setting'
     | '/admin/student'
     | '/admin/teacher'
@@ -294,6 +304,7 @@ export interface FileRouteTypes {
     | '/admin/major'
     | '/admin/notification'
     | '/admin/room'
+    | '/admin/session_time'
     | '/admin/setting'
     | '/admin/student'
     | '/admin/teacher'
@@ -321,6 +332,7 @@ export interface FileRouteTypes {
     | '/admin/major/'
     | '/admin/notification/'
     | '/admin/room/'
+    | '/admin/session_time/'
     | '/admin/setting/'
     | '/admin/student/'
     | '/admin/teacher/'
@@ -400,6 +412,13 @@ declare module '@tanstack/react-router' {
       path: '/setting'
       fullPath: '/admin/setting'
       preLoaderRoute: typeof AdminSettingIndexRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/admin/session_time/': {
+      id: '/admin/session_time/'
+      path: '/session_time'
+      fullPath: '/admin/session_time'
+      preLoaderRoute: typeof AdminSession_timeIndexRouteImport
       parentRoute: typeof AdminRouteRoute
     }
     '/admin/room/': {
@@ -530,6 +549,7 @@ interface AdminRouteRouteChildren {
   AdminMajorIndexRoute: typeof AdminMajorIndexRoute
   AdminNotificationIndexRoute: typeof AdminNotificationIndexRoute
   AdminRoomIndexRoute: typeof AdminRoomIndexRoute
+  AdminSession_timeIndexRoute: typeof AdminSession_timeIndexRoute
   AdminSettingIndexRoute: typeof AdminSettingIndexRoute
   AdminStudentIndexRoute: typeof AdminStudentIndexRoute
   AdminTeacherIndexRoute: typeof AdminTeacherIndexRoute
@@ -553,6 +573,7 @@ const AdminRouteRouteChildren: AdminRouteRouteChildren = {
   AdminMajorIndexRoute: AdminMajorIndexRoute,
   AdminNotificationIndexRoute: AdminNotificationIndexRoute,
   AdminRoomIndexRoute: AdminRoomIndexRoute,
+  AdminSession_timeIndexRoute: AdminSession_timeIndexRoute,
   AdminSettingIndexRoute: AdminSettingIndexRoute,
   AdminStudentIndexRoute: AdminStudentIndexRoute,
   AdminTeacherIndexRoute: AdminTeacherIndexRoute,

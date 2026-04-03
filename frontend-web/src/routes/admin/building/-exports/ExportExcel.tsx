@@ -11,7 +11,6 @@ const ExportExcel = ({ data }: { data: BuildingType[] }) => {
                 "ល.រ": index + 1,
                 "អាគារសិក្សា": item.name,
                 "ការពិពណ៌នា": item.description || '',
-                "ស្ថានភាព": item.isActive ? "សកម្ម" : "មិនសកម្ម",
             }));
 
             const worksheet = XLSX.utils.json_to_sheet(formattedData);

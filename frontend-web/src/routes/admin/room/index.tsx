@@ -8,6 +8,7 @@ import ExportExcel from './-exports/ExportExcel'
 import ExportPDF from './-exports/ExportPDF'
 import { useTitle } from '@/hooks/useTitle'
 import FetchData from '@/components/FetchData'
+import { useState } from 'react'
 
 export const Route = createFileRoute('/admin/room/')({
   component: RouteComponent,
@@ -16,9 +17,13 @@ export const Route = createFileRoute('/admin/room/')({
 function RouteComponent() {
   useTitle('Room Management')
 
+  const [name, setName] = useState('all')
+  const [page, setPage] = useState(1)
+  const [limit, setLimit] = useState(10)
+
   const { data, isLoading, error } = useQuery({
-    queryKey: ['rooms'],
-    queryFn: getRoom,
+    queryKey: ['rooms', name, page, limit],
+    queryFn: () => getRoom(name, page, limit),
     staleTime: 1000 * 60 * 60 * 24,
     gcTime: 1000 * 60 * 60 * 24,
     refetchOnWindowFocus: false,

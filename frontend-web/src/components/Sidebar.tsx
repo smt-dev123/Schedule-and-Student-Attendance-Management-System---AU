@@ -69,8 +69,9 @@ export default function Sidebar({
         { key: 'major', label: t('Sidebar.Study.major'), url: '/admin/major' },
         { key: 'department', label: 'តេប៉ាតឺម៉ង់', url: '/admin/department' },
         { key: 'grade_level', label: t('Sidebar.Study.level'), url: '/admin/grade_level' },
-        { key: 'generation', label: t('Sidebar.Study.generation'), url: '/admin/generation' },
+        // { key: 'generation', label: t('Sidebar.Study.generation'), url: '/admin/generation' },
         { key: 'academic_year', label: 'ឆ្នាំសិក្សា', url: '/admin/academic_year' },
+        { key: 'session_time', label: 'ម៉ោងសិក្សា', url: '/admin/session_time' },
       ],
     },
     {

@@ -3,10 +3,11 @@ import { useTitle } from '@/hooks/useTitle'
 import { Button, Flex, Select, Text, TextField, Box } from '@radix-ui/themes'
 import { useQuery } from '@tanstack/react-query'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { IoSearch, IoFilter, IoCloudDownloadOutline, IoAdd } from 'react-icons/io5'
+import { IoSearch, IoFilter } from 'react-icons/io5'
 import { useState, useEffect } from 'react'
 import { StudentTable } from '@/features/student/StudentTable'
 import FetchData from '@/components/FetchData'
+import StudentCreate from './-actions/Create'
 
 type StudentSearch = {
   name?: string
@@ -79,18 +80,12 @@ function RouteComponent() {
   return (
     <Flex direction="column" gap="4">
       {/* --- Header Section --- */}
-      <Flex justify="between" align="center" wrap="wrap" gap="3">
-        <Text size="6" weight="bold" className="tracking-tight">
-          បញ្ជីរាយនាមនិស្សិត
-        </Text>
-
+      <Flex justify="between" align="center" mb="2">
+        <Text size="5" weight="bold">និស្សិត</Text>
         <Flex gap="2">
-          <Button variant="outline" color="gray" className="cursor-pointer">
-            <IoCloudDownloadOutline /> Export
-          </Button>
-          <Button variant="solid" className="cursor-pointer">
-            <IoAdd /> បន្ថែមនិស្សិត
-          </Button>
+          <Button variant="outline" className="cursor-pointer">Export Excel</Button>
+          <Button variant="outline" className="cursor-pointer">បោះពុម្ភ</Button>
+          <StudentCreate />
         </Flex>
       </Flex>
 

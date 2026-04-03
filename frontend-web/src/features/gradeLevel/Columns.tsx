@@ -1,16 +1,15 @@
 import GradeLevleDelete from '@/routes/admin/grade_level/-actions/Delete'
 import GradeLevleUpdate from '@/routes/admin/grade_level/-actions/Update'
-import type { GradeLevelType } from '@/types'
+import type { AcademicLevelType } from '@/types'
 import { Flex, IconButton } from '@radix-ui/themes'
 import type { ColumnDef } from '@tanstack/react-table'
-import { FaRegEdit, FaRegEye, FaRegTrashAlt } from 'react-icons/fa'
+import { FaRegEye } from 'react-icons/fa'
 
-export const GradeLevelColumns: ColumnDef<GradeLevelType>[] = [
+export const AcademicLevelColumns: ColumnDef<AcademicLevelType>[] = [
   { accessorKey: 'id', header: 'ល.រ' },
   { accessorKey: 'level', header: 'កម្រិតថ្នាក់' },
-  { accessorKey: 'description', header: 'ការពិពណ៌នា' },
   {
-    id: 'grade_level-actions',
+    id: 'academic_level-actions',
     header: 'សកម្មភាព',
     enableSorting: false,
     cell: ({ row }) => (

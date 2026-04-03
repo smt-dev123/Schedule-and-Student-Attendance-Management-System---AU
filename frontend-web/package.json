@@ -12,7 +12,9 @@
     "format": "prettier",
     "check": "prettier --write . && eslint --fix",
     "server": "json-server --watch data/data.json --port 5000",
-    "server-net": "json-server --watch data/data.json --port 5000 --host 0.0.0.0"
+    "server-net": "json-server --watch data/data.json --port 5000 --host 0.0.0.0",
+    "route:gen": "tsr generate",
+    "route:watch": "tsr watch"
   },
   "dependencies": {
     "@better-auth/client": "^0.0.2-alpha.3",
@@ -36,6 +38,7 @@
     "@tanstack/react-router": "^1.130.2",
     "@tanstack/react-router-devtools": "^1.131.5",
     "@tanstack/react-table": "^8.21.3",
+    "@tanstack/router-cli": "^1.166.25",
     "@tanstack/router-plugin": "^1.121.2",
     "@types/file-saver": "^2.0.7",
     "@types/node": "^24.3.0",
