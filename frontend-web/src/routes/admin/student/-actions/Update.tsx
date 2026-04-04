@@ -36,12 +36,10 @@ const StudentUpdate = ({ data }: Props) => {
     formState: { errors },
   } = useForm<StudentsType>()
 
-  // Fetch Options Data
   const { data: faculties = [] } = useQuery({ queryKey: ['faculties'], queryFn: getFaculties })
   const { data: departments = [] } = useQuery({ queryKey: ['departments'], queryFn: getDepartments })
   const { data: academicLevels = [] } = useQuery({ queryKey: ['academicLevels'], queryFn: getAcademicLevels })
 
-  // បញ្ចូលទិន្នន័យចាស់ចូលក្នុង Form ពេលបើក Dialog
   useEffect(() => {
     if (open && data) {
       reset({

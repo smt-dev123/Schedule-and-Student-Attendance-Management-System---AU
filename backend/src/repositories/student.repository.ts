@@ -15,48 +15,83 @@ import { and, count, eq, ilike, SQL } from "drizzle-orm";
 
 export class StudentRepository {
   constructor(private readonly db: DrizzleDb) {}
-
   async findAll(query: StudentQueryInput): Promise<{
     data: Student[];
     total: number;
     page: number;
     limit: number;
   }> {
-    const { facultyId, departmentId, academicLevelId, page, limit, name } =
-      query;
+    const {
+      facultyId,
+      departmentId,
+      academicLevelId,
+      academicYearId,
+      page = 1,
+      limit = 10,
+      name,
+    } = query;
 
     const safePage = Math.max(1, Math.floor(page));
     const safeLimit = Math.min(100, Math.max(1, Math.floor(limit)));
 
     const conditions: SQL[] = [];
-    if (name?.trim()) conditions.push(ilike(students.name, `%${name.trim()}%`));
-    if (facultyId) conditions.push(eq(students.facultyId, facultyId));
-    if (departmentId) conditions.push(eq(students.departmentId, departmentId));
-    if (academicLevelId)
-      conditions.push(eq(students.academicLevelId, academicLevelId));
-    if (query.generation)
-      conditions.push(eq(students.generation, query.generation));
+
+    if (name?.trim()) {
+      conditions.push(ilike(students.name, `%${name.trim()}%`));
+    }
+
+    if (academicYearId) {
+      // បញ្ជាក់៖ ត្រូវប្រាកដថា academicYearId ជា Number
+      conditions.push(eq(students.academicYearId, Number(academicYearId)));
+    }
+
+    if (facultyId && facultyId !== null) {
+      conditions.push(eq(students.facultyId, Number(facultyId)));
+    }
+
+    if (departmentId && departmentId !== null) {
+      conditions.push(eq(students.departmentId, Number(departmentId)));
+    }
+
+    if (academicLevelId && academicLevelId !== null) {
+      conditions.push(eq(students.academicLevelId, Number(academicLevelId)));
+    }
 
     const where = conditions.length > 0 ? and(...conditions) : undefined;
 
-    const [data, countResult] = await Promise.all([
-      this.db.query.students.findMany({
-        where,
-        limit: safeLimit,
-        offset: (safePage - 1) * safeLimit,
-      }),
-      this.db.select({ total: count() }).from(students).where(where),
-    ]);
+    const countResult = await this.db
+      .select({ total: count() })
+      .from(students)
+      .where(where);
 
-    const total = countResult[0]?.total ?? 0;
+    const total = Number(countResult[0]?.total ?? 0);
 
-    return { data, total, page: safePage, limit: safeLimit };
-  }
+    let offset = (safePage - 1) * safeLimit;
+    let finalPage = safePage;
 
-  async findById(id: string): Promise<Student | undefined> {
-    return this.db.query.students.findFirst({
-      where: eq(students.id, id),
+    if (offset >= total && total > 0) {
+      offset = 0;
+      finalPage = 1;
+    }
+
+    // ៥. ទាញយកទិន្នន័យពិតប្រាកដ
+    const data = await this.db.query.students.findMany({
+      where,
+      limit: safeLimit,
+      offset: offset,
+      orderBy: (students, { desc }) => [desc(students.createdAt)],
+      with: {
+        faculty: true,
+        department: true,
+      },
     });
+
+    return {
+      data,
+      total,
+      page: finalPage,
+      limit: safeLimit,
+    };
   }
 
   async create(data: StudentInput): Promise<Student | undefined> {
@@ -90,7 +125,8 @@ export class StudentRepository {
     generation?: number;
   }): Promise<Student[]> {
     const conditions: SQL[] = [];
-    if (filter.facultyId) conditions.push(eq(students.facultyId, filter.facultyId));
+    if (filter.facultyId)
+      conditions.push(eq(students.facultyId, filter.facultyId));
     if (filter.departmentId)
       conditions.push(eq(students.departmentId, filter.departmentId));
     if (filter.generation)

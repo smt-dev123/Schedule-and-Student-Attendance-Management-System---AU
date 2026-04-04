@@ -11,7 +11,7 @@ import { useState } from 'react'
 import toast from 'react-hot-toast'
 import { FaArrowLeft, FaInfoCircle, FaSave, FaFileAlt } from 'react-icons/fa'
 
-export const Route = createFileRoute('/admin/course/$courseId/')({
+export const Route = createFileRoute('/admin/course/attendance/$attendanceId')({
   component: RouteComponent,
 })
 

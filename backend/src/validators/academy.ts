@@ -93,6 +93,7 @@ export const studentQuerySchema = z.object({
   facultyId: z.coerce.number().int().positive().optional(),
   departmentId: z.coerce.number().int().positive().optional(),
   academicLevelId: z.coerce.number().int().positive().optional(),
+  academicYearId: z.coerce.number().int().positive().optional(),
   generation: z.coerce.number().int().positive().optional(),
   page: z.coerce.number().int().positive().default(1),
   limit: z.coerce.number().int().positive().default(10),

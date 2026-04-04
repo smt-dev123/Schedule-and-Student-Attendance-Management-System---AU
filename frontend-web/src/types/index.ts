@@ -26,13 +26,13 @@ export interface GradeLevelType {
 
 export interface AcademicLevelType {
   id?: number
-  level: ['Associate', 'Bachelor', 'Master', 'PhD']
+  level: AcademicLevelEnum
   description?: string
 }
 
 export interface SessionTimeType {
   id?: number
-  shift: 'morning' | 'afternoon' | 'evening'
+  shift: StudyShiftEnum
   firstSessionStartTime: string
   firstSessionEndTime: string
   secondSessionStartTime: string
@@ -93,13 +93,13 @@ export interface AcademicYearsType {
   name: string
   startDate: string
   endDate: string
-  is_current: boolean
+  isCurrent: boolean
 }
-//
+
 export interface SubjectsType {
   id?: number
   name: string
-  gender: string
+  gender: GenderEnum
   gradeLevelId: number
   teacherId: number
 
@@ -116,7 +116,7 @@ export interface SubjectsType {
 export interface TeachersType {
   id?: string
   name: string
-  gender: string
+  gender: GenderEnum
   academicLevelId: number
   facultyId: number
   email: string
@@ -138,20 +138,48 @@ export interface StudentsType {
   departmentId: number
   academicLevelId: number
   academicYearId: number | null
-  educationalStatus: string | null
+  educationalStatus: EducationalStatusEnum
   year: number | null
-  gender: string | null
+  gender: GenderEnum
   generation: number | null
   semester: number | null
   isActive?: boolean
 }
-//
+
+export interface CoursesType {
+  id?: number
+  name: string
+  code: string
+  credit: number
+  description: string
+  day: DayEnum
+  teacherId: number
+  subjectId: number
+  sessionTimeId: number
+  firstSessionNote: string
+  secondSessionNote: string
+  isActive: boolean
+
+  teacher?: {
+    id?: number
+    name?: string
+  }
+  subject?: {
+    id?: number
+    name?: string
+  }
+  sessionTime?: {
+    id?: number
+    name?: string
+  }
+}
+
 export interface AttendancesType {
   id?: number
   studentId: number
   classId: number
   date: Date
-  status: 'Present' | 'Absent' | 'Late' | 'Excused'
+  status: AttendanceStatusEnum
   note: string
 
   student?: {
@@ -181,6 +209,12 @@ export interface ScheduleType {
   phone: string // លេខគ្រូ
 }
 
+export interface TranslationType {
+  id?: number
+  key: string
+  value: string
+}
+
 export interface UsersType {
   id?: number
   username?: string
@@ -189,3 +223,27 @@ export interface UsersType {
   role: string
   profile?: string
 }
+
+// Enums
+type DayEnum =
+  | 'Monday'
+  | 'Tuesday'
+  | 'Wednesday'
+  | 'Thursday'
+  | 'Friday'
+  | 'Saturday'
+  | 'Sunday'
+
+type StudyShiftEnum = 'morning' | 'evening' | 'night'
+
+type AcademicLevelEnum = 'Associate' | 'Bachelor' | 'Master' | 'PhD'
+
+type GenderEnum = 'male' | 'female' | 'other'
+
+type EducationalStatusEnum =
+  | 'enrolled'
+  | 'graduated'
+  | 'dropped out'
+  | 'transferred'
+
+type AttendanceStatusEnum = 'present' | 'absent' | 'late' | 'excused'

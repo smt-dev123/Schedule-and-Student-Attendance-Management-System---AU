@@ -8,6 +8,7 @@ export const getStudents = async (
   facultyId?: string,
   departmentId?: string,
   academicLevelId?: string,
+  academicYearId?: number | null,
   page: number = 1,
   limit: number = 10,
 ) => {
@@ -17,6 +18,7 @@ export const getStudents = async (
       facultyId: facultyId || undefined,
       departmentId: departmentId || undefined,
       academicLevelId: academicLevelId || undefined,
+      academicYearId,
       page,
       limit,
     },

@@ -1,51 +1,121 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
-import { BookOpen, Clock, ChevronRight } from 'lucide-react'
+import { BookOpen, Clock, CalendarDays, CheckCircle, User, Loader2 } from 'lucide-react'
+import { useQuery } from '@tanstack/react-query'
+import { useAcademicStore } from '@/stores/useAcademicStore'
+import FetchData from '@/components/FetchData'
+import { getCourses } from '@/api/CourseAPI'
 
 export const Route = createFileRoute('/admin/course/')({
   component: CourseListComponent,
 })
 
-const COURSES = [
-  { id: '101', name: "គណិតវិទ្យា (ថ្នាក់ទី ១២A)", teacher: "លោក ហ៊ាន សុខា", time: "08:00 - 09:30" },
-  { id: '102', name: "រូបវិទ្យា (ថ្នាក់ទី ១២B)", teacher: "អ្នកគ្រូ ចាន់ នី", time: "09:45 - 11:15" },
-];
-
 function CourseListComponent() {
-  return (
-    <div className="p-8 max-w-5xl mx-auto">
-      <h1 className="text-2xl font-bold text-gray-900 mb-8">កាលវិភាគបង្រៀនថ្ងៃនេះ</h1>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {COURSES.map((course) => (
-          <Link 
-            key={course.id}
-            to="/admin/course/$courseId" 
-            params={{ courseId: course.id }}
-            className="group block bg-white border border-gray-200 rounded-2xl p-6 shadow-sm hover:border-blue-500 hover:shadow-md transition-all"
-          >
-            <div className="flex justify-between items-start mb-4">
-              <div className="p-2 bg-blue-50 text-blue-600 rounded-lg group-hover:bg-blue-600 group-hover:text-white transition-colors">
-                <BookOpen size={20} />
-              </div>
-              <span className="text-xs font-medium text-gray-400">ID: {course.id}</span>
-            </div>
-            
-            <h3 className="text-lg font-bold text-gray-800 mb-2">{course.name}</h3>
-            
-            <div className="flex items-center text-sm text-gray-500 mb-4">
-              <Clock size={14} className="mr-1" />
-              <span>{course.time}</span>
-            </div>
+  const { selectedYearId } = useAcademicStore()
 
-            <div className="flex items-center justify-between pt-4 border-t border-gray-50">
-              <span className="text-sm font-medium text-gray-600">{course.teacher}</span>
-              <div className="text-blue-600 flex items-center text-sm font-semibold">
-                ស្រង់វត្តមាន <ChevronRight size={16} />
+  // const { data: apiResponse, isLoading, error } = useQuery({
+  //   queryKey: ['courses', selectedYearId],
+  //   queryFn: () => getCourses(selectedYearId!),
+  //   enabled: !!selectedYearId,
+  // })
+  // const courses = apiResponse?.data
+
+  // ប្រើប្រាស់ Mock Data បើសិនជា API មិនទាន់មានទិន្នន័យ
+  const courses = [
+    {
+      id: 1,
+      name: 'Introduction to Computer Science',
+      code: 'CS101',
+      day: 'Monday',
+      sessionTime: { firstSessionStartTime: '08:00', secondSessionEndTime: '15:00' },
+      teacher: { name: 'John Doe' },
+      scheduleId: 101, // សម្រាប់ទៅកាន់ Schedule
+      schedule: { classroom: { name: 'Room 101' } },
+    }
+  ]
+  const isLoading = false
+  const error = null
+
+  return (
+    <div className="p-8 max-w-7xl mx-auto font-kantumruy">
+      <div className="flex justify-between items-center mb-8">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900 text-slate-800">គ្រប់គ្រងវគ្គសិក្សា</h1>
+          <p className="text-sm text-gray-500">ជ្រើសរើសសកម្មភាពសម្រាប់ថ្នាក់រៀននីមួយៗ</p>
+        </div>
+        {isLoading && <Loader2 className="animate-spin text-blue-600" />}
+      </div>
+
+      <FetchData isLoading={isLoading} error={error} data={courses}>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {courses.map((course: any) => (
+            <div
+              key={course.id}
+              className="group relative bg-white border border-gray-100 rounded-[32px] p-6 shadow-sm hover:shadow-xl transition-all duration-300 border-b-4 hover:border-b-blue-500"
+            >
+              {/* Header Card */}
+              <div className="flex justify-between items-start mb-5">
+                <div className="p-3 bg-slate-100 text-slate-600 rounded-2xl group-hover:bg-blue-600 group-hover:text-white transition-colors duration-300">
+                  <BookOpen size={24} />
+                </div>
+                <BadgeCode code={course.code} />
+              </div>
+
+              {/* Course Info */}
+              <h3 className="text-xl font-bold text-gray-800 mb-4 line-clamp-1">
+                {course.name}
+              </h3>
+
+              <div className="space-y-3 mb-8">
+                <div className="flex items-center text-sm text-gray-500">
+                  <Clock size={16} className="mr-2 text-blue-500" />
+                  <span>{course.day} | {course.sessionTime?.firstSessionStartTime} - {course.sessionTime?.secondSessionEndTime}</span>
+                </div>
+                <div className="flex items-center text-sm text-gray-500">
+                  <User size={16} className="mr-2 text-blue-500" />
+                  <span className="truncate">គ្រូ៖ {course.teacher?.name}</span>
+                </div>
+                <div className="flex items-center text-sm text-gray-500 font-medium">
+                   <div className="w-4 h-4 rounded-full bg-blue-100 flex items-center justify-center mr-2">
+                      <div className="w-1.5 h-1.5 rounded-full bg-blue-600"></div>
+                   </div>
+                   បន្ទប់៖ {course.schedule?.classroom?.name || 'TBA'}
+                </div>
+              </div>
+
+              {/* Action Buttons: Schedule & Attendance */}
+              <div className="grid grid-cols-2 gap-3 pt-5 border-t border-gray-50">
+                <Link
+                  to="/admin/course/schedule/$scheduleId"
+                  params={{ scheduleId: String(course.scheduleId || course.id) }}
+                  className="flex items-center justify-center gap-2 py-2.5 px-4 bg-slate-50 text-slate-600 rounded-2xl text-xs font-bold hover:bg-indigo-50 hover:text-indigo-600 transition-colors border border-transparent hover:border-indigo-100"
+                >
+                  <CalendarDays size={16} />
+                  កាលវិភាគ
+                </Link>
+
+                <Link
+                  to="/admin/course/attendance/$attendanceId"
+                  params={{ attendanceId: String(course.id) }}
+                  className="flex items-center justify-center gap-2 py-2.5 px-4 bg-blue-50 text-blue-600 rounded-2xl text-xs font-bold hover:bg-blue-600 hover:text-white transition-all shadow-sm hover:shadow-blue-200"
+                >
+                  <CheckCircle size={16} />
+                  ស្រង់វត្តមាន
+                </Link>
               </div>
             </div>
-          </Link>
-        ))}
-      </div>
+          ))}
+        </div>
+      </FetchData>
+    </div>
+  )
+}
+
+// Sub-component សម្រាប់បង្ហាញកូដមុខវិជ្ជា
+function BadgeCode({ code }: { code: string }) {
+  return (
+    <div className="flex flex-col items-end">
+      <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Code</span>
+      <span className="text-sm font-mono font-bold text-slate-700 italic">{code || 'N/A'}</span>
     </div>
   )
 }

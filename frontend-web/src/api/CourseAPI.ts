@@ -1,0 +1,24 @@
+import api from '@/lib/axios'
+import type { CoursesType } from '@/types'
+
+const ENDPOINT = '/courses'
+
+export const getCourses = async (academicYearId: number) => {
+  const res = await api.get(ENDPOINT, { params: { academicYearId } })
+  return res.data.data ?? []
+}
+
+export const createCourse = async (data: CoursesType) => {
+  const res = await api.post(ENDPOINT, data)
+  return res.data.data
+}
+
+export const updateCourse = async (id: number, data: CoursesType) => {
+  const res = await api.put(`${ENDPOINT}/${id}`, data)
+  return res.data.data
+}
+
+export const deleteCourse = async (id: number) => {
+  const res = await api.delete(`${ENDPOINT}/${id}`)
+  return res.data.data
+}

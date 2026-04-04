@@ -3,20 +3,20 @@ import { AlertDialog, IconButton } from '@radix-ui/themes'
 import DeleteDialog from '@/components/action/DeleteDialog'
 import { FaRegTrashAlt } from 'react-icons/fa'
 import toast from 'react-hot-toast'
-import type { AcademicYearsType } from '@/types'
-import { deleteAcademicYear } from '@/api/AcademicYearAPI'
+import type { SessionTimeType } from '@/types'
+import { deleteSessionTime } from '@/api/SessionTime'
 
 interface Props {
-  data: AcademicYearsType
+  data: SessionTimeType
 }
 
 const SessionTimeDelete = ({ data }: Props) => {
   const queryClient = useQueryClient()
 
   const deleteMutation = useMutation({
-    mutationFn: async () => await deleteAcademicYear(Number(data.id)),
+    mutationFn: async () => await deleteSessionTime(Number(data.id)),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['academic_years'] })
+      queryClient.invalidateQueries({ queryKey: ['session_times'] })
       toast.success('លុបជោគជ័យ')
     },
     onError: () => {
@@ -39,7 +39,7 @@ const SessionTimeDelete = ({ data }: Props) => {
 
       <DeleteDialog
         title="ព្រមាន"
-        description={`តើអ្នកពិតជាចង់លុបឆ្នាំសិក្សា${data.name} មែនទេ?`}
+        description={`តើអ្នកពិតជាចង់លុបឆ្នាំសិក្សា${data.shift} មែនទេ?`}
         onConfirm={() => deleteMutation.mutate()}
         isLoading={deleteMutation.isPending}
       />

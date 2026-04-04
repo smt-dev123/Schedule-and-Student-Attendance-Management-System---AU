@@ -40,18 +40,6 @@ const SessionTimeCreate = () => {
     },
   })
 
-  // const onSubmit = (formData: SessionTimeType) => {
-  //   // បន្ថែម :00 ប្រសិនបើ Backend តម្រូវការ format HH:mm:ss
-  //   const payload = {
-  //     ...formData,
-  //     firstSessionStartTime: `${formData.firstSessionStartTime}:00`,
-  //     firstSessionEndTime: `${formData.firstSessionEndTime}:00`,
-  //     secondSessionStartTime: `${formData.secondSessionStartTime}:00`,
-  //     secondSessionEndTime: `${formData.secondSessionEndTime}:00`,
-  //   };
-  //   mutation.mutate(payload)
-  // }
-
   const onSubmit = (formData: SessionTimeType) => {
     // បង្កើត Object ថ្មីដោយបំប្លែងម៉ោងឲ្យមានវិនាទី (:00) ដើម្បីតម្រូវតាម Backend
     const payload = {
@@ -74,7 +62,6 @@ const SessionTimeCreate = () => {
         : formData.secondSessionEndTime,
     };
 
-    console.log("Payload to Server:", payload); // ពិនិត្យមើល Payload មុនផ្ញើ
     mutation.mutate(payload);
   };
 

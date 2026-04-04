@@ -39,7 +39,6 @@ const StudentCreate = () => {
     },
   })
 
-  // Fetch Data for Select Options
   const { data: faculties = [] } = useQuery({
     queryKey: ['faculties'],
     queryFn: getFaculties,
@@ -53,7 +52,6 @@ const StudentCreate = () => {
     queryFn: getAcademicLevels,
   })
 
-  // Reset form when dialog opens/closes
   useEffect(() => {
     if (open) reset()
   }, [open, reset])
