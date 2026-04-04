@@ -26,15 +26,15 @@ const FetchData = ({ isLoading, error, data, children }: FetchDataProps) => {
         );
     }
 
-    const isEmpty = Array.isArray(data) ? data.length === 0 : !data;
+    // const isEmpty = Array.isArray(data) ? data.length === 0 : !data;
 
-    if (isEmpty) {
-        return (
-            <Flex justify="center" p="9">
-                <Text color="gray">មិនមានទិន្នន័យសម្រាប់បង្ហាញឡើយ</Text>
-            </Flex>
-        );
-    }
+    // if (isEmpty) {
+    //     return (
+    //         <Flex justify="center" p="9">
+    //             <Text color="gray">មិនមានទិន្នន័យសម្រាប់បង្ហាញឡើយ</Text>
+    //         </Flex>
+    //     );
+    // }
 
     return <>{children}</>;
 };

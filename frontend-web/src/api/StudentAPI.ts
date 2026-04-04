@@ -3,11 +3,25 @@ import type { StudentsType } from '@/types'
 
 const ENDPOINT = '/students'
 
-export const getStudents = async (name?: string, faculty?: string, department?: string, academicLevel?: string, page?: number, limit?: number) => {
+export const getStudents = async (
+  name?: string,
+  facultyId?: string,
+  departmentId?: string,
+  academicLevelId?: string,
+  page: number = 1,
+  limit: number = 10,
+) => {
   const res = await api.get(ENDPOINT, {
-    params: { name, faculty, department, academicLevel, page, limit },
+    params: {
+      name: name || undefined,
+      facultyId: facultyId || undefined,
+      departmentId: departmentId || undefined,
+      academicLevelId: academicLevelId || undefined,
+      page,
+      limit,
+    },
   })
-  return res.data.data
+  return res.data?.data ?? []
 }
 
 export const createStudent = async (data: StudentsType) => {
@@ -15,12 +29,12 @@ export const createStudent = async (data: StudentsType) => {
   return res.data
 }
 
-export const updateStudent = async (id: number, data: StudentsType) => {
+export const updateStudent = async (id: string, data: StudentsType) => {
   const res = await api.put(`${ENDPOINT}/${id}`, data)
   return res.data
 }
 
-export const deleteStudent = async (id: number) => {
+export const deleteStudent = async (id: string) => {
   const res = await api.delete(`${ENDPOINT}/${id}`)
   return res.data
 }

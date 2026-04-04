@@ -4,6 +4,8 @@ import { IoSearch, IoFilter } from 'react-icons/io5'
 import { useTitle } from '@/hooks/useTitle'
 import { useQuery } from '@tanstack/react-query'
 import { getTeachers } from '@/api/TeacherAPI'
+import { getFaculties } from '@/api/FacultyAPI' // នាំចូល API 
+import { getAcademicLevels } from '@/api/AcademicLevelAPI' // នាំចូល API
 import { TeacherTable } from '@/features/teacher/GenerationTable'
 import TeacherCreate from './-actions/Create'
 import { useState, useMemo, useEffect } from 'react'
@@ -39,18 +41,28 @@ function RouteComponent() {
   const [facultyDraft, setFacultyDraft] = useState(faculty)
   const [majorDraft, setMajorDraft] = useState(major)
 
+  // --- ១. ទាញយកទិន្នន័យពី API សម្រាប់ Dropdowns ---
+  const { data: teachersData, isLoading, error } = useQuery({
+    queryKey: ['teachers'],
+    queryFn: getTeachers,
+  })
+
+  const { data: faculties = [] } = useQuery({
+    queryKey: ['faculties'],
+    queryFn: getFaculties,
+  })
+
+  const { data: academicLevels = [] } = useQuery({
+    queryKey: ['academicLevels'],
+    queryFn: getAcademicLevels,
+  })
+
   useEffect(() => {
     setSearchDraft(search)
     setDegreeDraft(degree)
     setFacultyDraft(faculty)
     setMajorDraft(major)
   }, [search, degree, faculty, major])
-
-  const { data, isLoading, error } = useQuery({
-    queryKey: ['teachers'],
-    queryFn: getTeachers,
-    staleTime: 1000 * 60 * 60,
-  })
 
   const handleApplyFilter = () => {
     navigate({
@@ -65,50 +77,46 @@ function RouteComponent() {
   }
 
   const handleClearFilter = () => {
-    const reset = { search: '', degree: 'all', faculty: 'all', major: 'all' }
     setSearchDraft('')
     setDegreeDraft('all')
     setFacultyDraft('all')
     setMajorDraft('all')
-    navigate({ search: reset })
+    navigate({ 
+        search: { search: '', degree: 'all', faculty: 'all', major: 'all' } 
+    })
   }
 
   const filteredData = useMemo(() => {
-    const rawList = Array.isArray(data) ? data : (data as any)?.data || (data as any)?.teachers || []
+    if (!teachersData) return [];
+    
+    // ចាប់យក Array តាមរយៈ res.data?.data ដែលអ្នកបានកំណត់ក្នុង getTeachers
+    const rawList = Array.isArray(teachersData) ? teachersData : (teachersData as any)?.data || [];
 
     return rawList.filter((teacher: any) => {
       const matchesSearch = !search ||
         teacher.name?.toLowerCase().includes(search.toLowerCase()) ||
-        teacher.id?.toString().includes(search)
+        teacher.id?.toString().includes(search);
 
-      const matchesDegree = degree === 'all' || teacher.degree === degree
-      const matchesFaculty = faculty === 'all' || teacher.faculty === faculty
-      const matchesMajor = major === 'all' || teacher.major === major
-
-      return matchesSearch && matchesDegree && matchesFaculty && matchesMajor
-    })
-  }, [data, search, degree, faculty, major])
-
-  if (isLoading || error) {
-    return <FetchData isLoading={isLoading} error={error} data={data} />
-  }
+      // បើប្រើ ID ពី API ត្រូវធៀបជា String ឬ Number ឱ្យត្រូវគ្នា
+      const matchesDegree = degree === 'all' || String(teacher.academicLevelId) === degree;
+      const matchesFaculty = faculty === 'all' || String(teacher.facultyId) === faculty;
+      
+      return matchesSearch && matchesDegree && matchesFaculty;
+    });
+  }, [teachersData, search, degree, faculty]);
 
   return (
     <div>
       <Flex direction="column" gap="4">
-        {/* Top Header */}
         <Flex justify="between" align="center" mb="2">
           <Text size="5" weight="bold">គ្រូបង្រៀន</Text>
           <Flex gap="2">
             <Button variant="outline" className="cursor-pointer">Export Excel</Button>
-            <Button variant="outline" className="cursor-pointer">បោះពុម្ភ</Button>
             <TeacherCreate />
           </Flex>
         </Flex>
 
-        {/* Filter Bar */}
         <Flex justify="between" gap="3" wrap="wrap">
-          {/* Search Field */}
           <Box flexGrow="1" maxWidth="300px">
             <TextField.Root
               placeholder="ស្វែងរក..."
@@ -120,32 +128,30 @@ function RouteComponent() {
             </TextField.Root>
           </Box>
 
-          {/* Select Options */}
           <Flex gap="2" wrap="wrap" align="center">
+            {/* --- Select កម្រិតវប្បធម៌ ពី API --- */}
             <Select.Root value={degreeDraft} onValueChange={setDegreeDraft}>
-              <Select.Trigger />
+              <Select.Trigger placeholder="កម្រិតវប្បធម៌" />
               <Select.Content>
                 <Select.Item value="all">កម្រិតថ្នាក់ទាំងអស់</Select.Item>
-                <Select.Item value="បរិញ្ញាបត្ររង">បរិញ្ញាបត្ររង</Select.Item>
-                <Select.Item value="បរិញ្ញាបត្រ">បរិញ្ញាបត្រ</Select.Item>
-                <Select.Item value="បរិញ្ញាបត្រជាន់ខ្ពស់">បរិញ្ញាបត្រជាន់ខ្ពស់</Select.Item>
+                {academicLevels.map((level: any) => (
+                  <Select.Item key={level.id} value={String(level.id)}>
+                    {level.level}
+                  </Select.Item>
+                ))}
               </Select.Content>
             </Select.Root>
 
+            {/* --- Select មហាវិទ្យាល័យ ពី API --- */}
             <Select.Root value={facultyDraft} onValueChange={setFacultyDraft}>
-              <Select.Trigger />
+              <Select.Trigger placeholder="មហាវិទ្យាល័យ" />
               <Select.Content>
                 <Select.Item value="all">មហាវិទ្យាល័យទាំងអស់</Select.Item>
-                <Select.Item value="មវប">មវប</Select.Item>
-              </Select.Content>
-            </Select.Root>
-
-            <Select.Root value={majorDraft} onValueChange={setMajorDraft}>
-              <Select.Trigger />
-              <Select.Content>
-                <Select.Item value="all">មុខជំនាញទាំងអស់</Select.Item>
-                <Select.Item value="វិទ្យាសាស្រ្ដកុំព្យូទ័រ">វិទ្យាសាស្រ្ដកុំព្យូទ័រ</Select.Item>
-                <Select.Item value="ព័ត៌មានវិទ្យា">ព័ត៌មានវិទ្យា</Select.Item>
+                {faculties.map((f: any) => (
+                  <Select.Item key={f.id} value={String(f.id)}>
+                    {f.name}
+                  </Select.Item>
+                ))}
               </Select.Content>
             </Select.Root>
 
@@ -158,8 +164,9 @@ function RouteComponent() {
           </Flex>
         </Flex>
 
-        {/* Table Section */}
-        <TeacherTable data={filteredData} />
+        <FetchData isLoading={isLoading} error={error} data={teachersData}>
+            <TeacherTable data={filteredData} />
+        </FetchData>
       </Flex>
     </div>
   )

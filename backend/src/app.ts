@@ -14,20 +14,28 @@ import teacherRoutes from "./routes/teacher.routes";
 import translationRoutes from "./routes/translation.routes";
 import notificationRoutes from "./routes/notification.routes";
 import authRoutes from "./routes/auth.routes";
+import academicYearRoutes from "./routes/academic-year.routes";
 import { auth } from "./lib/auth";
 import { errorHandler } from "./middlewares/error";
 import { cors } from "hono/cors";
 
-const app = new Hono().basePath("/api");
+const app = new Hono();
 
-app.use("*", cors({
-  origin: (origin) => origin, // Allows the requesting origin
-  credentials: true,
-}));
 app.use("*", logger());
 app.use("*", diMiddleware);
+app.use(
+  "*",
+  cors({
+    origin: ["http://localhost:4000"],
+    allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowHeaders: ["Content-Type", "Authorization"],
+    exposeHeaders: ["Content-Length"],
+    maxAge: 600,
+    credentials: true,
+  }),
+);
 
-app.on(["POST", "GET"], "/auth/*", (c) => {
+app.on(["POST", "GET"], "/api/auth/*", (c) => {
   return auth.handler(c.req.raw);
 });
 
@@ -40,19 +48,20 @@ app.get("/health", (c) =>
 
 app.notFound((c) => c.json({ message: "Route not found" }, 404));
 
-app.route("/buildings", buildingRoutes);
-app.route("/classrooms", classroomRoutes);
-app.route("/academic-levels", academicLevelRoutes);
-app.route("/attendance", attendanceRoutes);
-app.route("/departments", departmentRoutes);
-app.route("/faculties", facultyRoutes);
-app.route("/schedules", scheduleRoutes);
-app.route("/session-times", sessionTimeRoutes);
-app.route("/students", studentRoutes);
-app.route("/teachers", teacherRoutes);
-app.route("/translations", translationRoutes);
-app.route("/notifications", notificationRoutes);
-app.route("/authentications", authRoutes);
+app.route("/api/buildings", buildingRoutes);
+app.route("/api/classrooms", classroomRoutes);
+app.route("/api/academic-levels", academicLevelRoutes);
+app.route("/api/attendance", attendanceRoutes);
+app.route("/api/departments", departmentRoutes);
+app.route("/api/faculties", facultyRoutes);
+app.route("/api/schedules", scheduleRoutes);
+app.route("/api/session-times", sessionTimeRoutes);
+app.route("/api/students", studentRoutes);
+app.route("/api/teachers", teacherRoutes);
+app.route("/api/translations", translationRoutes);
+app.route("/api/notifications", notificationRoutes);
+app.route("/api/authentications", authRoutes);
+app.route("/api/academic-years", academicYearRoutes);
 
 app.onError((e, c) => errorHandler(c, e));
 

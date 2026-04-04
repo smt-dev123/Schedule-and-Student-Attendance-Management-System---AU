@@ -8,8 +8,8 @@ export const getRoom = async (name?: string, page?: number, limit?: number) => {
 
 export const createRoom = async (newRoom: RoomType) => {
   const res = await api.post('/classrooms', newRoom)
-  return res.data?.data
-}
+  return res.data?.data ?? []
+} 
 
 export const updateRoom = async (id: number, updateRoom: RoomType) => {
   const res = await api.put(`/classrooms/${id}`, updateRoom)

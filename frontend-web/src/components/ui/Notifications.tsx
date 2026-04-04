@@ -7,8 +7,9 @@ import { Link } from '@tanstack/react-router'
 
 export function Notifications() {
   const { user } = useAuth()
+  const queryClient = useQueryClient()
 
-  const { data: notifications = [] } = useQuery({
+  const { data: rawData } = useQuery({
     queryKey: ['notifications', user?.id],
     queryFn: () => {
       const role = (user as any)?.role
@@ -21,7 +22,8 @@ export function Notifications() {
     enabled: !!user,
   })
 
-  const queryClient = useQueryClient()
+  // Ensure notifications is always an array to prevent .slice or .map errors
+  const notifications = Array.isArray(rawData) ? rawData : []
 
   const markAsReadMutation = useMutation({
     mutationFn: markNotificationAsRead,
@@ -74,18 +76,15 @@ export function Notifications() {
         }}
         className="bg-white dark:bg-gray-800 shadow-xl border border-gray-100 dark:border-gray-700"
       >
-        {/* Header */}
         <Box mb="3" pb="2" style={{ borderBottom: '1px solid #eaeaea' }} className="dark:border-gray-700">
           <Text size="3" weight="bold" className="text-gray-900 dark:text-gray-100">
             Notifications
           </Text>
         </Box>
 
-        {/* Notifications List */}
         <Flex direction="column" gap="2">
           {notifications.length > 0 ? (
             notifications.slice(0, 10).map((n: any, i: number) => {
-              // Extract fields accommodating both Notification and NotificationRecipient models
               const title = n.notification?.title || n.title || 'Announcement'
               const message = n.notification?.message || n.message || ''
               const time = n.createdAt || n.notification?.createdAt || new Date().toISOString()
@@ -153,7 +152,6 @@ export function Notifications() {
           )}
         </Flex>
 
-        {/* Footer */}
         {notifications.length > 0 && (
           <Box mt="3" style={{ textAlign: 'center', borderTop: '1px solid #eaeaea', paddingTop: '12px' }} className="dark:border-gray-700">
             <Link to="/admin/notification">

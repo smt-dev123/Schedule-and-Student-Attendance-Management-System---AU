@@ -1,9 +1,10 @@
 import type { BuildingRepository } from "@/repositories/building.repository";
 import type { ClassroomRepository } from "@/repositories/classroom.repository";
-import type { Classroom } from "@/types/infrastructure";
+import type { Classroom, ClassroomWithBuilding } from "@/types/infrastructure";
 import type { RedisCache } from "@/utils/redis";
 import type {
   ClassroomInput,
+  ClassroomQueryInput,
   ClassroomUpdateInput,
 } from "@/validators/infrastructure";
 import { HTTPException } from "hono/http-exception";
@@ -17,8 +18,19 @@ export class ClassroomService {
     private readonly cache: RedisCache,
   ) {}
 
-  async findAll(): Promise<Classroom[]> {
-    return this.classroomRepository.findAll();
+  async findAll(query: ClassroomQueryInput): Promise<{
+    data: ClassroomWithBuilding[];
+    total: number;
+    page: number;
+    limit: number;
+  }> {
+    const { name, floor, isAvailable, page = 1, limit = 10 } = query;
+
+    if (!name && !floor && isAvailable === undefined) {
+      return { data: [], total: 0, page, limit };
+    }
+
+    return await this.classroomRepository.findAll(query);
   }
 
   async findById(id: number): Promise<Classroom> {

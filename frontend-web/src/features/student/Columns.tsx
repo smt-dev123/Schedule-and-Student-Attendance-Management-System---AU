@@ -1,3 +1,5 @@
+import StudentDelete from '@/routes/admin/student/-actions/Delete'
+import StudentUpdate from '@/routes/admin/student/-actions/Update'
 import type { StudentsType } from '@/types'
 import { Badge, Flex, IconButton } from '@radix-ui/themes'
 import type { ColumnDef } from '@tanstack/react-table'
@@ -42,7 +44,7 @@ export const StudentColumns: ColumnDef<StudentsType>[] = [
     accessorKey: 'status',
     header: 'ស្ថានភាព',
     cell: ({ row }) => {
-      const status = row.original.status
+      const status = row.original.educationalStatus || 'enrolled'
       return (
         <Badge color={getStatusColor(status)} variant="soft">
           {status}
@@ -69,6 +71,8 @@ export const StudentColumns: ColumnDef<StudentsType>[] = [
         >
           <FaRegEdit />
         </IconButton>
+        <StudentUpdate data={row.original} />
+        <StudentDelete data={row.original} />
       </Flex>
     ),
   },

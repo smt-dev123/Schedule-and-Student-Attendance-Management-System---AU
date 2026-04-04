@@ -41,6 +41,21 @@ export type AcademicLevelUpdateInput = z.infer<
 >;
 
 /**
+ * Academic Year Schemas
+ */
+export const academicYearSchema = z.object({
+  name: z.string().min(1, "Academic year name is required"),
+  startDate: z.coerce.date(),
+  endDate: z.coerce.date(),
+  isCurrent: z.boolean().default(true),
+});
+
+export const academicYearUpdateSchema = academicYearSchema.partial();
+
+export type AcademicYearInput = z.infer<typeof academicYearSchema>;
+export type AcademicYearUpdateInput = z.infer<typeof academicYearUpdateSchema>;
+
+/**
  * Department Schemas
  */
 export const departmentSchema = z.object({
@@ -56,10 +71,11 @@ export type DepartmentUpdateInput = z.infer<typeof departmentUpdateSchema>;
  * Student Schemas
  */
 export const studentSchema = z.object({
-  id: z.string().min(1, "Student ID is required"),
+  id: z.string(),
   name: z.string().min(1, "Student name is required"),
   phone: z.string().min(10).max(15),
   email: z.email("Invalid email format"),
+  password: z.string().min(1, "Password is required"),
   facultyId: z.number().int().positive(),
   departmentId: z.number().int().positive(),
   academicLevelId: z.number().int().positive(),
@@ -72,26 +88,46 @@ export const studentSchema = z.object({
 });
 export const studentUpdateSchema = studentSchema.partial();
 
+export const studentQuerySchema = z.object({
+  name: z.string().optional(),
+  facultyId: z.coerce.number().int().positive().optional(),
+  departmentId: z.coerce.number().int().positive().optional(),
+  academicLevelId: z.coerce.number().int().positive().optional(),
+  generation: z.coerce.number().int().positive().optional(),
+  page: z.coerce.number().int().positive().default(1),
+  limit: z.coerce.number().int().positive().default(10),
+});
+
 export type StudentInput = z.infer<typeof studentSchema>;
 export type StudentUpdateInput = z.infer<typeof studentUpdateSchema>;
+export type StudentQueryInput = z.infer<typeof studentQuerySchema>;
 
 /**
  * Teacher Schemas
  */
 export const teacherSchema = z.object({
-  id: z.string().min(1, "Teacher ID is required"),
+  id: z.string(),
   name: z.string().min(1, "Teacher name is required"),
   phone: z.string().min(10).max(15),
   email: z.email("Invalid email format"),
+  password: z.string().min(1, "Password is required"),
   gender: genderEnum,
   academicLevelId: z.number().int().positive(),
   facultyId: z.number().int().positive(),
   isActive: z.boolean().default(true),
 });
 export const teacherUpdateSchema = teacherSchema.partial();
+export const teacherQuerySchema = z.object({
+  name: z.string().optional(),
+  academicLevelId: z.coerce.number().int().positive().optional(),
+  facultyId: z.coerce.number().int().positive().optional(),
+  page: z.coerce.number().int().positive().default(1),
+  limit: z.coerce.number().int().positive().default(10),
+});
 
 export type TeacherInput = z.infer<typeof teacherSchema>;
 export type TeacherUpdateInput = z.infer<typeof teacherUpdateSchema>;
+export type TeacherQueryInput = z.infer<typeof teacherQuerySchema>;
 
 /**
  * Course Schemas
@@ -104,15 +140,10 @@ export const courseSchema = z.object({
   day: dayEnum,
   teacherId: z.string(),
   scheduleId: z.number().int().positive(),
-  buildingId: z.number().int().positive(),
-  classroomId: z.number().int().positive(),
   sessionTimeId: z.number().int().positive(),
   firstSessionNote: z.string().optional(),
   secondSessionNote: z.string().optional(),
   isActive: z.boolean().default(true),
-  facultyId: z.number().int().positive(),
-  departmentId: z.number().int().positive(),
-  academicLevelId: z.number().int().positive(),
 });
 export const courseUpdateSchema = courseSchema.partial();
 
@@ -151,9 +182,11 @@ export const scheduleSchema = z.object({
   academicLevelId: z.coerce.number().positive(),
   generation: z.coerce.number().positive(),
   departmentId: z.coerce.number().positive(),
+  classroomId: z.coerce.number().positive(),
   semester: z.coerce.number().positive(),
   semesterStart: z.coerce.date(),
   semesterEnd: z.coerce.date(),
+  academicYearId: z.coerce.number().positive(),
   studyShift: studyShiftEnum,
 });
 

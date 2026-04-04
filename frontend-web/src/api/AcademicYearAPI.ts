@@ -17,10 +17,10 @@ export const updateAcademicYear = async (
   updateAcademicYear: AcademicYearsType,
 ) => {
   const res = await api.put(`/academic-years/${id}`, updateAcademicYear)
-  return res.data
+  return res.data.data
 }
 
 export const deleteAcademicYear = async (id: number) => {
   const res = await api.delete(`/academic-years/${id}`)
-  return res.data
+  return res.data.data
 }

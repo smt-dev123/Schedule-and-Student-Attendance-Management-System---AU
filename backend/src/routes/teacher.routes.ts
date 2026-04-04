@@ -1,26 +1,44 @@
 import { Hono } from "hono";
 import { zValidator } from "@hono/zod-validator";
-import { teacherSchema, teacherUpdateSchema } from "@/validators/academy";
+import {
+  teacherQuerySchema,
+  teacherSchema,
+  teacherUpdateSchema,
+} from "@/validators/academy";
+import authentication from "@/middlewares/auth";
+import { auth } from "@/lib/auth";
 
 const router = new Hono();
 
-router.get("/", async (c) => {
+router.get("/", zValidator("query", teacherQuerySchema), async (c) => {
   const { teacherService } = c.var.container;
-  const teachers = await teacherService.findAll();
+  const query = c.req.valid("query");
+  const teachers = await teacherService.findAll(query);
   return c.json(teachers);
 });
 
-router.get("/:id", async (c) => {
+router.get("/profile/me", authentication, async (c) => {
+  const user = c.get("user");
   const { teacherService } = c.var.container;
-  const id = c.req.param("id");
-  const teacher = await teacherService.findById(id);
+  const teacher = await teacherService.findById(user.id);
   return c.json(teacher);
 });
 
-router.post("/", zValidator("json", teacherSchema), async (c) => {
+router.post("/", zValidator("json", teacherSchema.omit({ id: true })), async (c) => {
   const { teacherService } = c.var.container;
   const data = c.req.valid("json");
-  const teacher = await teacherService.create(data);
+  const { user } = await auth.api.signUpEmail({
+    body: {
+      name: data.name,
+      email: data.email,
+      password: data.password,
+      role: "teacher",
+    },
+  });
+  const teacher = await teacherService.create({
+    ...data,
+    id: user.id,
+  });
   return c.json(teacher);
 });
 

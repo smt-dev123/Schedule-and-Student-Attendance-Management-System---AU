@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Button, Dialog, Flex, Select, Text, TextField } from '@radix-ui/themes'
 import { Controller, useForm } from 'react-hook-form'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
@@ -9,26 +9,38 @@ import { getAcademicLevels } from '@/api/AcademicLevelAPI'
 import { getFaculties } from '@/api/FacultyAPI'
 
 const TeacherCreate = () => {
+  const queryClient = useQueryClient()
+  const [open, setOpen] = useState(false)
+
   const {
     control,
     register,
     handleSubmit,
     reset,
     formState: { errors },
-  } = useForm<TeachersType>()
+  } = useForm<TeachersType>({
+    defaultValues: {
+      gender: '',
+      academicLevelId: undefined,
+      facultyId: undefined,
+    }
+  })
 
-  const queryClient = useQueryClient()
-  const [open, setOpen] = useState(false)
-
-  const { data: academicLevels } = useQuery({
+  // Fetch Data
+  const { data: academicLevels = [] } = useQuery({
     queryKey: ['academicLevels'],
     queryFn: getAcademicLevels,
   })
 
-  const { data: faculties } = useQuery({
-    queryKey: ['faculties'],
-    queryFn: getFaculties,
-  })
+const { data: faculties = [] } = useQuery({
+  queryKey: ['faculties'],
+  queryFn: getFaculties,
+});
+
+  // Reset form when dialog closes
+  useEffect(() => {
+    if (!open) reset()
+  }, [open, reset])
 
   const mutation = useMutation({
     mutationFn: (formData: TeachersType) => createTeachers(formData),
@@ -36,7 +48,6 @@ const TeacherCreate = () => {
       queryClient.invalidateQueries({ queryKey: ['teachers'] })
       toast.success('បង្កើតជោគជ័យ')
       setOpen(false)
-      reset()
     },
     onError: () => {
       toast.error('បង្កើតមិនជោគជ័យ')
@@ -46,6 +57,7 @@ const TeacherCreate = () => {
   const onSubmit = (formData: TeachersType) => {
     mutation.mutate({
       ...formData,
+      // Ensure IDs are numbers if your backend expects them as such
       academicLevelId: Number(formData.academicLevelId),
       facultyId: Number(formData.facultyId),
     })
@@ -59,95 +71,66 @@ const TeacherCreate = () => {
         </Button>
       </Dialog.Trigger>
 
-      <Dialog.Content maxWidth="450px" style={{ maxHeight: '80vh', overflowY: 'auto' }}>
+      <Dialog.Content maxWidth="450px">
         <Dialog.Title>បន្ថែមគ្រូថ្មី</Dialog.Title>
 
         <form onSubmit={handleSubmit(onSubmit)}>
-          <Flex direction="column" gap="3">
-            {/* ID */}
-            <label>
-              <Text as="div" size="2" mb="1" weight="bold">
-                អត្តលេខគ្រូ (ID)
-              </Text>
+          <Flex direction="column" gap="3" style={{ maxHeight: '60vh', overflowY: 'auto', paddingRight: '4px' }}>
+            {/* Teacher ID */}
+            <Box>
+              <Text as="div" size="2" mb="1" weight="bold">អត្តលេខគ្រូ (ID)</Text>
               <TextField.Root
                 {...register('id', { required: 'ត្រូវបញ្ចូលអត្តលេខគ្រូ' })}
-                placeholder="បញ្ចូលអត្តលេខគ្រូ (ឧ. T-001)"
+                placeholder="ឧ. T-001"
               />
-              {errors.id && (
-                <Text size="2" color="red">
-                  {errors.id.message}
-                </Text>
-              )}
-            </label>
+              {errors.id && <Text size="2" color="red">{errors.id.message}</Text>}
+            </Box>
 
             {/* Name */}
-            <label>
-              <Text as="div" size="2" mb="1" weight="bold">
-                គោត្តនាម-នាម
-              </Text>
+            <Box>
+              <Text as="div" size="2" mb="1" weight="bold">គោត្តនាម-នាម</Text>
               <TextField.Root
                 {...register('name', { required: 'ត្រូវបញ្ចូលឈ្មោះ' })}
                 placeholder="បញ្ចូលឈ្មោះ"
               />
-              {errors.name && (
-                <Text size="2" color="red">
-                  {errors.name.message}
-                </Text>
-              )}
-            </label>
+              {errors.name && <Text size="2" color="red">{errors.name.message}</Text>}
+            </Box>
 
             {/* Gender */}
-            <label>
-              <Text as="div" size="2" mb="1" weight="bold">
-                ភេទ
-              </Text>
+            <Box>
+              <Text as="div" size="2" mb="1" weight="bold">ភេទ</Text>
               <Controller
                 name="gender"
                 control={control}
                 rules={{ required: 'ត្រូវជ្រើសរើសភេទ' }}
                 render={({ field }) => (
-                  <Select.Root
-                    value={field.value || ''}
-                    onValueChange={(val) => field.onChange(val)}
-                  >
-                    <Select.Trigger
-                      placeholder="ជ្រើសរើសភេទ"
-                      style={{ width: '100%' }}
-                    />
-                    <Select.Content className="w-[var(--radix-select-trigger-width)]">
+                  <Select.Root value={field.value} onValueChange={field.onChange}>
+                    <Select.Trigger placeholder="ជ្រើសរើសភេទ" style={{ width: '100%' }} />
+                    <Select.Content>
                       <Select.Item value="male">ប្រុស</Select.Item>
                       <Select.Item value="female">ស្រី</Select.Item>
                     </Select.Content>
                   </Select.Root>
                 )}
               />
-              {errors.gender && (
-                <Text size="2" color="red">
-                  {errors.gender.message}
-                </Text>
-              )}
-            </label>
+              {errors.gender && <Text size="2" color="red">{errors.gender.message}</Text>}
+            </Box>
 
             {/* Academic Level */}
-            <label>
-              <Text as="div" size="2" mb="1" weight="bold">
-                កម្រិតវប្បធម៌
-              </Text>
+            <Box>
+              <Text as="div" size="2" mb="1" weight="bold">កម្រិតវប្បធម៌</Text>
               <Controller
                 name="academicLevelId"
                 control={control}
                 rules={{ required: 'ត្រូវជ្រើសរើសកម្រិតវប្បធម៌' }}
                 render={({ field }) => (
-                  <Select.Root
-                    value={field.value ? String(field.value) : ''}
+                  <Select.Root 
+                    value={field.value ? String(field.value) : undefined} 
                     onValueChange={(val) => field.onChange(Number(val))}
                   >
-                    <Select.Trigger
-                      placeholder="ជ្រើសរើសកម្រិតវប្បធម៌"
-                      style={{ width: '100%' }}
-                    />
-                    <Select.Content className="w-[var(--radix-select-trigger-width)]">
-                      {academicLevels?.map((level: { id: number; level: string }) => (
+                    <Select.Trigger placeholder="ជ្រើសរើសកម្រិតវប្បធម៌" style={{ width: '100%' }} />
+                    <Select.Content>
+                      {academicLevels.map((level: any) => (
                         <Select.Item key={level.id} value={String(level.id)}>
                           {level.level}
                         </Select.Item>
@@ -156,33 +139,24 @@ const TeacherCreate = () => {
                   </Select.Root>
                 )}
               />
-              {errors.academicLevelId && (
-                <Text size="2" color="red">
-                  {errors.academicLevelId.message}
-                </Text>
-              )}
-            </label>
+              {errors.academicLevelId && <Text size="2" color="red">{errors.academicLevelId.message}</Text>}
+            </Box>
 
             {/* Faculty */}
-            <label>
-              <Text as="div" size="2" mb="1" weight="bold">
-                មហាវិទ្យាល័យ
-              </Text>
+            <Box>
+              <Text as="div" size="2" mb="1" weight="bold">មហាវិទ្យាល័យ</Text>
               <Controller
                 name="facultyId"
                 control={control}
                 rules={{ required: 'ត្រូវជ្រើសរើសមហាវិទ្យាល័យ' }}
                 render={({ field }) => (
-                  <Select.Root
-                    value={field.value ? String(field.value) : ''}
+                  <Select.Root 
+                    value={field.value ? String(field.value) : undefined} 
                     onValueChange={(val) => field.onChange(Number(val))}
                   >
-                    <Select.Trigger
-                      placeholder="ជ្រើសរើសមហាវិទ្យាល័យ"
-                      style={{ width: '100%' }}
-                    />
-                    <Select.Content className="w-[var(--radix-select-trigger-width)]">
-                      {faculties?.map((faculty: { id: number; name: string }) => (
+                    <Select.Trigger placeholder="ជ្រើសរើសមហាវិទ្យាល័យ" style={{ width: '100%' }} />
+                    <Select.Content>
+                      {faculties.map((faculty: any) => (
                         <Select.Item key={faculty.id} value={String(faculty.id)}>
                           {faculty.name}
                         </Select.Item>
@@ -191,18 +165,12 @@ const TeacherCreate = () => {
                   </Select.Root>
                 )}
               />
-              {errors.facultyId && (
-                <Text size="2" color="red">
-                  {errors.facultyId.message}
-                </Text>
-              )}
-            </label>
+              {errors.facultyId && <Text size="2" color="red">{errors.facultyId.message}</Text>}
+            </Box>
 
             {/* Email */}
-            <label>
-              <Text as="div" size="2" mb="1" weight="bold">
-                អ៊ីម៉ែល
-              </Text>
+            <Box>
+              <Text as="div" size="2" mb="1" weight="bold">អ៊ីម៉ែល</Text>
               <TextField.Root
                 {...register('email', { 
                   required: 'ត្រូវបញ្ចូលអ៊ីម៉ែល',
@@ -211,43 +179,43 @@ const TeacherCreate = () => {
                     message: "អ៊ីម៉ែលមិនត្រឹមត្រូវ"
                   }
                 })}
-                placeholder="បញ្ចូលអ៊ីម៉ែល"
+                placeholder="example@mail.com"
               />
-               {errors.email && (
-                <Text size="2" color="red">
-                  {errors.email.message}
-                </Text>
-              )}
-            </label>
+              {errors.email && <Text size="2" color="red">{errors.email.message}</Text>}
+            </Box>
 
             {/* Phone */}
-            <label>
-              <Text as="div" size="2" mb="1" weight="bold">
-                លេខទូរស័ព្ទ
-              </Text>
+            <Box>
+              <Text as="div" size="2" mb="1" weight="bold">លេខទូរស័ព្ទ</Text>
               <TextField.Root
                 {...register('phone', { 
                   required: 'ត្រូវបញ្ចូលលេខទូរស័ព្ទ',
-                  minLength: { value: 10, message: 'យ៉ាងហោចណាស់ ១០ ខ្ទង់' },
-                  maxLength: { value: 15, message: 'មិនលើសពី ១៥ ខ្ទង់' }
+                  minLength: { value: 10, message: 'យ៉ាងហោចណាស់ 10 ខ្ទង់' }
                 })}
-                placeholder="បញ្ចូលលេខទូរស័ព្ទ"
+                placeholder="012345678"
               />
-               {errors.phone && (
-                <Text size="2" color="red">
-                  {errors.phone.message}
-                </Text>
-              )}
-            </label>
+              {errors.phone && <Text size="2" color="red">{errors.phone.message}</Text>}
+            </Box>
+
+            {/* Password */}
+            <Box>
+              <Text as="div" size="2" mb="1" weight="bold">ពាក្យសម្ងាត់</Text>
+              <TextField.Root
+                {...register('password', { required: 'ត្រូវបញ្ចូលពាក្យសម្ងាត់ យ៉ាងហោចណាស់ 8 ខ្ទង់' })}
+                placeholder="********"
+                type="password"
+              />
+              {errors.password && <Text size="2" color="red">{errors.password.message}</Text>}
+            </Box>
           </Flex>
 
           <Flex gap="3" mt="4" justify="end">
             <Dialog.Close>
-              <Button variant="soft" color="gray" type="button">
+              <Button variant="soft" color="gray" type="button" style={{ cursor: 'pointer' }}>
                 ចាកចេញ
               </Button>
             </Dialog.Close>
-            <Button type="submit" loading={mutation.isPending}>
+            <Button type="submit" loading={mutation.isPending} style={{ cursor: 'pointer' }}>
               រក្សាទុក
             </Button>
           </Flex>
@@ -256,5 +224,8 @@ const TeacherCreate = () => {
     </Dialog.Root>
   )
 }
+
+// Helper component to keep the list clean
+const Box = ({ children }: { children: React.ReactNode }) => <div style={{ marginBottom: '4px' }}>{children}</div>
 
 export default TeacherCreate

@@ -99,10 +99,10 @@ export default function Sidebar({
       url: '/admin/classes',
     },
     {
-      key: 'user',
+      key: 'course',
       icon: <FaRegUser className="text-md" />,
-      label: t('Sidebar.user'),
-      url: '/admin/user',
+      label: 'វគ្គសិក្សា',
+      url: '/admin/course',
     },
     {
       key: 'setting',

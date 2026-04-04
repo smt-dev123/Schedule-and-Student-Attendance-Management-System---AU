@@ -3,6 +3,7 @@ CREATE TYPE "public"."attendance_status" AS ENUM('present', 'absent', 'late', 'e
 CREATE TYPE "public"."day" AS ENUM('Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday');--> statement-breakpoint
 CREATE TYPE "public"."educational_status" AS ENUM('enrolled', 'graduated', 'dropped out', 'transferred');--> statement-breakpoint
 CREATE TYPE "public"."gender" AS ENUM('male', 'female');--> statement-breakpoint
+CREATE TYPE "public"."notification_priority" AS ENUM('low', 'normal', 'high');--> statement-breakpoint
 CREATE TYPE "public"."study_shift" AS ENUM('morning', 'evening', 'night');--> statement-breakpoint
 CREATE TABLE "academic_levels" (
 	"id" serial PRIMARY KEY NOT NULL,
@@ -10,6 +11,14 @@ CREATE TABLE "academic_levels" (
 	"created_at" timestamp DEFAULT now(),
 	"updated_at" timestamp DEFAULT now(),
 	CONSTRAINT "academic_levels_level_unique" UNIQUE("level")
+);
+--> statement-breakpoint
+CREATE TABLE "academic_years" (
+	"id" serial PRIMARY KEY NOT NULL,
+	"name" varchar,
+	"startDate" timestamp,
+	"endDate" timestamp,
+	"is_current" boolean DEFAULT false
 );
 --> statement-breakpoint
 CREATE TABLE "courses" (
@@ -21,8 +30,6 @@ CREATE TABLE "courses" (
 	"day" "day" NOT NULL,
 	"teacher_id" text NOT NULL,
 	"schedule_id" integer NOT NULL,
-	"building_id" integer NOT NULL,
-	"classroom_id" integer NOT NULL,
 	"session_time_id" integer NOT NULL,
 	"first_session_note" varchar,
 	"second_session_note" varchar,
@@ -54,12 +61,14 @@ CREATE TABLE "schedules" (
 	"faculty_id" integer NOT NULL,
 	"year" integer NOT NULL,
 	"academic_level_id" integer NOT NULL,
+	"academic_year_id" integer NOT NULL,
 	"generation" integer NOT NULL,
 	"department_id" integer NOT NULL,
 	"semester" integer NOT NULL,
 	"semester_start" timestamp NOT NULL,
 	"semester_end" timestamp NOT NULL,
 	"study_shift" "study_shift" DEFAULT 'morning',
+	"classroom_id" integer NOT NULL,
 	"created_at" timestamp DEFAULT now(),
 	"updated_at" timestamp DEFAULT now()
 );
@@ -79,6 +88,14 @@ CREATE TABLE "session_times" (
 	CONSTRAINT "unique_session_time" UNIQUE("shift","first_session_start_time","first_session_end_time","second_session_start_time","second_session_end_time")
 );
 --> statement-breakpoint
+CREATE TABLE "student_academic_years" (
+	"id" serial PRIMARY KEY NOT NULL,
+	"student_id" text NOT NULL,
+	"academic_year_id" integer NOT NULL,
+	"created_at" timestamp DEFAULT now(),
+	"updated_at" timestamp DEFAULT now()
+);
+--> statement-breakpoint
 CREATE TABLE "students" (
 	"id" text PRIMARY KEY NOT NULL,
 	"name" varchar NOT NULL,
@@ -87,6 +104,7 @@ CREATE TABLE "students" (
 	"faculty_id" integer,
 	"department_id" integer,
 	"academic_level_id" integer,
+	"academic_year_id" integer,
 	"educational_status" "educational_status",
 	"year" integer,
 	"gender" "gender",
@@ -205,10 +223,12 @@ CREATE TABLE "classrooms" (
 	"classroom_id" serial PRIMARY KEY NOT NULL,
 	"classroom_number" integer NOT NULL,
 	"name" varchar NOT NULL,
+	"floor" integer NOT NULL,
 	"building_id" integer NOT NULL,
 	"is_available" boolean DEFAULT true,
 	"created_at" timestamp DEFAULT now(),
 	"updated_at" timestamp DEFAULT now(),
+	CONSTRAINT "classrooms_classroom_number_unique" UNIQUE("classroom_number"),
 	CONSTRAINT "classrooms_name_unique" UNIQUE("name")
 );
 --> statement-breakpoint
@@ -238,23 +258,26 @@ CREATE TABLE "notifications" (
 	"faculty_id" integer NOT NULL,
 	"target_department" integer,
 	"target_generation" integer,
-	"priority" varchar(20) DEFAULT 'normal',
+	"priority" "notification_priority" DEFAULT 'normal',
 	"created_at" timestamp DEFAULT now()
 );
 --> statement-breakpoint
 ALTER TABLE "courses" ADD CONSTRAINT "courses_teacher_id_teachers_id_fk" FOREIGN KEY ("teacher_id") REFERENCES "public"."teachers"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "courses" ADD CONSTRAINT "courses_schedule_id_schedules_id_fk" FOREIGN KEY ("schedule_id") REFERENCES "public"."schedules"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "courses" ADD CONSTRAINT "courses_building_id_buildings_building_id_fk" FOREIGN KEY ("building_id") REFERENCES "public"."buildings"("building_id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "courses" ADD CONSTRAINT "courses_classroom_id_classrooms_classroom_id_fk" FOREIGN KEY ("classroom_id") REFERENCES "public"."classrooms"("classroom_id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "courses" ADD CONSTRAINT "courses_session_time_id_session_times_id_fk" FOREIGN KEY ("session_time_id") REFERENCES "public"."session_times"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "departments" ADD CONSTRAINT "departments_faculty_id_faculties_id_fk" FOREIGN KEY ("faculty_id") REFERENCES "public"."faculties"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "schedules" ADD CONSTRAINT "schedules_faculty_id_faculties_id_fk" FOREIGN KEY ("faculty_id") REFERENCES "public"."faculties"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "schedules" ADD CONSTRAINT "schedules_academic_level_id_academic_levels_id_fk" FOREIGN KEY ("academic_level_id") REFERENCES "public"."academic_levels"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "schedules" ADD CONSTRAINT "schedules_academic_year_id_academic_years_id_fk" FOREIGN KEY ("academic_year_id") REFERENCES "public"."academic_years"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "schedules" ADD CONSTRAINT "schedules_department_id_departments_id_fk" FOREIGN KEY ("department_id") REFERENCES "public"."departments"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "schedules" ADD CONSTRAINT "schedules_classroom_id_classrooms_classroom_id_fk" FOREIGN KEY ("classroom_id") REFERENCES "public"."classrooms"("classroom_id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "student_academic_years" ADD CONSTRAINT "student_academic_years_student_id_students_id_fk" FOREIGN KEY ("student_id") REFERENCES "public"."students"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "student_academic_years" ADD CONSTRAINT "student_academic_years_academic_year_id_academic_years_id_fk" FOREIGN KEY ("academic_year_id") REFERENCES "public"."academic_years"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "students" ADD CONSTRAINT "students_id_user_id_fk" FOREIGN KEY ("id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "students" ADD CONSTRAINT "students_faculty_id_faculties_id_fk" FOREIGN KEY ("faculty_id") REFERENCES "public"."faculties"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "students" ADD CONSTRAINT "students_department_id_departments_id_fk" FOREIGN KEY ("department_id") REFERENCES "public"."departments"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "students" ADD CONSTRAINT "students_academic_level_id_academic_levels_id_fk" FOREIGN KEY ("academic_level_id") REFERENCES "public"."academic_levels"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "students" ADD CONSTRAINT "students_academic_year_id_academic_years_id_fk" FOREIGN KEY ("academic_year_id") REFERENCES "public"."academic_years"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "teachers" ADD CONSTRAINT "teachers_id_user_id_fk" FOREIGN KEY ("id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "teachers" ADD CONSTRAINT "teachers_academic_level_id_academic_levels_id_fk" FOREIGN KEY ("academic_level_id") REFERENCES "public"."academic_levels"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "teachers" ADD CONSTRAINT "teachers_faculty_id_faculties_id_fk" FOREIGN KEY ("faculty_id") REFERENCES "public"."faculties"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
@@ -271,10 +294,11 @@ ALTER TABLE "notifications" ADD CONSTRAINT "notifications_faculty_id_faculties_i
 CREATE INDEX "idx_course_teacher" ON "courses" USING btree ("teacher_id");--> statement-breakpoint
 CREATE INDEX "idx_course_schedule" ON "courses" USING btree ("schedule_id");--> statement-breakpoint
 CREATE INDEX "idx_course_day_schedule" ON "courses" USING btree ("day","schedule_id");--> statement-breakpoint
-CREATE UNIQUE INDEX "unique_schedule_day_classroom_time" ON "courses" USING btree ("schedule_id","day","building_id","classroom_id","session_time_id");--> statement-breakpoint
+CREATE UNIQUE INDEX "unique_schedule_day_classroom_time" ON "courses" USING btree ("schedule_id","day","session_time_id");--> statement-breakpoint
 CREATE UNIQUE INDEX "unique_faculty_department" ON "departments" USING btree ("faculty_id","name");--> statement-breakpoint
 CREATE UNIQUE INDEX "unique_schedule_identifier" ON "schedules" USING btree ("faculty_id","academic_level_id","generation","semester","year","department_id");--> statement-breakpoint
 CREATE INDEX "idx_schedule_faculty_generation" ON "schedules" USING btree ("faculty_id","generation");--> statement-breakpoint
+CREATE UNIQUE INDEX "unique_student_academic_year" ON "student_academic_years" USING btree ("student_id","academic_year_id");--> statement-breakpoint
 CREATE INDEX "idx_student_schedule_filter" ON "students" USING btree ("faculty_id","academic_level_id","generation","semester","year");--> statement-breakpoint
 CREATE INDEX "idx_teacher_faculty" ON "teachers" USING btree ("faculty_id");--> statement-breakpoint
 CREATE UNIQUE INDEX "unique_attendance_record" ON "attendance_records" USING btree ("course_id","student_id","date","session");--> statement-breakpoint

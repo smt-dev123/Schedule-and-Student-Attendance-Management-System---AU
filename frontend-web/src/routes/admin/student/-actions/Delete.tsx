@@ -3,20 +3,20 @@ import { AlertDialog, IconButton } from '@radix-ui/themes'
 import DeleteDialog from '@/components/action/DeleteDialog'
 import { FaRegTrashAlt } from 'react-icons/fa'
 import toast from 'react-hot-toast'
-import type { TeachersType } from '@/types'
-import { deleteTeachers } from '@/api/TeacherAPI'
+import type { StudentsType } from '@/types'
+import { deleteStudent } from '@/api/StudentAPI'
 
 interface Props {
-  data: TeachersType
+  data: StudentsType
 }
 
-const TeacherDelete = ({ data }: Props) => {
+const StudentDelete = ({ data }: Props) => {
   const queryClient = useQueryClient()
 
   const deleteMutation = useMutation({
-    mutationFn: async () => await deleteTeachers(String(data.id)),
+    mutationFn: async () => await deleteStudent(String(data.id)),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['teachers'] })
+      queryClient.invalidateQueries({ queryKey: ['students'] })
       toast.success('លុបជោគជ័យ')
     },
     onError: () => {
@@ -39,7 +39,7 @@ const TeacherDelete = ({ data }: Props) => {
 
       <DeleteDialog
         title="ព្រមាន"
-        description={`តើអ្នកពិតជាចង់លុបគ្រូ${data.name} មែនទេ?`}
+        description={`តើអ្នកពិតជាចង់លុបនិស្សិត${data.name} មែនទេ?`}
         onConfirm={() => deleteMutation.mutate()}
         isLoading={deleteMutation.isPending}
       />
@@ -47,4 +47,4 @@ const TeacherDelete = ({ data }: Props) => {
   )
 }
 
-export default TeacherDelete
+export default StudentDelete

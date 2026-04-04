@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useMemo } from 'react'
 import { Send, BookOpen, Calendar, MessageSquare, ChevronRight, Bell } from 'lucide-react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { getFaculties } from '@/api/FacultyAPI'
@@ -25,61 +25,51 @@ function RouteComponent() {
   const queryClient = useQueryClient()
   const scrollRef = useRef<HTMLDivElement>(null)
 
-  // --- WebSocket Setup ---
-  useEffect(() => {
-    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const socket = new WebSocket(`${protocol}//localhost:3000/api/notifications/ws`);
-
-    socket.onopen = () => {
-      console.log('Connected to WebSocket');
-    };
-
-    socket.onmessage = (event) => {
-      const message = JSON.parse(event.data);
-
-      // Look for NEW_NOTIFICATION type
-      if (message.type === 'NEW_NOTIFICATION') {
-        const newNotification = message.data;
-
-        // បច្ចុប្បន្នភាពទិន្នន័យក្នុង React Query Cache ភ្លាមៗនៅពេលមានសារថ្មី
-        queryClient.setQueryData(['notifications'], (oldData: Message[] | undefined) => {
-          return oldData ? [...oldData, newNotification] : [newNotification];
-        });
-
-        toast.success('New notification received!');
-      }
-    };
-
-    socket.onerror = (error) => {
-      console.error('WebSocket Error:', error);
-    };
-
-    return () => {
-      socket.close(); // បិទការភ្ជាប់ពេលចាកចេញពី Page នេះ
-    };
-  }, [queryClient]);
-  // -----------------------
-
-  // Fetch data
-  const { data: faculties = [] } = useQuery<FacultiesType[]>({
+  // --- 1. Data Fetching with Safety Defaults ---
+  const { data: rawFaculties } = useQuery<FacultiesType[]>({
     queryKey: ['faculties'],
     queryFn: getFaculties
   })
 
-  const { data: generations = [] } = useQuery<GenerationsType[]>({
+  const { data: rawGenerations } = useQuery<GenerationsType[]>({
     queryKey: ['generations'],
     queryFn: getGeneration
   })
 
-  const { data: notifications = [] } = useQuery<Message[]>({
+  const { data: rawNotifications } = useQuery<Message[]>({
     queryKey: ['notifications'],
     queryFn: getNotifications
   })
+
+  // Normalize data to ensure they are ALWAYS arrays
+  const faculties = useMemo(() => (Array.isArray(rawFaculties) ? rawFaculties : []), [rawFaculties]);
+  const generations = useMemo(() => (Array.isArray(rawGenerations) ? rawGenerations : []), [rawGenerations]);
+  const notifications = useMemo(() => (Array.isArray(rawNotifications) ? rawNotifications : []), [rawNotifications]);
 
   const [selectedYear, setSelectedYear] = useState<number | ''>('')
   const [selectedFaculty, setSelectedFaculty] = useState<number | ''>('')
   const [message, setMessage] = useState('')
 
+  // --- 2. WebSocket Setup ---
+  useEffect(() => {
+    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const socket = new WebSocket(`${protocol}//localhost:3000/api/notifications/ws`);
+
+    socket.onmessage = (event) => {
+      const payload = JSON.parse(event.data);
+      if (payload.type === 'NEW_NOTIFICATION') {
+        const newNotification = payload.data;
+        queryClient.setQueryData(['notifications'], (old: Message[] | undefined) => {
+          return old ? [...old, newNotification] : [newNotification];
+        });
+        toast.success('New notification received!');
+      }
+    };
+
+    return () => socket.close();
+  }, [queryClient]);
+
+  // --- 3. Selection Logic ---
   useEffect(() => {
     if (faculties.length > 0 && selectedFaculty === '') {
       setSelectedFaculty(faculties[0].id || '')
@@ -92,28 +82,34 @@ function RouteComponent() {
     }
   }, [generations, selectedYear])
 
+  // --- 4. Mutation ---
   const mutation = useMutation({
     mutationFn: broadcastNotification,
     onSuccess: () => {
-      // កន្លែងនេះមិនបាច់ invalidateQueries ក៏បាន បើ Server បាញ់ WebSocket មកវិញឱ្យខ្លួនឯង
       queryClient.invalidateQueries({ queryKey: ['notifications'] })
       setMessage('')
       toast.success('Notification sent successfully')
     },
-    onError: () => {
-      toast.error('Failed to send notification')
-    }
+    onError: () => toast.error('Failed to send notification')
   })
 
+  // --- 5. Filtering & Helper Vars ---
+  const filteredMessages = notifications.filter(
+    (m) => m.facultyId === Number(selectedFaculty) && (!selectedYear || m.targetGeneration === Number(selectedYear))
+  )
+
+  const selectedFacultyName = faculties.find(f => f.id === Number(selectedFaculty))?.name || 'Loading...'
+  const selectedYearName = generations.find(g => g.id === Number(selectedYear))?.name || 'All Years'
+
+  // Auto-scroll logic
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight
     }
-  }, [notifications, selectedFaculty, selectedYear])
+  }, [filteredMessages])
 
-  function handleSend() {
+  const handleSend = () => {
     if (!message.trim() || selectedFaculty === '') return
-
     mutation.mutate({
       title: "Announcement",
       message: message,
@@ -123,19 +119,11 @@ function RouteComponent() {
     })
   }
 
-  const filteredMessages = notifications.filter(
-    (m) => m.facultyId === Number(selectedFaculty) && (!selectedYear || m.targetGeneration === Number(selectedYear))
-  )
-
-  const selectedFacultyName = faculties.find(f => f.id === Number(selectedFaculty))?.name || 'Loading...'
-  const selectedYearName = generations.find(g => g.id === Number(selectedYear))?.name || 'All Years'
-
   return (
-    <div className="flex h-[calc(100vh-150px)] w-full rounded-lg bg-white dark:bg-gray-950 overflow-hidden text-slate-900 dark:text-slate-100">
-      {/* ... (UI របស់អ្នករក្សានៅដដែល) ... */}
-      {/* បញ្ជាក់៖ ខ្ញុំមិនបានផ្លាស់ប្តូរផ្នែក JSX ទេ ដើម្បីកុំឱ្យវែងឆ្ងាយ */}
+    <div className="flex h-[calc(100vh-150px)] w-full rounded-lg bg-white dark:bg-gray-950 overflow-hidden text-slate-900 dark:text-slate-100 border border-slate-200 dark:border-gray-800">
+      
+      {/* Sidebar */}
       <aside className="w-80 flex flex-col border-r border-slate-200 dark:border-gray-800 bg-slate-50/50 dark:bg-gray-900">
-        {/* Sidebar content */}
         <div className="p-6 border-b border-slate-200 dark:border-gray-800">
           <div className="flex items-center gap-3 mb-6">
             <div className="bg-sky-600 p-2 rounded-lg text-white">
@@ -143,14 +131,14 @@ function RouteComponent() {
             </div>
             <h1 className="text-xl font-bold tracking-tight">Notifications</h1>
           </div>
-          {/* Select Year */}
+
           <label className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.1em] mb-2 block">Generation</label>
           <div className="relative">
             <Calendar className="absolute left-3 top-2.5 text-slate-400" size={16} />
             <select
               value={selectedYear}
               onChange={(e) => setSelectedYear(e.target.value === '' ? '' : Number(e.target.value))}
-              className="w-full pl-10 pr-4 py-2 bg-white dark:bg-gray-800 border border-slate-200 dark:border-gray-700 rounded-xl text-sm appearance-none focus:ring-2 focus:ring-sky-500 outline-none transition-all shadow-sm"
+              className="w-full pl-10 pr-4 py-2 bg-white dark:bg-gray-800 border border-slate-200 dark:border-gray-700 rounded-xl text-sm appearance-none focus:ring-2 focus:ring-sky-500 outline-none transition-all shadow-sm cursor-pointer"
             >
               <option value="">All Years</option>
               {generations.map((gen) => (
@@ -167,14 +155,15 @@ function RouteComponent() {
               <button
                 key={f.id}
                 onClick={() => setSelectedFaculty(f.id!)}
-                className={`w-full flex items-center justify-between px-4 py-3 rounded-xl text-sm font-medium transition-all group ${selectedFaculty === f.id
-                  ? 'bg-white dark:bg-gray-800 text-sky-600 dark:text-sky-400 shadow-sm border border-slate-200 dark:border-gray-700'
-                  : 'text-slate-500 hover:bg-white dark:hover:bg-gray-800 hover:text-slate-700'
-                  }`}
+                className={`w-full flex items-center justify-between px-4 py-3 rounded-xl text-sm font-medium transition-all group ${
+                  selectedFaculty === f.id
+                    ? 'bg-white dark:bg-gray-800 text-sky-600 dark:text-sky-400 shadow-sm border border-slate-200 dark:border-gray-700'
+                    : 'text-slate-500 hover:bg-white dark:hover:bg-gray-800 hover:text-slate-700'
+                }`}
               >
                 <div className="flex items-center gap-3">
                   <BookOpen size={18} className={selectedFaculty === f.id ? 'text-sky-500' : 'text-slate-400'} />
-                  {f.name}
+                  <span className="truncate max-w-[160px]">{f.name}</span>
                 </div>
                 <ChevronRight size={14} className={`transition-transform ${selectedFaculty === f.id ? 'translate-x-0' : '-translate-x-2 opacity-0 group-hover:opacity-100 group-hover:translate-x-0'}`} />
               </button>
@@ -183,8 +172,9 @@ function RouteComponent() {
         </div>
       </aside>
 
+      {/* Main Chat Area */}
       <main className="flex-1 flex flex-col bg-white dark:bg-gray-950">
-        <header className="h-20 flex items-center justify-between px-8 border-b border-slate-100 dark:border-gray-800">
+        <header className="h-20 flex items-center justify-between px-8 border-b border-slate-100 dark:border-gray-800 bg-white/80 dark:bg-gray-950/80 backdrop-blur-md z-10">
           <div>
             <h2 className="text-2xl font-bold text-slate-800 dark:text-white leading-none mb-1">{selectedFacultyName}</h2>
             <div className="flex items-center gap-2">
@@ -197,8 +187,8 @@ function RouteComponent() {
         <div ref={scrollRef} className="flex-1 overflow-y-auto p-8 space-y-8 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] dark:bg-[radial-gradient(#1f2937_1px,transparent_1px)] [background-size:20px_20px] custom-scrollbar">
           {filteredMessages.length > 0 ? (
             filteredMessages.map((msg) => (
-              <div key={msg.id} className={`flex flex-col items-end`}>
-                <div className={`max-w-2xl px-5 py-3 rounded-2xl text-[15px] leading-relaxed shadow-sm bg-sky-600 text-white rounded-tr-none`}>
+              <div key={msg.id} className="flex flex-col items-end">
+                <div className="max-w-2xl px-5 py-3 rounded-2xl text-[15px] leading-relaxed shadow-sm bg-sky-600 text-white rounded-tr-none">
                   {msg.message}
                 </div>
                 <div className="mt-2 flex items-center gap-2 px-1">
@@ -209,27 +199,35 @@ function RouteComponent() {
             ))
           ) : (
             <div className="h-full flex flex-col items-center justify-center text-slate-400 opacity-60">
-              <MessageSquare size={32} />
-              <p className="text-lg font-medium">No messages found</p>
+              <MessageSquare size={48} className="mb-4 stroke-[1.5]" />
+              <p className="text-lg font-medium">No messages found for this selection</p>
             </div>
           )}
         </div>
 
-        <div className="p-6 border-t border-slate-100 dark:border-gray-800">
+        {/* Input Area */}
+        <div className="p-6 border-t border-slate-100 dark:border-gray-800 bg-white dark:bg-gray-950">
           <div className="max-w-4xl mx-auto relative group">
-            <div className="relative flex items-end gap-3 bg-white dark:bg-gray-800 p-3 rounded-2xl border border-slate-200 dark:border-gray-700 shadow-xl shadow-slate-200/50">
+            <div className="relative flex items-end gap-3 bg-white dark:bg-gray-800 p-3 rounded-2xl border border-slate-200 dark:border-gray-700 shadow-xl shadow-slate-200/50 dark:shadow-none focus-within:border-sky-500 transition-colors">
               <textarea
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
                 onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
                 disabled={mutation.isPending}
-                placeholder="Type a message..."
+                placeholder="Write an announcement..."
                 className="flex-1 bg-transparent border-none focus:ring-0 text-[15px] p-2 resize-none max-h-40 min-h-[50px] outline-none dark:text-white"
               />
-              <button onClick={handleSend} disabled={!message.trim() || mutation.isPending} className="bg-sky-600 hover:bg-sky-700 text-white p-3 rounded-xl transition-all">
-                <Send size={20} />
+              <button 
+                onClick={handleSend} 
+                disabled={!message.trim() || mutation.isPending} 
+                className="bg-sky-600 hover:bg-sky-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white p-3 rounded-xl transition-all shadow-lg shadow-sky-200 dark:shadow-none"
+              >
+                <Send size={20} className={mutation.isPending ? 'animate-pulse' : ''} />
               </button>
             </div>
+            <p className="text-[10px] text-center mt-3 text-slate-400">
+              Press <kbd className="font-sans border px-1 rounded">Enter</kbd> to broadcast to all students in this faculty.
+            </p>
           </div>
         </div>
       </main>

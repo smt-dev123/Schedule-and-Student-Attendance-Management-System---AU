@@ -1,13 +1,21 @@
 import type { StudentRepository } from "@/repositories/student.repository";
 import type { Student } from "@/types/academy";
-import type { StudentInput, StudentUpdateInput } from "@/validators/academy";
+import type {
+  StudentInput,
+  StudentQueryInput,
+  StudentUpdateInput,
+} from "@/validators/academy";
 import { HTTPException } from "hono/http-exception";
 
 export class StudentService {
   constructor(private readonly studentRepo: StudentRepository) {}
 
   async create(data: StudentInput): Promise<Student> {
-    return this.studentRepo.create(data);
+    const student = await this.studentRepo.create(data);
+    if (!student) {
+      throw new HTTPException(400, { message: "Failed to create student" });
+    }
+    return student;
   }
 
   async update(id: string, data: StudentUpdateInput): Promise<Student> {
@@ -44,7 +52,34 @@ export class StudentService {
     return student;
   }
 
-  async findAll(): Promise<Student[]> {
-    return this.studentRepo.findAll();
+  async findAll(query: StudentQueryInput): Promise<{
+    data: Student[];
+    total: number;
+    page: number;
+    limit: number;
+  }> {
+    return this.studentRepo.findAll(query);
+  }
+
+  async findScheduleByStudentIdAndAcademicYearId(studentId: string) {
+    const result =
+      await this.studentRepo.findScheduleByStudentIdAndAcademicYearId(
+        studentId,
+      );
+    if (!result) {
+      throw new HTTPException(404, { message: "Student not found" });
+    }
+    return result;
+  }
+
+  async findScheduleByStudentIdAndCurrentAcademicYear(studentId: string) {
+    const result =
+      await this.studentRepo.findScheduleByStudentIdAndCurrentAcademicYear(
+        studentId,
+      );
+    if (!result) {
+      throw new HTTPException(404, { message: "Student not found" });
+    }
+    return result;
   }
 }

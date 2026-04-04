@@ -1,5 +1,6 @@
 import { serve } from "bun";
 import app from "./app";
+import { websocket } from "hono/bun";
 
 const server = serve({
   port: 3000,

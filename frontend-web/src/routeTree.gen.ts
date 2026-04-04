@@ -27,10 +27,12 @@ import { Route as AdminGenerationIndexRouteImport } from './routes/admin/generat
 import { Route as AdminFacultyIndexRouteImport } from './routes/admin/faculty/index'
 import { Route as AdminDepartmentIndexRouteImport } from './routes/admin/department/index'
 import { Route as AdminDashboardIndexRouteImport } from './routes/admin/dashboard/index'
+import { Route as AdminCourseIndexRouteImport } from './routes/admin/course/index'
 import { Route as AdminClassesIndexRouteImport } from './routes/admin/classes/index'
 import { Route as AdminBuildingIndexRouteImport } from './routes/admin/building/index'
 import { Route as AdminAcademic_yearIndexRouteImport } from './routes/admin/academic_year/index'
 import { Route as AdminTeacherTeacherIdRouteImport } from './routes/admin/teacher/$teacherId'
+import { Route as AdminCourseCourseIdIndexRouteImport } from './routes/admin/course/$courseId/index'
 import { Route as AdminClassesAttendanceAttendanceIdRouteImport } from './routes/admin/classes/attendance/$attendanceId'
 import { Route as AdminClassesScheduleScheduleIdIndexRouteImport } from './routes/admin/classes/schedule/$scheduleId/index'
 import { Route as AdminClassesScheduleScheduleIdEditRouteImport } from './routes/admin/classes/schedule/$scheduleId/edit'
@@ -126,6 +128,11 @@ const AdminDashboardIndexRoute = AdminDashboardIndexRouteImport.update({
   path: '/dashboard/',
   getParentRoute: () => AdminRouteRoute,
 } as any)
+const AdminCourseIndexRoute = AdminCourseIndexRouteImport.update({
+  id: '/course/',
+  path: '/course/',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
 const AdminClassesIndexRoute = AdminClassesIndexRouteImport.update({
   id: '/classes/',
   path: '/classes/',
@@ -146,6 +153,12 @@ const AdminTeacherTeacherIdRoute = AdminTeacherTeacherIdRouteImport.update({
   path: '/teacher/$teacherId',
   getParentRoute: () => AdminRouteRoute,
 } as any)
+const AdminCourseCourseIdIndexRoute =
+  AdminCourseCourseIdIndexRouteImport.update({
+    id: '/course/$courseId/',
+    path: '/course/$courseId/',
+    getParentRoute: () => AdminRouteRoute,
+  } as any)
 const AdminClassesAttendanceAttendanceIdRoute =
   AdminClassesAttendanceAttendanceIdRouteImport.update({
     id: '/classes/attendance/$attendanceId',
@@ -181,6 +194,7 @@ export interface FileRoutesByFullPath {
   '/admin/academic_year': typeof AdminAcademic_yearIndexRoute
   '/admin/building': typeof AdminBuildingIndexRoute
   '/admin/classes': typeof AdminClassesIndexRoute
+  '/admin/course': typeof AdminCourseIndexRoute
   '/admin/dashboard': typeof AdminDashboardIndexRoute
   '/admin/department': typeof AdminDepartmentIndexRoute
   '/admin/faculty': typeof AdminFacultyIndexRoute
@@ -195,6 +209,7 @@ export interface FileRoutesByFullPath {
   '/admin/teacher': typeof AdminTeacherIndexRoute
   '/admin/user': typeof AdminUserIndexRoute
   '/admin/classes/attendance/$attendanceId': typeof AdminClassesAttendanceAttendanceIdRoute
+  '/admin/course/$courseId': typeof AdminCourseCourseIdIndexRoute
   '/admin/classes/attendance/report/$attendanceReportId': typeof AdminClassesAttendanceReportAttendanceReportIdRoute
   '/admin/classes/schedule/$scheduleId/edit': typeof AdminClassesScheduleScheduleIdEditRoute
   '/admin/classes/schedule/$scheduleId': typeof AdminClassesScheduleScheduleIdIndexRoute
@@ -209,6 +224,7 @@ export interface FileRoutesByTo {
   '/admin/academic_year': typeof AdminAcademic_yearIndexRoute
   '/admin/building': typeof AdminBuildingIndexRoute
   '/admin/classes': typeof AdminClassesIndexRoute
+  '/admin/course': typeof AdminCourseIndexRoute
   '/admin/dashboard': typeof AdminDashboardIndexRoute
   '/admin/department': typeof AdminDepartmentIndexRoute
   '/admin/faculty': typeof AdminFacultyIndexRoute
@@ -223,6 +239,7 @@ export interface FileRoutesByTo {
   '/admin/teacher': typeof AdminTeacherIndexRoute
   '/admin/user': typeof AdminUserIndexRoute
   '/admin/classes/attendance/$attendanceId': typeof AdminClassesAttendanceAttendanceIdRoute
+  '/admin/course/$courseId': typeof AdminCourseCourseIdIndexRoute
   '/admin/classes/attendance/report/$attendanceReportId': typeof AdminClassesAttendanceReportAttendanceReportIdRoute
   '/admin/classes/schedule/$scheduleId/edit': typeof AdminClassesScheduleScheduleIdEditRoute
   '/admin/classes/schedule/$scheduleId': typeof AdminClassesScheduleScheduleIdIndexRoute
@@ -238,6 +255,7 @@ export interface FileRoutesById {
   '/admin/academic_year/': typeof AdminAcademic_yearIndexRoute
   '/admin/building/': typeof AdminBuildingIndexRoute
   '/admin/classes/': typeof AdminClassesIndexRoute
+  '/admin/course/': typeof AdminCourseIndexRoute
   '/admin/dashboard/': typeof AdminDashboardIndexRoute
   '/admin/department/': typeof AdminDepartmentIndexRoute
   '/admin/faculty/': typeof AdminFacultyIndexRoute
@@ -252,6 +270,7 @@ export interface FileRoutesById {
   '/admin/teacher/': typeof AdminTeacherIndexRoute
   '/admin/user/': typeof AdminUserIndexRoute
   '/admin/classes/attendance/$attendanceId': typeof AdminClassesAttendanceAttendanceIdRoute
+  '/admin/course/$courseId/': typeof AdminCourseCourseIdIndexRoute
   '/admin/classes/attendance/report/$attendanceReportId': typeof AdminClassesAttendanceReportAttendanceReportIdRoute
   '/admin/classes/schedule/$scheduleId/edit': typeof AdminClassesScheduleScheduleIdEditRoute
   '/admin/classes/schedule/$scheduleId/': typeof AdminClassesScheduleScheduleIdIndexRoute
@@ -268,6 +287,7 @@ export interface FileRouteTypes {
     | '/admin/academic_year'
     | '/admin/building'
     | '/admin/classes'
+    | '/admin/course'
     | '/admin/dashboard'
     | '/admin/department'
     | '/admin/faculty'
@@ -282,6 +302,7 @@ export interface FileRouteTypes {
     | '/admin/teacher'
     | '/admin/user'
     | '/admin/classes/attendance/$attendanceId'
+    | '/admin/course/$courseId'
     | '/admin/classes/attendance/report/$attendanceReportId'
     | '/admin/classes/schedule/$scheduleId/edit'
     | '/admin/classes/schedule/$scheduleId'
@@ -296,6 +317,7 @@ export interface FileRouteTypes {
     | '/admin/academic_year'
     | '/admin/building'
     | '/admin/classes'
+    | '/admin/course'
     | '/admin/dashboard'
     | '/admin/department'
     | '/admin/faculty'
@@ -310,6 +332,7 @@ export interface FileRouteTypes {
     | '/admin/teacher'
     | '/admin/user'
     | '/admin/classes/attendance/$attendanceId'
+    | '/admin/course/$courseId'
     | '/admin/classes/attendance/report/$attendanceReportId'
     | '/admin/classes/schedule/$scheduleId/edit'
     | '/admin/classes/schedule/$scheduleId'
@@ -324,6 +347,7 @@ export interface FileRouteTypes {
     | '/admin/academic_year/'
     | '/admin/building/'
     | '/admin/classes/'
+    | '/admin/course/'
     | '/admin/dashboard/'
     | '/admin/department/'
     | '/admin/faculty/'
@@ -338,6 +362,7 @@ export interface FileRouteTypes {
     | '/admin/teacher/'
     | '/admin/user/'
     | '/admin/classes/attendance/$attendanceId'
+    | '/admin/course/$courseId/'
     | '/admin/classes/attendance/report/$attendanceReportId'
     | '/admin/classes/schedule/$scheduleId/edit'
     | '/admin/classes/schedule/$scheduleId/'
@@ -477,6 +502,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminDashboardIndexRouteImport
       parentRoute: typeof AdminRouteRoute
     }
+    '/admin/course/': {
+      id: '/admin/course/'
+      path: '/course'
+      fullPath: '/admin/course'
+      preLoaderRoute: typeof AdminCourseIndexRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
     '/admin/classes/': {
       id: '/admin/classes/'
       path: '/classes'
@@ -503,6 +535,13 @@ declare module '@tanstack/react-router' {
       path: '/teacher/$teacherId'
       fullPath: '/admin/teacher/$teacherId'
       preLoaderRoute: typeof AdminTeacherTeacherIdRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/admin/course/$courseId/': {
+      id: '/admin/course/$courseId/'
+      path: '/course/$courseId'
+      fullPath: '/admin/course/$courseId'
+      preLoaderRoute: typeof AdminCourseCourseIdIndexRouteImport
       parentRoute: typeof AdminRouteRoute
     }
     '/admin/classes/attendance/$attendanceId': {
@@ -541,6 +580,7 @@ interface AdminRouteRouteChildren {
   AdminAcademic_yearIndexRoute: typeof AdminAcademic_yearIndexRoute
   AdminBuildingIndexRoute: typeof AdminBuildingIndexRoute
   AdminClassesIndexRoute: typeof AdminClassesIndexRoute
+  AdminCourseIndexRoute: typeof AdminCourseIndexRoute
   AdminDashboardIndexRoute: typeof AdminDashboardIndexRoute
   AdminDepartmentIndexRoute: typeof AdminDepartmentIndexRoute
   AdminFacultyIndexRoute: typeof AdminFacultyIndexRoute
@@ -555,6 +595,7 @@ interface AdminRouteRouteChildren {
   AdminTeacherIndexRoute: typeof AdminTeacherIndexRoute
   AdminUserIndexRoute: typeof AdminUserIndexRoute
   AdminClassesAttendanceAttendanceIdRoute: typeof AdminClassesAttendanceAttendanceIdRoute
+  AdminCourseCourseIdIndexRoute: typeof AdminCourseCourseIdIndexRoute
   AdminClassesAttendanceReportAttendanceReportIdRoute: typeof AdminClassesAttendanceReportAttendanceReportIdRoute
   AdminClassesScheduleScheduleIdEditRoute: typeof AdminClassesScheduleScheduleIdEditRoute
   AdminClassesScheduleScheduleIdIndexRoute: typeof AdminClassesScheduleScheduleIdIndexRoute
@@ -565,6 +606,7 @@ const AdminRouteRouteChildren: AdminRouteRouteChildren = {
   AdminAcademic_yearIndexRoute: AdminAcademic_yearIndexRoute,
   AdminBuildingIndexRoute: AdminBuildingIndexRoute,
   AdminClassesIndexRoute: AdminClassesIndexRoute,
+  AdminCourseIndexRoute: AdminCourseIndexRoute,
   AdminDashboardIndexRoute: AdminDashboardIndexRoute,
   AdminDepartmentIndexRoute: AdminDepartmentIndexRoute,
   AdminFacultyIndexRoute: AdminFacultyIndexRoute,
@@ -580,6 +622,7 @@ const AdminRouteRouteChildren: AdminRouteRouteChildren = {
   AdminUserIndexRoute: AdminUserIndexRoute,
   AdminClassesAttendanceAttendanceIdRoute:
     AdminClassesAttendanceAttendanceIdRoute,
+  AdminCourseCourseIdIndexRoute: AdminCourseCourseIdIndexRoute,
   AdminClassesAttendanceReportAttendanceReportIdRoute:
     AdminClassesAttendanceReportAttendanceReportIdRoute,
   AdminClassesScheduleScheduleIdEditRoute:

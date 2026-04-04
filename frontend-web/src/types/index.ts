@@ -121,28 +121,30 @@ export interface TeachersType {
   facultyId: number
   email: string
   phone: string
+  password: string
   education_level?: string
   address?: string
   profile?: string
   departmentId?: number
 }
 
-export type StudentsType = {
-  id?: string;
-  name: string;
-  phone: string | null;
-  email: string | null;
-  facultyId: number | null;
-  departmentId: number | null;
-  academicLevelId: number | null;
-  academicYearId: number | null;
-  educationalStatus: string | null;
-  year: number | null;
-  gender: string | null;
-  generation: number | null;
-  semester: number | null;
-  isActive: boolean;
-};
+export interface StudentsType {
+  id?: string
+  name: string
+  phone: string
+  email: string
+  password: string
+  facultyId: number
+  departmentId: number
+  academicLevelId: number
+  academicYearId: number | null
+  educationalStatus: string | null
+  year: number | null
+  gender: string | null
+  generation: number | null
+  semester: number | null
+  isActive?: boolean
+}
 //
 export interface AttendancesType {
   id?: number

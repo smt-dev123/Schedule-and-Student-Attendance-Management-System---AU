@@ -18,7 +18,15 @@ import {
   studyShiftEnum,
 } from "./enums";
 import { user } from "./authentication";
-import { buildings, classrooms } from "./infrastructure";
+import { classrooms } from "./infrastructure";
+
+export const academicYears = pgTable("academic_years", {
+  id: serial("id").primaryKey(),
+  name: varchar("name"),
+  startDate: timestamp("startDate"),
+  endDate: timestamp("endDate"),
+  isCurrent: boolean("is_current").default(false),
+});
 
 export const faculties = pgTable("faculties", {
   id: serial("id").primaryKey(),
@@ -86,6 +94,9 @@ export const schedules = pgTable(
     academicLevelId: integer("academic_level_id")
       .notNull()
       .references(() => academicLevels.id),
+    academicYearId: integer("academic_year_id")
+      .notNull()
+      .references(() => academicYears.id),
     generation: integer("generation").notNull(),
     departmentId: integer("department_id")
       .notNull()
@@ -94,6 +105,9 @@ export const schedules = pgTable(
     semesterStart: timestamp("semester_start").notNull(),
     semesterEnd: timestamp("semester_end").notNull(),
     studyShift: studyShiftEnum("study_shift").default("morning"),
+    classroomId: integer("classroom_id")
+      .notNull()
+      .references(() => classrooms.id),
     createdAt: timestamp("created_at").defaultNow(),
     updatedAt: timestamp("updated_at").defaultNow(),
   },
@@ -128,12 +142,6 @@ export const courses = pgTable(
     scheduleId: integer("schedule_id")
       .notNull()
       .references(() => schedules.id),
-    buildingId: integer("building_id")
-      .notNull()
-      .references(() => buildings.id),
-    classroomId: integer("classroom_id")
-      .notNull()
-      .references(() => classrooms.id),
     sessionTimeId: integer("session_time_id")
       .notNull()
       .references(() => sessionTimes.id),
@@ -150,8 +158,6 @@ export const courses = pgTable(
     uniqueIndex("unique_schedule_day_classroom_time").on(
       table.scheduleId,
       table.day,
-      table.buildingId,
-      table.classroomId,
       table.sessionTimeId,
     ),
   ],
@@ -192,6 +198,9 @@ export const students = pgTable(
     academicLevelId: integer("academic_level_id").references(
       () => academicLevels.id,
     ),
+    academicYearId: integer("academic_year_id").references(
+      () => academicYears.id,
+    ),
     educationalStatus: educationalStatus("educational_status"),
     year: integer("year"),
     gender: gender("gender"),
@@ -208,6 +217,27 @@ export const students = pgTable(
       table.generation,
       table.semester,
       table.year,
+    ),
+  ],
+);
+
+export const studentAcademicYears = pgTable(
+  "student_academic_years",
+  {
+    id: serial("id").primaryKey(),
+    studentId: text("student_id")
+      .notNull()
+      .references(() => students.id, { onDelete: "cascade" }),
+    academicYearId: integer("academic_year_id")
+      .notNull()
+      .references(() => academicYears.id, { onDelete: "cascade" }),
+    createdAt: timestamp("created_at").defaultNow(),
+    updatedAt: timestamp("updated_at").defaultNow(),
+  },
+  (table) => [
+    uniqueIndex("unique_student_academic_year").on(
+      table.studentId,
+      table.academicYearId,
     ),
   ],
 );

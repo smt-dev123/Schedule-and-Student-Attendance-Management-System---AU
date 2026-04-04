@@ -1,4 +1,5 @@
 attendance-and-schedule/
+example/
 
 # Backend (Hono.js)
 backend/node_modules/

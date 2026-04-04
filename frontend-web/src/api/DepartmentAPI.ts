@@ -16,10 +16,10 @@ export const updateDepartments = async (
   updateDepartments: DepartmentsType,
 ) => {
   const res = await api.put(`/departments/${id}`, updateDepartments)
-  return res.data
+  return res.data.data
 }
 
 export const deleteDepartments = async (id: number) => {
   const res = await api.delete(`/departments/${id}`)
-  return res.data
+  return res.data.data
 }

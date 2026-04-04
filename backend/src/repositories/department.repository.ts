@@ -8,14 +8,10 @@ import type {
 import { eq } from "drizzle-orm";
 
 export class DepartmentRepository {
-  constructor(private readonly db: DrizzleDb) { }
+  constructor(private readonly db: DrizzleDb) {}
 
   async findAll(): Promise<Department[]> {
-    return await this.db.query.departments.findMany({
-      with: {
-        faculty: true,
-      }
-    });
+    return await this.db.query.departments.findMany();
   }
 
   async findById(id: number): Promise<Department | undefined> {

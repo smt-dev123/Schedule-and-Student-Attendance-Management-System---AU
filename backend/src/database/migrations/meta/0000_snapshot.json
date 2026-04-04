@@ -1,5 +1,5 @@
 {
-  "id": "54b2432d-8991-432b-8ad8-33cdd66d377b",
+  "id": "66812b06-0b80-4ad8-bbfa-fe11b521fcb1",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -48,6 +48,50 @@
           ]
         }
       },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.academic_years": {
+      "name": "academic_years",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "startDate": {
+          "name": "startDate",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "endDate": {
+          "name": "endDate",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "is_current": {
+          "name": "is_current",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
@@ -101,18 +145,6 @@
         },
         "schedule_id": {
           "name": "schedule_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "building_id": {
-          "name": "building_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "classroom_id": {
-          "name": "classroom_id",
           "type": "integer",
           "primaryKey": false,
           "notNull": true
@@ -225,18 +257,6 @@
               "nulls": "last"
             },
             {
-              "expression": "building_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "classroom_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
               "expression": "session_time_id",
               "isExpression": false,
               "asc": true,
@@ -272,32 +292,6 @@
           ],
           "columnsTo": [
             "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        },
-        "courses_building_id_buildings_building_id_fk": {
-          "name": "courses_building_id_buildings_building_id_fk",
-          "tableFrom": "courses",
-          "tableTo": "buildings",
-          "columnsFrom": [
-            "building_id"
-          ],
-          "columnsTo": [
-            "building_id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        },
-        "courses_classroom_id_classrooms_classroom_id_fk": {
-          "name": "courses_classroom_id_classrooms_classroom_id_fk",
-          "tableFrom": "courses",
-          "tableTo": "classrooms",
-          "columnsFrom": [
-            "classroom_id"
-          ],
-          "columnsTo": [
-            "classroom_id"
           ],
           "onDelete": "no action",
           "onUpdate": "no action"
@@ -494,6 +488,12 @@
           "primaryKey": false,
           "notNull": true
         },
+        "academic_year_id": {
+          "name": "academic_year_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
         "generation": {
           "name": "generation",
           "type": "integer",
@@ -531,6 +531,12 @@
           "primaryKey": false,
           "notNull": false,
           "default": "'morning'"
+        },
+        "classroom_id": {
+          "name": "classroom_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
         },
         "created_at": {
           "name": "created_at",
@@ -642,6 +648,19 @@
           "onDelete": "no action",
           "onUpdate": "no action"
         },
+        "schedules_academic_year_id_academic_years_id_fk": {
+          "name": "schedules_academic_year_id_academic_years_id_fk",
+          "tableFrom": "schedules",
+          "tableTo": "academic_years",
+          "columnsFrom": [
+            "academic_year_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
         "schedules_department_id_departments_id_fk": {
           "name": "schedules_department_id_departments_id_fk",
           "tableFrom": "schedules",
@@ -651,6 +670,19 @@
           ],
           "columnsTo": [
             "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "schedules_classroom_id_classrooms_classroom_id_fk": {
+          "name": "schedules_classroom_id_classrooms_classroom_id_fk",
+          "tableFrom": "schedules",
+          "tableTo": "classrooms",
+          "columnsFrom": [
+            "classroom_id"
+          ],
+          "columnsTo": [
+            "classroom_id"
           ],
           "onDelete": "no action",
           "onUpdate": "no action"
@@ -758,6 +790,100 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
+    "public.student_academic_years": {
+      "name": "student_academic_years",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "student_id": {
+          "name": "student_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "academic_year_id": {
+          "name": "academic_year_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "unique_student_academic_year": {
+          "name": "unique_student_academic_year",
+          "columns": [
+            {
+              "expression": "student_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "academic_year_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "student_academic_years_student_id_students_id_fk": {
+          "name": "student_academic_years_student_id_students_id_fk",
+          "tableFrom": "student_academic_years",
+          "tableTo": "students",
+          "columnsFrom": [
+            "student_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "student_academic_years_academic_year_id_academic_years_id_fk": {
+          "name": "student_academic_years_academic_year_id_academic_years_id_fk",
+          "tableFrom": "student_academic_years",
+          "tableTo": "academic_years",
+          "columnsFrom": [
+            "academic_year_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
     "public.students": {
       "name": "students",
       "schema": "",
@@ -800,6 +926,12 @@
         },
         "academic_level_id": {
           "name": "academic_level_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "academic_year_id": {
+          "name": "academic_year_id",
           "type": "integer",
           "primaryKey": false,
           "notNull": false
@@ -945,6 +1077,19 @@
           "tableTo": "academic_levels",
           "columnsFrom": [
             "academic_level_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "students_academic_year_id_academic_years_id_fk": {
+          "name": "students_academic_year_id_academic_years_id_fk",
+          "tableFrom": "students",
+          "tableTo": "academic_years",
+          "columnsFrom": [
+            "academic_year_id"
           ],
           "columnsTo": [
             "id"
@@ -1844,6 +1989,12 @@
           "primaryKey": false,
           "notNull": true
         },
+        "floor": {
+          "name": "floor",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
         "building_id": {
           "name": "building_id",
           "type": "integer",
@@ -1912,6 +2063,13 @@
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
+        "classrooms_classroom_number_unique": {
+          "name": "classrooms_classroom_number_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "classroom_number"
+          ]
+        },
         "classrooms_name_unique": {
           "name": "classrooms_name_unique",
           "nullsNotDistinct": false,
@@ -2129,7 +2287,8 @@
         },
         "priority": {
           "name": "priority",
-          "type": "varchar(20)",
+          "type": "notification_priority",
+          "typeSchema": "public",
           "primaryKey": false,
           "notNull": false,
           "default": "'normal'"
@@ -2215,6 +2374,15 @@
       "values": [
         "male",
         "female"
+      ]
+    },
+    "public.notification_priority": {
+      "name": "notification_priority",
+      "schema": "public",
+      "values": [
+        "low",
+        "normal",
+        "high"
       ]
     },
     "public.study_shift": {
