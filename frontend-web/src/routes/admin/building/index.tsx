@@ -6,10 +6,10 @@ import { useQuery } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
 import BuildingCreate from './-actions/Create'
 import ExportExcel from './-exports/ExportExcel'
-import ExportPDF from './-exports/ExportPDF'
+import { BuildingReport } from './-exports/ExportPDF'
 import { useState } from 'react'
 import FetchData from '@/components/FetchData'
-import BuildingCard from '@/components/ui/Card'
+import PDFDownload from '@/components/ui/PDFDownload'
 
 export const Route = createFileRoute('/admin/building/')({
   component: RouteComponent,
@@ -18,8 +18,8 @@ export const Route = createFileRoute('/admin/building/')({
 function RouteComponent() {
   useTitle('Building Management')
 
-  const [name, setName] = useState("all");
-  const [search, setSearch] = useState("");
+  const [name, setName] = useState('all')
+  const [search, setSearch] = useState('')
   const { data, isLoading, error } = useQuery({
     queryKey: ['buildings', name, search],
     queryFn: () => getBuilding(name, search),
@@ -40,8 +40,11 @@ function RouteComponent() {
             តារាងអាគារសិក្សា
           </Text>
           <Flex gap="2">
+            <PDFDownload
+              document={<BuildingReport data={data} />}
+              fileName="building-report.pdf"
+            />
             <ExportExcel data={data} />
-            <ExportPDF data={data} />
             <BuildingCreate />
           </Flex>
         </div>

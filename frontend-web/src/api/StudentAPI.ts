@@ -26,6 +26,16 @@ export const getStudents = async (
   return res.data?.data ?? []
 }
 
+export const promoteStudent = async (data: {
+  studentId: number
+  academicYearId: number
+  year: number
+  semester: number
+}) => {
+  const res = await api.post(`${ENDPOINT}/promote`, data)
+  return res.data
+}
+
 export const createStudent = async (data: StudentsType) => {
   const res = await api.post(ENDPOINT, data)
   return res.data

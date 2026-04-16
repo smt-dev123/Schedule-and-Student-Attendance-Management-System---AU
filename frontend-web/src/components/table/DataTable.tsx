@@ -52,8 +52,8 @@ export function DataTable<TData, TValue>({
                         asc: <HiArrowUp />,
                         desc: <HiArrowDown />,
                       }[header.column.getIsSorted() as string] ?? (
-                          <HiArrowsUpDown />
-                        ))}
+                        <HiArrowsUpDown />
+                      ))}
                   </div>
                 </Table.ColumnHeaderCell>
               ))}

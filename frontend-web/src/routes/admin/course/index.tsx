@@ -1,9 +1,17 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
-import { BookOpen, Clock, CalendarDays, CheckCircle, User, Loader2 } from 'lucide-react'
+import {
+  BookOpen,
+  Clock,
+  CalendarDays,
+  CheckCircle,
+  User,
+  Loader2,
+} from 'lucide-react'
 import { useQuery } from '@tanstack/react-query'
 import { useAcademicStore } from '@/stores/useAcademicStore'
 import FetchData from '@/components/FetchData'
 import { getCourses } from '@/api/CourseAPI'
+import { Button, Flex, Text } from '@radix-ui/themes'
 
 export const Route = createFileRoute('/admin/course/')({
   component: CourseListComponent,
@@ -23,27 +31,43 @@ function CourseListComponent() {
   const courses = [
     {
       id: 1,
-      name: 'Introduction to Computer Science',
+      name: 'Data Structure and Algorithm',
       code: 'CS101',
       day: 'Monday',
-      sessionTime: { firstSessionStartTime: '08:00', secondSessionEndTime: '15:00' },
-      teacher: { name: 'John Doe' },
+      sessionTime: {
+        firstSessionStartTime: '06:00',
+        secondSessionEndTime: '07:30',
+      },
+      teacher: { name: 'សេង ស៊ង់' },
       scheduleId: 101, // សម្រាប់ទៅកាន់ Schedule
-      schedule: { classroom: { name: 'Room 101' } },
-    }
+      schedule: { classroom: { name: 'ស្រុកកងមាស' } },
+    },
   ]
   const isLoading = false
   const error = null
 
   return (
-    <div className="p-8 max-w-7xl mx-auto font-kantumruy">
-      <div className="flex justify-between items-center mb-8">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900 text-slate-800">គ្រប់គ្រងវគ្គសិក្សា</h1>
-          <p className="text-sm text-gray-500">ជ្រើសរើសសកម្មភាពសម្រាប់ថ្នាក់រៀននីមួយៗ</p>
-        </div>
-        {isLoading && <Loader2 className="animate-spin text-blue-600" />}
-      </div>
+    <div className="p-4 max-w-7xl mx-auto font-kantumruy">
+      <Flex justify="between" mb="4">
+        <Text size="5" className="font-bold">
+          គ្រប់គ្រងវគ្គសិក្សា
+        </Text>
+        <Flex gap="2">
+          {/* Export */}
+
+          <Button variant="outline" style={{ cursor: 'pointer' }}>
+            Export Excel
+          </Button>
+          <Button variant="outline" style={{ cursor: 'pointer' }}>
+            បោះពុម្ភ
+          </Button>
+
+          <Button variant="solid" style={{ cursor: 'pointer' }}>
+            បង្កើតថ្នាក់រៀន
+          </Button>
+        </Flex>
+      </Flex>
+      {/* Header */}
 
       <FetchData isLoading={isLoading} error={error} data={courses}>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -68,17 +92,20 @@ function CourseListComponent() {
               <div className="space-y-3 mb-8">
                 <div className="flex items-center text-sm text-gray-500">
                   <Clock size={16} className="mr-2 text-blue-500" />
-                  <span>{course.day} | {course.sessionTime?.firstSessionStartTime} - {course.sessionTime?.secondSessionEndTime}</span>
+                  <span>
+                    {course.day} | {course.sessionTime?.firstSessionStartTime} -{' '}
+                    {course.sessionTime?.secondSessionEndTime}
+                  </span>
                 </div>
                 <div className="flex items-center text-sm text-gray-500">
                   <User size={16} className="mr-2 text-blue-500" />
                   <span className="truncate">គ្រូ៖ {course.teacher?.name}</span>
                 </div>
                 <div className="flex items-center text-sm text-gray-500 font-medium">
-                   <div className="w-4 h-4 rounded-full bg-blue-100 flex items-center justify-center mr-2">
-                      <div className="w-1.5 h-1.5 rounded-full bg-blue-600"></div>
-                   </div>
-                   បន្ទប់៖ {course.schedule?.classroom?.name || 'TBA'}
+                  <div className="w-4 h-4 rounded-full bg-blue-100 flex items-center justify-center mr-2">
+                    <div className="w-1.5 h-1.5 rounded-full bg-blue-600"></div>
+                  </div>
+                  បន្ទប់៖ {course.schedule?.classroom?.name || 'TBA'}
                 </div>
               </div>
 
@@ -86,7 +113,9 @@ function CourseListComponent() {
               <div className="grid grid-cols-2 gap-3 pt-5 border-t border-gray-50">
                 <Link
                   to="/admin/course/schedule/$scheduleId"
-                  params={{ scheduleId: String(course.scheduleId || course.id) }}
+                  params={{
+                    scheduleId: String(course.scheduleId || course.id),
+                  }}
                   className="flex items-center justify-center gap-2 py-2.5 px-4 bg-slate-50 text-slate-600 rounded-2xl text-xs font-bold hover:bg-indigo-50 hover:text-indigo-600 transition-colors border border-transparent hover:border-indigo-100"
                 >
                   <CalendarDays size={16} />
@@ -114,8 +143,12 @@ function CourseListComponent() {
 function BadgeCode({ code }: { code: string }) {
   return (
     <div className="flex flex-col items-end">
-      <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Code</span>
-      <span className="text-sm font-mono font-bold text-slate-700 italic">{code || 'N/A'}</span>
+      <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+        Code
+      </span>
+      <span className="text-sm font-mono font-bold text-slate-700 italic">
+        {code || 'N/A'}
+      </span>
     </div>
   )
 }

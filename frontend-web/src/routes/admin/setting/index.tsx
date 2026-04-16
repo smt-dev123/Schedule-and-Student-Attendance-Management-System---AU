@@ -81,52 +81,45 @@ function RouteComponent() {
 
               {/* Personal Information */}
               <Box>
-                <Text size="4" weight="bold">ព័ត៌មានផ្ទាល់ខ្លួន</Text>
+                <Text size="4" weight="bold">
+                  ព័ត៌មានផ្ទាល់ខ្លួន
+                </Text>
                 <Separator size="4" my="3" />
-                <Flex gap="4" direction={{ initial: 'column', sm: 'row' }} mb="4">
+                <Flex
+                  gap="4"
+                  direction={{ initial: 'column', sm: 'row' }}
+                  mb="4"
+                >
                   <label className="grow">
-                    <Text as="div" size="2" mb="1" weight="bold">នាមត្រកូល</Text>
+                    <Text as="div" size="2" mb="1" weight="bold">
+                      នាមត្រកូល
+                    </Text>
                     <TextField.Root placeholder="បញ្ចូលនាមត្រកូល" />
                   </label>
                   <label className="grow">
-                    <Text as="div" size="2" mb="1" weight="bold">នាមខ្លួន</Text>
+                    <Text as="div" size="2" mb="1" weight="bold">
+                      នាមខ្លួន
+                    </Text>
                     <TextField.Root placeholder="បញ្ចូលនាមខ្លួន" />
                   </label>
                 </Flex>
 
                 <Flex gap="4" direction={{ initial: 'column', sm: 'row' }}>
                   <label className="grow">
-                    <Text as="div" size="2" mb="1" weight="bold">អ៊ីមែល</Text>
-                    <TextField.Root type="email" placeholder="example@mail.com" />
+                    <Text as="div" size="2" mb="1" weight="bold">
+                      អ៊ីមែល
+                    </Text>
+                    <TextField.Root
+                      type="email"
+                      placeholder="example@mail.com"
+                    />
                   </label>
                   <label className="grow">
-                    <Text as="div" size="2" mb="1" weight="bold">លេខទូរស័ព្ទ</Text>
+                    <Text as="div" size="2" mb="1" weight="bold">
+                      លេខទូរស័ព្ទ
+                    </Text>
                     <TextField.Root type="tel" placeholder="012 345 678" />
                   </label>
-                </Flex>
-              </Box>
-
-              <Box mt="2">
-                <Text size="4" weight="bold">ការកំណត់ប្រព័ន្ធ</Text>
-                <Separator size="4" my="3" />
-                <Flex gap="4" direction={{ initial: 'column', sm: 'row' }}>
-                  <Box className="grow">
-                    <Text as="div" size="2" mb="1" weight="bold">
-                      ឆ្នាំសិក្សាបច្ចុប្បន្ន (Academic Year)
-                    </Text>
-                    <Select.Root defaultValue="2024-2025">
-                      <Select.Trigger className="w-full" placeholder="ជ្រើសរើសឆ្នាំសិក្សា" />
-                      <Select.Content position="popper">
-                        <Select.Item value="2023-2024">២០២៣ - ២០២៤</Select.Item>
-                        <Select.Item value="2024-2025">២០២៤ - ២០២៥</Select.Item>
-                        <Select.Item value="2025-2026">២០២៥ - ២០២៦</Select.Item>
-                      </Select.Content>
-                    </Select.Root>
-                    <Text as="div" size="1" color="gray" mt="1">
-                      * រាល់ទិន្នន័យរបាយការណ៍នឹងត្រូវបានបង្ហាញផ្អែកលើឆ្នាំសិក្សានេះ
-                    </Text>
-                  </Box>
-                  <Box className="grow" />
                 </Flex>
               </Box>
             </Flex>
@@ -135,24 +128,36 @@ function RouteComponent() {
           {/* --- TAB: SECURITY --- */}
           <Tabs.Content value="security">
             <Flex direction="column" gap="4">
-              <Text size="4" weight="bold">ប្តូរលេខសម្ងាត់</Text>
+              <Text size="4" weight="bold">
+                ប្តូរលេខសម្ងាត់
+              </Text>
               <Separator size="4" my="1" />
 
               <Box maxWidth="400px">
                 <Flex direction="column" gap="3">
                   <label>
-                    <Text as="div" size="2" mb="1" weight="bold">លេខសម្ងាត់ចាស់</Text>
+                    <Text as="div" size="2" mb="1" weight="bold">
+                      លេខសម្ងាត់ចាស់
+                    </Text>
                     <TextField.Root type="password" placeholder="••••••••" />
                   </label>
                   <label>
-                    <Text as="div" size="2" mb="1" weight="bold">លេខសម្ងាត់ថ្មី</Text>
+                    <Text as="div" size="2" mb="1" weight="bold">
+                      លេខសម្ងាត់ថ្មី
+                    </Text>
                     <TextField.Root type="password" placeholder="••••••••" />
                   </label>
                   <label>
-                    <Text as="div" size="2" mb="1" weight="bold">បញ្ជាក់លេខសម្ងាត់ថ្មី</Text>
+                    <Text as="div" size="2" mb="1" weight="bold">
+                      បញ្ជាក់លេខសម្ងាត់ថ្មី
+                    </Text>
                     <TextField.Root type="password" placeholder="••••••••" />
                   </label>
-                  <Button mt="2" variant="outline" style={{ width: 'fit-content' }}>
+                  <Button
+                    mt="2"
+                    variant="outline"
+                    style={{ width: 'fit-content' }}
+                  >
                     ធ្វើបច្ចុប្បន្នភាពលេខសម្ងាត់
                   </Button>
                 </Flex>
@@ -164,14 +169,20 @@ function RouteComponent() {
           <Tabs.Content value="backup">
             <Flex direction="column" gap="5">
               <Box>
-                <Text size="4" weight="bold">ការចម្លងទុកទិន្នន័យ (Backup & Restore)</Text>
-                <Text size="2" color="gray">គ្រប់គ្រងសុវត្ថិភាពទិន្នន័យប្រព័ន្ធរបស់អ្នក</Text>
+                <Text size="4" weight="bold">
+                  ការចម្លងទុកទិន្នន័យ (Backup & Restore)
+                </Text>
+                <Text size="2" color="gray">
+                  គ្រប់គ្រងសុវត្ថិភាពទិន្នន័យប្រព័ន្ធរបស់អ្នក
+                </Text>
               </Box>
 
               <Card variant="surface">
                 <Flex justify="between" align="center">
                   <Box>
-                    <Text as="div" size="3" weight="bold">Auto Backup</Text>
+                    <Text as="div" size="3" weight="bold">
+                      Auto Backup
+                    </Text>
                     <Text as="div" size="2" color="gray">
                       ដំណើរការការចម្លងទុកដោយស្វ័យប្រវត្តិទៅកាន់ Cloud Storage
                     </Text>
@@ -182,7 +193,9 @@ function RouteComponent() {
 
               <Flex gap="4" direction={{ initial: 'column', sm: 'row' }}>
                 <Box className="grow">
-                  <Text as="div" size="2" mb="1" weight="bold">ភាពញឹកញាប់ (Frequency)</Text>
+                  <Text as="div" size="2" mb="1" weight="bold">
+                    ភាពញឹកញាប់ (Frequency)
+                  </Text>
                   <Select.Root defaultValue="daily">
                     <Select.Trigger className="w-full" />
                     <Select.Content>
@@ -194,13 +207,17 @@ function RouteComponent() {
                 </Box>
 
                 <Box className="grow">
-                  <Text as="div" size="2" mb="1" weight="bold">រក្សាទុកក្នុងរយៈពេល (Retention)</Text>
+                  <Text as="div" size="2" mb="1" weight="bold">
+                    រក្សាទុកក្នុងរយៈពេល (Retention)
+                  </Text>
                   <Select.Root defaultValue="30">
                     <Select.Trigger className="w-full" />
                     <Select.Content>
                       <Select.Item value="7">៧ ថ្ងៃ</Select.Item>
                       <Select.Item value="30">៣០ ថ្ងៃ</Select.Item>
-                      <Select.Item value="always">រហូតដល់លុបដោយផ្ទាល់</Select.Item>
+                      <Select.Item value="always">
+                        រហូតដល់លុបដោយផ្ទាល់
+                      </Select.Item>
                     </Select.Content>
                   </Select.Root>
                 </Box>
@@ -209,7 +226,9 @@ function RouteComponent() {
               <Separator size="4" />
 
               <Box>
-                <Text size="3" weight="bold" mb="2" as="div">សកម្មភាពបន្ទាប់បន្សំ</Text>
+                <Text size="3" weight="bold" mb="2" as="div">
+                  សកម្មភាពបន្ទាប់បន្សំ
+                </Text>
                 <Flex gap="3">
                   <Button variant="soft" color="gray">
                     ទាញយក Database ឥឡូវនេះ (.sql)

@@ -11,12 +11,12 @@ export const TeachaerColumns: ColumnDef<TeachersType>[] = [
     header: 'ល.រ',
     cell: ({ row }) => {
       return <span>{row.index + 1}</span>
-    }
+    },
   },
   { accessorKey: 'name', header: 'គោត្តនាម-នាម' },
   { accessorKey: 'gender', header: 'ភេទ' },
   // { accessorKey: 'name', header: 'អាយុ' },
-  { accessorKey: 'education_level.name', header: 'កម្រិតវប្បធម៍' },
+  { accessorKey: 'education_level.name', header: 'កម្រិតសិក្សា' },
   { accessorKey: 'department.name', header: 'តេប៉ាតឺម៉ង់' },
   { accessorKey: 'faculty.name', header: 'មហាវិទ្យាល័យ' },
   { accessorKey: 'email', header: 'អ៊ីម៉ែល' },

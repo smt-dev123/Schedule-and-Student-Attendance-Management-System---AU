@@ -1,0 +1,205 @@
+import { useState, useEffect } from 'react'
+import {
+  Button,
+  Dialog,
+  Flex,
+  Select,
+  Text,
+  TextField,
+  Grid,
+  Box,
+  Badge,
+  IconButton,
+} from '@radix-ui/themes'
+import { useForm, Controller } from 'react-hook-form'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import toast from 'react-hot-toast'
+import { IoArrowUpCircle } from 'react-icons/io5'
+import { getAcademicYear } from '@/api/AcademicYearAPI'
+import { promoteStudent } from '@/api/StudentAPI' // ប្រើ Promote API វិញ
+
+interface PromoteProps {
+  student: any // ទិន្នន័យនិស្សិតពី Table Row
+}
+
+const StudentPromote = ({ student }: PromoteProps) => {
+  const [open, setOpen] = useState(false)
+  const queryClient = useQueryClient()
+
+  const { register, handleSubmit, control, reset, setValue } = useForm({
+    defaultValues: {
+      studentId: '',
+      academicYearId: '',
+      year: '',
+      semester: '',
+    },
+  })
+
+  const { data: academicYears = [] } = useQuery({
+    queryKey: ['academicYears'],
+    queryFn: getAcademicYear,
+  })
+
+  useEffect(() => {
+    if (open && student) {
+      setValue('studentId', student.id.toString())
+
+      // Logic គណនាឆ្នាំ និង ឆមាសបន្ទាប់អូតូ
+      const isSemester2 = Number(student.semester) === 2
+      setValue(
+        'year',
+        isSemester2
+          ? (Number(student.year) + 1).toString()
+          : student.year.toString(),
+      )
+      setValue('semester', isSemester2 ? '1' : '2')
+
+      // កំណត់ឆ្នាំសិក្សាបច្ចុប្បន្នជា Default
+      if (academicYears.length > 0) {
+        const latestYear =
+          academicYears.find((ay: any) => ay.isCurrent) ||
+          [...academicYears].sort((a, b) => b.id - a.id)[0]
+        if (latestYear) setValue('academicYearId', latestYear.id.toString())
+      }
+    }
+  }, [open, student, academicYears, setValue])
+
+  const mutation = useMutation({
+    mutationFn: (payload: any) => promoteStudent(payload), // ហៅ API Promote
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['students'] })
+      toast.success(
+        `បានបន្ថែមឆ្នាំសិក្សាថ្មីសម្រាប់និស្សិត ${student.name} ជោគជ័យ`,
+      )
+      setOpen(false)
+    },
+    onError: (error: any) => {
+      toast.error(error?.response?.data?.message || 'ប្រតិបត្តិការមិនជោគជ័យ')
+    },
+  })
+
+  const onSubmit = (formData: any) => {
+    const payload = {
+      studentId: student.id, // ID សិស្សដដែល (UUID)
+      academicYearId: Number(formData.academicYearId), // ឆ្នាំសិក្សាថ្មី (ឧ. 2025-2026)
+      year: Number(formData.year), // ឆ្នាំទីថ្មី (ឧ. ឆ្នាំទី ២)
+      semester: Number(formData.semester), // ឆមាសថ្មី (ឧ. ឆមាសទី ១)
+
+      // បញ្ជូនព័ត៌មានគោលផ្សេងៗដែលសិស្សកំពុងរៀន (ទាញពី props student)
+      facultyId: student.facultyId,
+      departmentId: student.departmentId,
+      academicLevelId: student.academicLevelId,
+    }
+
+    mutation.mutate(payload)
+  }
+
+  return (
+    <Dialog.Root open={open} onOpenChange={setOpen}>
+      <Dialog.Trigger>
+        <IconButton
+          size="1"
+          color="blue"
+          variant="surface"
+          style={{ cursor: 'pointer' }}
+          title="ឡើងថ្នាក់/បន្ថែមឆ្នាំសិក្សា"
+        >
+          <IoArrowUpCircle size="18" />
+        </IconButton>
+      </Dialog.Trigger>
+
+      <Dialog.Content maxWidth="450px">
+        <Dialog.Title>បន្ថែមឆ្នាំសិក្សាថ្មី</Dialog.Title>
+        <Dialog.Description size="2" mb="4">
+          រៀបចំការចុះឈ្មោះនិស្សិត{' '}
+          <Text weight="bold" color="indigo">
+            {student.name}
+          </Text>{' '}
+          ចូលក្នុងឆមាសបន្ទាប់។
+        </Dialog.Description>
+
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <Flex direction="column" gap="4">
+            <Box>
+              <Text as="div" size="2" mb="1" weight="bold">
+                ព័ត៌មានបច្ចុប្បន្ន
+              </Text>
+              <Badge color="gray" variant="soft">
+                ឆ្នាំទី {student.year} ឆមាស {student.semester} (
+                {student.department?.name})
+              </Badge>
+            </Box>
+
+            <Grid columns="2" gap="3">
+              <Box>
+                <Text as="div" size="2" mb="1" weight="bold">
+                  ទៅឆ្នាំសិក្សា *
+                </Text>
+                <Controller
+                  name="academicYearId"
+                  control={control}
+                  render={({ field }) => (
+                    <Select.Root
+                      value={field.value}
+                      onValueChange={field.onChange}
+                    >
+                      <Select.Trigger className="w-full" />
+                      <Select.Content>
+                        {academicYears.map((ay: any) => (
+                          <Select.Item key={ay.id} value={ay.id.toString()}>
+                            {ay.name} {ay.isCurrent && '(បច្ចុប្បន្ន)'}
+                          </Select.Item>
+                        ))}
+                      </Select.Content>
+                    </Select.Root>
+                  )}
+                />
+              </Box>
+              <Box>
+                <Text as="div" size="2" mb="1" weight="bold">
+                  ឆ្នាំទី *
+                </Text>
+                <TextField.Root
+                  type="number"
+                  {...register('year', { required: true })}
+                />
+              </Box>
+            </Grid>
+
+            <Box>
+              <Text as="div" size="2" mb="1" weight="bold">
+                ឆមាស *
+              </Text>
+              <TextField.Root
+                type="number"
+                {...register('semester', { required: true })}
+              />
+            </Box>
+
+            <Flex gap="3" mt="4" justify="end">
+              <Dialog.Close>
+                <Button
+                  variant="soft"
+                  color="gray"
+                  type="button"
+                  style={{ cursor: 'pointer' }}
+                >
+                  បោះបង់
+                </Button>
+              </Dialog.Close>
+              <Button
+                type="submit"
+                loading={mutation.isPending}
+                style={{ cursor: 'pointer' }}
+              >
+                រក្សាទុកទិន្នន័យ
+              </Button>
+            </Flex>
+          </Flex>
+        </form>
+      </Dialog.Content>
+    </Dialog.Root>
+  )
+}
+
+export default StudentPromote

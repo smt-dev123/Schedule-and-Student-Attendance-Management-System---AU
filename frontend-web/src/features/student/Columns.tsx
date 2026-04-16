@@ -1,9 +1,10 @@
 import StudentDelete from '@/routes/admin/student/-actions/Delete'
+import StudentPromote from '@/routes/admin/student/-actions/StudentPromote'
 import StudentUpdate from '@/routes/admin/student/-actions/Update'
 import type { StudentsType } from '@/types'
-import { Badge, Flex, IconButton } from '@radix-ui/themes'
+import { Badge, Flex, IconButton, Text } from '@radix-ui/themes'
 import type { ColumnDef } from '@tanstack/react-table'
-import { FaRegEdit } from 'react-icons/fa'
+import { FaRegEdit, FaRegEye } from 'react-icons/fa'
 
 export const STUDENT_STATUS = {
   ACTIVE: 'សកម្ម',
@@ -33,13 +34,21 @@ export const StudentColumns: ColumnDef<StudentsType>[] = [
     header: 'ល.រ',
     cell: ({ row }) => {
       return <span>{row.index + 1}</span>
-    }
+    },
   },
   { accessorKey: 'name', header: 'ឈ្មោះ' },
   { accessorKey: 'gender', header: 'ភេទ' },
   { accessorKey: 'dob', header: 'ថ្ងៃ ខែ ឆ្នាំកំណើត' },
   { accessorKey: 'pob', header: 'ទីកន្លែងកំណើត' },
-
+  {
+    id: 'grade',
+    header: 'ថ្នាក់សិក្សា',
+    cell: ({ row }) => (
+      <Text size="2">
+        ឆ្នាំទី {row.original.year} ឆមាស {row.original.semester}
+      </Text>
+    ),
+  },
   {
     accessorKey: 'status',
     header: 'ស្ថានភាព',
@@ -62,6 +71,7 @@ export const StudentColumns: ColumnDef<StudentsType>[] = [
     enableSorting: false,
     cell: ({ row }) => (
       <Flex gap="2">
+        <StudentPromote student={row.original} />
         <IconButton
           size="1"
           color="cyan"
@@ -69,7 +79,7 @@ export const StudentColumns: ColumnDef<StudentsType>[] = [
           style={{ cursor: 'pointer' }}
           onClick={() => console.log('Edit student:', row.original.id)}
         >
-          <FaRegEdit />
+          <FaRegEye />
         </IconButton>
         <StudentUpdate data={row.original} />
         <StudentDelete data={row.original} />

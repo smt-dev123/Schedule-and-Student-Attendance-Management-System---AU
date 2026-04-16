@@ -5,7 +5,6 @@ import { createFileRoute } from '@tanstack/react-router'
 import FetchData from '@/components/FetchData'
 import { getSessionTime } from '@/api/SessionTime'
 import SessionTimeCreate from './-actions/Create'
-import { AcademicYearTable } from '@/features/academic_year/GenerationTable'
 import { SessionTimeTable } from '@/features/session_time/SessionTimeTable'
 
 export const Route = createFileRoute('/admin/session_time/')({

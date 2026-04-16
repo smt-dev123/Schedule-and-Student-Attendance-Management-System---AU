@@ -1,6 +1,13 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useState, useRef, useEffect, useMemo } from 'react'
-import { Send, BookOpen, Calendar, MessageSquare, ChevronRight, Bell } from 'lucide-react'
+import {
+  Send,
+  BookOpen,
+  Calendar,
+  MessageSquare,
+  ChevronRight,
+  Bell,
+} from 'lucide-react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { getFaculties } from '@/api/FacultyAPI'
 import { getGeneration } from '@/api/GenerationAPI'
@@ -28,23 +35,32 @@ function RouteComponent() {
   // --- 1. Data Fetching with Safety Defaults ---
   const { data: rawFaculties } = useQuery<FacultiesType[]>({
     queryKey: ['faculties'],
-    queryFn: getFaculties
+    queryFn: getFaculties,
   })
 
   const { data: rawGenerations } = useQuery<GenerationsType[]>({
     queryKey: ['generations'],
-    queryFn: getGeneration
+    queryFn: getGeneration,
   })
 
   const { data: rawNotifications } = useQuery<Message[]>({
     queryKey: ['notifications'],
-    queryFn: getNotifications
+    queryFn: getNotifications,
   })
 
   // Normalize data to ensure they are ALWAYS arrays
-  const faculties = useMemo(() => (Array.isArray(rawFaculties) ? rawFaculties : []), [rawFaculties]);
-  const generations = useMemo(() => (Array.isArray(rawGenerations) ? rawGenerations : []), [rawGenerations]);
-  const notifications = useMemo(() => (Array.isArray(rawNotifications) ? rawNotifications : []), [rawNotifications]);
+  const faculties = useMemo(
+    () => (Array.isArray(rawFaculties) ? rawFaculties : []),
+    [rawFaculties],
+  )
+  const generations = useMemo(
+    () => (Array.isArray(rawGenerations) ? rawGenerations : []),
+    [rawGenerations],
+  )
+  const notifications = useMemo(
+    () => (Array.isArray(rawNotifications) ? rawNotifications : []),
+    [rawNotifications],
+  )
 
   const [selectedYear, setSelectedYear] = useState<number | ''>('')
   const [selectedFaculty, setSelectedFaculty] = useState<number | ''>('')
@@ -52,22 +68,27 @@ function RouteComponent() {
 
   // --- 2. WebSocket Setup ---
   useEffect(() => {
-    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const socket = new WebSocket(`${protocol}//localhost:3000/api/notifications/ws`);
+    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:'
+    const socket = new WebSocket(
+      `${protocol}//localhost:3000/api/notifications/ws`,
+    )
 
     socket.onmessage = (event) => {
-      const payload = JSON.parse(event.data);
+      const payload = JSON.parse(event.data)
       if (payload.type === 'NEW_NOTIFICATION') {
-        const newNotification = payload.data;
-        queryClient.setQueryData(['notifications'], (old: Message[] | undefined) => {
-          return old ? [...old, newNotification] : [newNotification];
-        });
-        toast.success('New notification received!');
+        const newNotification = payload.data
+        queryClient.setQueryData(
+          ['notifications'],
+          (old: Message[] | undefined) => {
+            return old ? [...old, newNotification] : [newNotification]
+          },
+        )
+        toast.success('New notification received!')
       }
-    };
+    }
 
-    return () => socket.close();
-  }, [queryClient]);
+    return () => socket.close()
+  }, [queryClient])
 
   // --- 3. Selection Logic ---
   useEffect(() => {
@@ -90,16 +111,21 @@ function RouteComponent() {
       setMessage('')
       toast.success('Notification sent successfully')
     },
-    onError: () => toast.error('Failed to send notification')
+    onError: () => toast.error('Failed to send notification'),
   })
 
   // --- 5. Filtering & Helper Vars ---
   const filteredMessages = notifications.filter(
-    (m) => m.facultyId === Number(selectedFaculty) && (!selectedYear || m.targetGeneration === Number(selectedYear))
+    (m) =>
+      m.facultyId === Number(selectedFaculty) &&
+      (!selectedYear || m.targetGeneration === Number(selectedYear)),
   )
 
-  const selectedFacultyName = faculties.find(f => f.id === Number(selectedFaculty))?.name || 'Loading...'
-  const selectedYearName = generations.find(g => g.id === Number(selectedYear))?.name || 'All Years'
+  const selectedFacultyName =
+    faculties.find((f) => f.id === Number(selectedFaculty))?.name ||
+    'Loading...'
+  const selectedYearName =
+    generations.find((g) => g.id === Number(selectedYear))?.name || 'All Years'
 
   // Auto-scroll logic
   useEffect(() => {
@@ -111,17 +137,16 @@ function RouteComponent() {
   const handleSend = () => {
     if (!message.trim() || selectedFaculty === '') return
     mutation.mutate({
-      title: "Announcement",
+      title: 'Announcement',
       message: message,
       facultyId: Number(selectedFaculty),
       targetGeneration: selectedYear ? Number(selectedYear) : undefined,
-      priority: "normal"
+      priority: 'normal',
     })
   }
 
   return (
     <div className="flex h-[calc(100vh-150px)] w-full rounded-lg bg-white dark:bg-gray-950 overflow-hidden text-slate-900 dark:text-slate-100 border border-slate-200 dark:border-gray-800">
-      
       {/* Sidebar */}
       <aside className="w-80 flex flex-col border-r border-slate-200 dark:border-gray-800 bg-slate-50/50 dark:bg-gray-900">
         <div className="p-6 border-b border-slate-200 dark:border-gray-800">
@@ -132,8 +157,10 @@ function RouteComponent() {
             <h1 className="text-xl font-bold tracking-tight">Notifications</h1>
           </div>
 
-          <label className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.1em] mb-2 block">Generation</label>
-          <div className="relative">
+          {/* <label className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.1em] mb-2 block">
+            Generation
+          </label> */}
+          {/* <div className="relative">
             <Calendar className="absolute left-3 top-2.5 text-slate-400" size={16} />
             <select
               value={selectedYear}
@@ -145,11 +172,13 @@ function RouteComponent() {
                 <option key={gen.id} value={gen.id}>{gen.name}</option>
               ))}
             </select>
-          </div>
+          </div> */}
         </div>
 
         <div className="flex-1 overflow-y-auto py-4 px-3 custom-scrollbar">
-          <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.1em] mb-4 px-4">Faculties</h3>
+          <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.1em] mb-4 px-4">
+            Faculties
+          </h3>
           <nav className="space-y-1">
             {faculties.map((f) => (
               <button
@@ -162,10 +191,20 @@ function RouteComponent() {
                 }`}
               >
                 <div className="flex items-center gap-3">
-                  <BookOpen size={18} className={selectedFaculty === f.id ? 'text-sky-500' : 'text-slate-400'} />
+                  <BookOpen
+                    size={18}
+                    className={
+                      selectedFaculty === f.id
+                        ? 'text-sky-500'
+                        : 'text-slate-400'
+                    }
+                  />
                   <span className="truncate max-w-[160px]">{f.name}</span>
                 </div>
-                <ChevronRight size={14} className={`transition-transform ${selectedFaculty === f.id ? 'translate-x-0' : '-translate-x-2 opacity-0 group-hover:opacity-100 group-hover:translate-x-0'}`} />
+                <ChevronRight
+                  size={14}
+                  className={`transition-transform ${selectedFaculty === f.id ? 'translate-x-0' : '-translate-x-2 opacity-0 group-hover:opacity-100 group-hover:translate-x-0'}`}
+                />
               </button>
             ))}
           </nav>
@@ -176,15 +215,22 @@ function RouteComponent() {
       <main className="flex-1 flex flex-col bg-white dark:bg-gray-950">
         <header className="h-20 flex items-center justify-between px-8 border-b border-slate-100 dark:border-gray-800 bg-white/80 dark:bg-gray-950/80 backdrop-blur-md z-10">
           <div>
-            <h2 className="text-2xl font-bold text-slate-800 dark:text-white leading-none mb-1">{selectedFacultyName}</h2>
+            <h2 className="text-2xl font-bold text-slate-800 dark:text-white leading-none mb-1">
+              {selectedFacultyName}
+            </h2>
             <div className="flex items-center gap-2">
               <span className="flex h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
-              <span className="text-xs text-slate-400 font-medium">{selectedYearName}</span>
+              <span className="text-xs text-slate-400 font-medium">
+                {selectedYearName}
+              </span>
             </div>
           </div>
         </header>
 
-        <div ref={scrollRef} className="flex-1 overflow-y-auto p-8 space-y-8 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] dark:bg-[radial-gradient(#1f2937_1px,transparent_1px)] [background-size:20px_20px] custom-scrollbar">
+        <div
+          ref={scrollRef}
+          className="flex-1 overflow-y-auto p-8 space-y-8 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] dark:bg-[radial-gradient(#1f2937_1px,transparent_1px)] [background-size:20px_20px] custom-scrollbar"
+        >
           {filteredMessages.length > 0 ? (
             filteredMessages.map((msg) => (
               <div key={msg.id} className="flex flex-col items-end">
@@ -192,15 +238,24 @@ function RouteComponent() {
                   {msg.message}
                 </div>
                 <div className="mt-2 flex items-center gap-2 px-1">
-                  <span className="text-[10px] font-bold text-slate-400 uppercase">Admin</span>
-                  <span className="text-[10px] text-slate-400 opacity-60">/ {msg.createdAt ? new Date(msg.createdAt).toLocaleString() : ''}</span>
+                  <span className="text-[10px] font-bold text-slate-400 uppercase">
+                    Admin
+                  </span>
+                  <span className="text-[10px] text-slate-400 opacity-60">
+                    /{' '}
+                    {msg.createdAt
+                      ? new Date(msg.createdAt).toLocaleString()
+                      : ''}
+                  </span>
                 </div>
               </div>
             ))
           ) : (
             <div className="h-full flex flex-col items-center justify-center text-slate-400 opacity-60">
               <MessageSquare size={48} className="mb-4 stroke-[1.5]" />
-              <p className="text-lg font-medium">No messages found for this selection</p>
+              <p className="text-lg font-medium">
+                No messages found for this selection
+              </p>
             </div>
           )}
         </div>
@@ -212,21 +267,30 @@ function RouteComponent() {
               <textarea
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
-                onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault()
+                    handleSend()
+                  }
+                }}
                 disabled={mutation.isPending}
                 placeholder="Write an announcement..."
                 className="flex-1 bg-transparent border-none focus:ring-0 text-[15px] p-2 resize-none max-h-40 min-h-[50px] outline-none dark:text-white"
               />
-              <button 
-                onClick={handleSend} 
-                disabled={!message.trim() || mutation.isPending} 
+              <button
+                onClick={handleSend}
+                disabled={!message.trim() || mutation.isPending}
                 className="bg-sky-600 hover:bg-sky-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white p-3 rounded-xl transition-all shadow-lg shadow-sky-200 dark:shadow-none"
               >
-                <Send size={20} className={mutation.isPending ? 'animate-pulse' : ''} />
+                <Send
+                  size={20}
+                  className={mutation.isPending ? 'animate-pulse' : ''}
+                />
               </button>
             </div>
             <p className="text-[10px] text-center mt-3 text-slate-400">
-              Press <kbd className="font-sans border px-1 rounded">Enter</kbd> to broadcast to all students in this faculty.
+              Press <kbd className="font-sans border px-1 rounded">Enter</kbd>{' '}
+              to broadcast to all students in this faculty.
             </p>
           </div>
         </div>

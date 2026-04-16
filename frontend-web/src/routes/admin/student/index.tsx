@@ -11,7 +11,10 @@ import { useState, useEffect, useMemo } from 'react'
 import { StudentTable } from '@/features/student/StudentTable'
 import FetchData from '@/components/FetchData'
 import StudentCreate from './-actions/Create'
-import { useAcademicStore } from '@/stores/useAcademicStore' 
+import { useAcademicStore } from '@/stores/useAcademicStore'
+import StudentPromote from './-actions/StudentPromote'
+import PDFDownload from '@/components/ui/PDFDownload'
+import StudentReport from './-exports/ExportPDF'
 
 type StudentSearch = {
   name?: string
@@ -40,23 +43,46 @@ function RouteComponent() {
   useTitle('គ្រប់គ្រងនិស្សិត')
 
   const { selectedYearId } = useAcademicStore()
-  
-  const { name, facultyId, departmentId, academicLevelId, page } = Route.useSearch()
+
+  const { name, facultyId, departmentId, academicLevelId, page } =
+    Route.useSearch()
   const navigate = useNavigate({ from: Route.fullPath })
 
   // Draft state សម្រាប់ Filter UI
-  const [draft, setDraft] = useState<StudentSearch>({ name, facultyId, departmentId, academicLevelId })
+  const [draft, setDraft] = useState<StudentSearch>({
+    name,
+    facultyId,
+    departmentId,
+    academicLevelId,
+  })
 
   useEffect(() => {
     setDraft({ name, facultyId, departmentId, academicLevelId })
   }, [name, facultyId, departmentId, academicLevelId])
 
-  const { data: faculties = [] } = useQuery({ queryKey: ['faculties'], queryFn: getFaculties })
-  const { data: departments = [] } = useQuery({ queryKey: ['departments'], queryFn: getDepartments })
-  const { data: academicLevels = [] } = useQuery({ queryKey: ['academicLevels'], queryFn: getAcademicLevels })
+  const { data: faculties = [] } = useQuery({
+    queryKey: ['faculties'],
+    queryFn: getFaculties,
+  })
+  const { data: departments = [] } = useQuery({
+    queryKey: ['departments'],
+    queryFn: getDepartments,
+  })
+  const { data: academicLevels = [] } = useQuery({
+    queryKey: ['academicLevels'],
+    queryFn: getAcademicLevels,
+  })
 
   const { data, isLoading, error } = useQuery({
-    queryKey: ['students', selectedYearId, name, facultyId, departmentId, academicLevelId, page],
+    queryKey: [
+      'students',
+      selectedYearId,
+      name,
+      facultyId,
+      departmentId,
+      academicLevelId,
+      page,
+    ],
     queryFn: () =>
       getStudents(
         name,
@@ -68,7 +94,7 @@ function RouteComponent() {
         10,
       ),
     // ដំណើរការ Query លុះត្រាតែមាន selectedYearId ពី Store
-    enabled: !!selectedYearId, 
+    enabled: !!selectedYearId,
   })
 
   const handleApplyFilter = () => {
@@ -82,14 +108,22 @@ function RouteComponent() {
   }
 
   const handleClearFilter = () => {
-    const reset = { name: '', facultyId: 'all', departmentId: 'all', academicLevelId: 'all', page: 1 }
+    const reset = {
+      name: '',
+      facultyId: 'all',
+      departmentId: 'all',
+      academicLevelId: 'all',
+      page: 1,
+    }
     setDraft(reset)
     navigate({ search: reset })
   }
 
   const students = useMemo(() => {
     if (!data) return []
-    return Array.isArray(data) ? data : (data as any)?.data || (data as any)?.students || []
+    return Array.isArray(data)
+      ? data
+      : (data as any)?.data || (data as any)?.students || []
   }, [data])
 
   return (
@@ -97,10 +131,18 @@ function RouteComponent() {
       {/* --- Header Section --- */}
       <Flex justify="between" align="center" mb="2">
         <Flex direction="column">
-            <Text size="5" weight="bold">បញ្ជីរាយនាមនិស្សិត</Text>
+          <Text size="5" weight="bold">
+            បញ្ជីរាយនាមនិស្សិត
+          </Text>
         </Flex>
         <Flex gap="2">
-          <Button variant="outline" style={{ cursor: 'pointer' }}>Export Excel</Button>
+          <PDFDownload
+            document={<StudentReport data={students} />}
+            fileName="student-report.pdf"
+          />
+          <Button variant="outline" style={{ cursor: 'pointer' }}>
+            Export Excel
+          </Button>
           <StudentCreate />
         </Flex>
       </Flex>
@@ -108,23 +150,31 @@ function RouteComponent() {
       {/* --- Filter Section --- */}
       <Flex justify="between" gap="3" wrap="wrap" align="end">
         <Box flexGrow="1" maxWidth="300px">
-          <Text as="div" size="2" mb="1" weight="bold">ស្វែងរក</Text>
+          <Text as="div" size="2" mb="1" weight="bold">
+            ស្វែងរក
+          </Text>
           <TextField.Root
             placeholder="ឈ្មោះ ឬ អត្តលេខ..."
             value={draft.name}
             onChange={(e) => setDraft({ ...draft, name: e.target.value })}
             onKeyDown={(e) => e.key === 'Enter' && handleApplyFilter()}
           >
-            <TextField.Slot><IoSearch /></TextField.Slot>
+            <TextField.Slot>
+              <IoSearch />
+            </TextField.Slot>
           </TextField.Root>
         </Box>
 
         <Flex gap="2" wrap="wrap" align="end">
           <Box>
-            <Text as="div" size="2" mb="1" weight="bold">កម្រិតសិក្សា</Text>
-            <Select.Root 
-              value={draft.academicLevelId} 
-              onValueChange={(val) => setDraft({ ...draft, academicLevelId: val })}
+            <Text as="div" size="2" mb="1" weight="bold">
+              កម្រិតសិក្សា
+            </Text>
+            <Select.Root
+              value={draft.academicLevelId}
+              onValueChange={(val) =>
+                setDraft({ ...draft, academicLevelId: val })
+              }
             >
               <Select.Trigger style={{ minWidth: '150px' }} />
               <Select.Content>
@@ -139,9 +189,11 @@ function RouteComponent() {
           </Box>
 
           <Box>
-            <Text as="div" size="2" mb="1" weight="bold">មហាវិទ្យាល័យ</Text>
-            <Select.Root 
-              value={draft.facultyId} 
+            <Text as="div" size="2" mb="1" weight="bold">
+              មហាវិទ្យាល័យ
+            </Text>
+            <Select.Root
+              value={draft.facultyId}
               onValueChange={(val) => setDraft({ ...draft, facultyId: val })}
             >
               <Select.Trigger style={{ minWidth: '150px' }} />
@@ -157,9 +209,11 @@ function RouteComponent() {
           </Box>
 
           <Box>
-            <Text as="div" size="2" mb="1" weight="bold">ដេប៉ាតឺម៉ង់</Text>
-            <Select.Root 
-              value={draft.departmentId} 
+            <Text as="div" size="2" mb="1" weight="bold">
+              ដេប៉ាតឺម៉ង់
+            </Text>
+            <Select.Root
+              value={draft.departmentId}
               onValueChange={(val) => setDraft({ ...draft, departmentId: val })}
             >
               <Select.Trigger style={{ minWidth: '150px' }} />
@@ -174,10 +228,19 @@ function RouteComponent() {
             </Select.Root>
           </Box>
 
-          <Button onClick={handleApplyFilter} color="indigo" style={{ cursor: 'pointer' }}>
+          <Button
+            onClick={handleApplyFilter}
+            color="indigo"
+            style={{ cursor: 'pointer' }}
+          >
             <IoFilter /> ស្វែងរក
           </Button>
-          <Button variant="soft" color="gray" onClick={handleClearFilter} style={{ cursor: 'pointer' }}>
+          <Button
+            variant="soft"
+            color="gray"
+            onClick={handleClearFilter}
+            style={{ cursor: 'pointer' }}
+          >
             សម្អាត
           </Button>
         </Flex>

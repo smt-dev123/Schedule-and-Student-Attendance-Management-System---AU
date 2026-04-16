@@ -8,15 +8,23 @@ import {
 import { Button, Flex, Text, Box, Heading } from '@radix-ui/themes'
 import { createFileRoute, useRouter } from '@tanstack/react-router'
 import { FaArrowLeft, FaPrint, FaFileExcel } from 'react-icons/fa'
+import { useState, useEffect } from 'react'
+import AttendancePDF from './-exports/ExportPDF'
+import { PDFDownloadLink } from '@react-pdf/renderer'
 
 export const Route = createFileRoute(
-  '/admin/classes/attendance/report/$attendanceReportId',
+  '/admin/course/attendance/report/$attendanceReportId',
 )({
   component: RouteComponent,
 })
 
 function RouteComponent() {
   const router = useRouter()
+  const [isClient, setIsClient] = useState(false)
+
+  useEffect(() => {
+    setIsClient(true)
+  }, [])
 
   // ទិន្នន័យនិស្សិតដែលអ្នកបានផ្ដល់ឱ្យ
   const students = [
@@ -98,13 +106,29 @@ function RouteComponent() {
           <Button variant="soft" color="green">
             <FaFileExcel /> Export Excel
           </Button>
-          <Button
+          {isClient ? (
+            <PDFDownloadLink
+              document={<AttendancePDF students={students} />}
+              fileName="attendance-report.pdf"
+              className="bg-blue-600 text-white px-4 py-2 rounded-lg"
+            >
+              {({ loading }) => (loading ? 'កំពុងរៀបចំ...' : 'ទាញយកជា PDF')}
+            </PDFDownloadLink>
+          ) : (
+            <Button
+              disabled
+              className="bg-blue-600 text-white px-4 py-2 rounded-lg cursor-not-allowed opacity-70"
+            >
+              កំពុងរៀបចំ...
+            </Button>
+          )}
+          {/* <Button
             variant="solid"
             onClick={() => window.print()}
             className="cursor-pointer"
           >
             <FaPrint /> បោះពុម្ភរបាយការណ៍
-          </Button>
+          </Button> */}
         </Flex>
       </Flex>
 
@@ -250,7 +274,7 @@ function RouteComponent() {
             </Text>
             <Box mt="8" className="h-20" /> {/* Space for signature */}
             <Text as="div" size="3" weight="bold" className="underline">
-              លី សេងស៊ង់
+              ល. សេង ស៊ង់
             </Text>
           </Box>
         </Flex>

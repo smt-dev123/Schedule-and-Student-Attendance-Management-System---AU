@@ -7,10 +7,26 @@ import {
 } from '@/components/ui/tables/table'
 import api from '@/lib/axios'
 import { useAcademicStore } from '@/stores/useAcademicStore'
-import { Button, Flex, Text, Spinner, Badge, Box, Card, Separator } from '@radix-ui/themes'
+import {
+  Button,
+  Flex,
+  Text,
+  Spinner,
+  Badge,
+  Box,
+  Card,
+  Separator,
+} from '@radix-ui/themes'
 import { useQuery } from '@tanstack/react-query'
 import { createFileRoute, Link, useRouter } from '@tanstack/react-router'
-import { FaArrowLeft, FaEdit, FaFileExport, FaPrint, FaChalkboardTeacher, FaDoorOpen } from 'react-icons/fa'
+import {
+  FaArrowLeft,
+  FaEdit,
+  FaFileExport,
+  FaPrint,
+  FaChalkboardTeacher,
+  FaDoorOpen,
+} from 'react-icons/fa'
 
 export const Route = createFileRoute('/admin/course/schedule/$scheduleId')({
   component: RouteComponent,
@@ -38,120 +54,127 @@ function RouteComponent() {
   //   },
   // })
 
-    const res = {
-    "id": 1,
-    "generation": 1,
-    "semester": 1,
-    "department": {
-      "name": "Information Technology"
+  const res = {
+    id: 1,
+    generation: 19,
+    year: 4,
+    semester: 2,
+    department: {
+      name: 'វិទ្យាសាស្រ្ដ និងបច្ចេកវិទ្យា',
     },
-    "classroom": {
-      "name": "Room 101",
-      "building": {
-        "name": "Building A"
-      }
+    classroom: {
+      name: 'ស្រុកកងមាស',
+      building: {
+        name: 'សៀងណាំ',
+      },
     },
-    "studyShift": "morning",
-    "courses": [
+    studyShift: 'យប់',
+    courses: [
       {
-        "id": 1,
-        "name": "Introduction to Programming",
-        "code": "IT101",
-        "day": "Monday",
-        "teacher": {
-          "name": "Mr. John Doe"
+        id: 1,
+        name: 'Introduction to Programming',
+        phone: '012345678',
+        day: 'Monday',
+        teacher: {
+          name: 'សេង ស៊ង់',
         },
-        "sessionTime": {
-          "firstSessionStartTime": "08:00 AM",
-          "secondSessionEndTime": "10:00 AM"
-        }
+        sessionTime: {
+          firstSessionStartTime: '06:00',
+          secondSessionEndTime: '07:30',
+        },
       },
       {
-        "id": 2,
-        "name": "Database Management System",
-        "code": "IT201",
-        "day": "Tuesday",
-        "teacher": {
-          "name": "Ms. Jane Smith"
+        id: 2,
+        name: 'Database Management System',
+        phone: '012345678',
+        day: 'Tuesday',
+        teacher: {
+          name: 'សេង គ្រី',
         },
-        "sessionTime": {
-          "firstSessionStartTime": "09:00 AM",
-          "secondSessionEndTime": "11:00 AM"
-        }
+        sessionTime: {
+          firstSessionStartTime: '06:00',
+          secondSessionEndTime: '07:30',
+        },
       },
       {
-        "id": 3,
-        "name": "Web Development",
-        "code": "IT301",
-        "day": "Wednesday",
-        "teacher": {
-          "name": "Mr. John Doe"
+        id: 3,
+        name: 'Web Development',
+        phone: '012345678',
+        day: 'Wednesday',
+        teacher: {
+          name: 'សេង គ្រី',
         },
-        "sessionTime": {
-          "firstSessionStartTime": "10:00 AM",
-          "secondSessionEndTime": "12:00 PM"
-        }
+        sessionTime: {
+          firstSessionStartTime: '06:00',
+          secondSessionEndTime: '07:30',
+        },
       },
       {
-        "id": 4,
-        "name": "Data Structures and Algorithms",
-        "code": "IT401",
-        "day": "Thursday",
-        "teacher": {
-          "name": "Ms. Jane Smith"
+        id: 4,
+        name: 'Data Structures and Algorithms',
+        phone: '012345678',
+        day: 'Thursday',
+        teacher: {
+          name: 'សេង ស៊ង់',
         },
-        "sessionTime": {
-          "firstSessionStartTime": "11:00 AM",
-          "secondSessionEndTime": "01:00 PM"
-        }
+        sessionTime: {
+          firstSessionStartTime: '06:00',
+          secondSessionEndTime: '07:30',
+        },
       },
       {
-        "id": 5,
-        "name": "Computer Networks",
-        "code": "IT501",
-        "day": "Friday",
-        "teacher": {
-          "name": "Mr. John Doe"
+        id: 5,
+        name: 'Computer Networks',
+        phone: '012345678',
+        day: 'Friday',
+        teacher: {
+          name: 'សេង ស៊ង់',
         },
-        "sessionTime": {
-          "firstSessionStartTime": "12:00 PM",
-          "secondSessionEndTime": "02:00 PM"
-        }
+        sessionTime: {
+          firstSessionStartTime: '06:00',
+          secondSessionEndTime: '07:30',
+        },
       },
       {
-        "id": 6,
-        "name": "Operating Systems",
-        "code": "IT601",
-        "day": "Saturday",
-        "teacher": {
-          "name": "Ms. Jane Smith"
+        id: 6,
+        name: 'Operating Systems',
+        phone: '012345678',
+        day: 'Saturday',
+        teacher: {
+          name: 'សេង ស៊ង់',
         },
-        "sessionTime": {
-          "firstSessionStartTime": "01:00 PM",
-          "secondSessionEndTime": "03:00 PM"
-        }
-      }
-    ]
+        sessionTime: {
+          firstSessionStartTime: '06:00',
+          secondSessionEndTime: '07:30',
+        },
+      },
+    ],
   }
 
   const isLoading = false
   const error = null
 
-  // const schedule = res?.data || res 
+  // const schedule = res?.data || res
   const schedule = res
 
-  if (isLoading) return (
-    <Flex justify="center" align="center" className="h-[60vh]">
-      <Spinner size="3" />
-      <Text ml="3" color="gray">កំពុងទាញយកកាលវិភាគ...</Text>
-    </Flex>
-  )
+  if (isLoading)
+    return (
+      <Flex justify="center" align="center" className="h-[60vh]">
+        <Spinner size="3" />
+        <Text ml="3" color="gray">
+          កំពុងទាញយកកាលវិភាគ...
+        </Text>
+      </Flex>
+    )
 
-  if (error || !schedule) return (
-    <Flex justify="center" p="9">
-      <Text color="red" weight="bold" size="5">មិនអាចរកឃើញកាលវិភាគនេះទេ!</Text>
-    </Flex>
-  )
+  if (error || !schedule)
+    return (
+      <Flex justify="center" p="9">
+        <Text color="red" weight="bold" size="5">
+          មិនអាចរកឃើញកាលវិភាគនេះទេ!
+        </Text>
+      </Flex>
+    )
 
   // រៀបចំ Grouping courses by day
   const coursesByDay = schedule.courses?.reduce((acc: any, course: any) => {
@@ -163,7 +186,6 @@ function RouteComponent() {
 
   return (
     <div className="p-4 md:p-6 max-w-[1400px] mx-auto space-y-6 print:p-0">
-      
       {/* Header Actions - លាក់នៅពេល Print */}
       <Flex justify="between" align="center" className="print:hidden">
         <Flex gap="3" align="center">
@@ -174,15 +196,30 @@ function RouteComponent() {
             <FaArrowLeft size={14} />
           </button>
           <Box>
-            <Text size="5" weight="bold">កាលវិភាគសិក្សា</Text>
-            <Text size="1" color="gray" className="block uppercase tracking-widest font-mono">ID: {scheduleId}</Text>
+            <Text size="5" weight="bold">
+              កាលវិភាគសិក្សា
+            </Text>
+            {/* <Text
+              size="1"
+              color="gray"
+              className="block uppercase tracking-widest font-mono"
+            >
+              ID: {scheduleId}
+            </Text> */}
           </Box>
         </Flex>
         <Flex gap="2">
-          <Button variant="soft" color="gray"><FaFileExport /> Export Excel</Button>
-          <Button variant="soft" onClick={() => window.print()}><FaPrint /> បោះពុម្ភ</Button>
+          <Button variant="soft" color="gray">
+            <FaFileExport /> Export Excel
+          </Button>
+          <Button variant="soft" onClick={() => window.print()}>
+            <FaPrint /> បោះពុម្ភ
+          </Button>
           <Button variant="solid" asChild>
-            <Link to="/admin/classes/schedule/$scheduleId/edit" params={{ scheduleId: String(schedule.id) }}>
+            <Link
+              to="/admin/classes/schedule/$scheduleId/edit"
+              params={{ scheduleId: String(schedule.id) }}
+            >
               <FaEdit /> កែប្រែទិន្នន័យ
             </Link>
           </Button>
@@ -192,104 +229,168 @@ function RouteComponent() {
       {/* Schedule Info Card */}
       <Card className="border-none shadow-sm bg-gradient-to-br from-blue-600 to-indigo-800 p-8 rounded-3xl text-white relative overflow-hidden">
         <div className="absolute top-0 right-0 p-8 opacity-10 pointer-events-none">
-            <FaChalkboardTeacher size={120} />
+          <FaChalkboardTeacher size={120} />
         </div>
-        
+
         <Flex direction="column" gap="2" className="relative z-10">
           <Badge variant="surface" color="blue" size="2" className="w-fit mb-2">
-             {selectedYearName}
+            {selectedYearName}
           </Badge>
           <Text size="7" weight="bold" className="tracking-tight">
-             កាលវិភាគសិក្សា {schedule.academicLevel?.level || 'បរិញ្ញាបត្រ'}
+            កាលវិភាគសិក្សា {schedule.academicLevel?.level || 'បរិញ្ញាបត្រ'}
           </Text>
           <Flex gap="4" align="center" className="text-blue-100 text-sm">
-             <Text weight="medium">ជំនាន់ទី {schedule.generation}</Text>
-             <Text>•</Text>
-             <Text>ឆ្នាំទី {schedule.year} ឆមាស {schedule.semester}</Text>
-             <Text>•</Text>
-             <Badge color="blue" variant="soft" className="uppercase font-bold tracking-tighter">
-                {schedule.studyShift === 'morning' ? 'វេនព្រឹក' : 'វេនយប់'}
-             </Badge>
+            <Text weight="medium">ជំនាន់ទី {schedule.generation}</Text>
+            <Text>•</Text>
+            <Text>
+              ឆ្នាំទី {schedule.year} ឆមាស {schedule.semester}
+            </Text>
+            <Text>•</Text>
+            <Badge
+              color="blue"
+              variant="surface"
+              className="uppercase font-bold tracking-tighter"
+            >
+              {schedule.studyShift === 'morning' ? 'វេនព្រឹក' : 'វេនយប់'}
+            </Badge>
           </Flex>
-          <Flex gap="5" mt="4" className="bg-white/10 p-3 rounded-xl w-fit border border-white/20">
-             <Flex align="center" gap="2"><FaDoorOpen size={14}/> បន្ទប់៖ {schedule.classroom?.name || 'TBA'}</Flex>
-             <Flex align="center" gap="2">📍 អាគារ៖ {schedule.classroom?.building?.name || 'AU'}</Flex>
+          <Flex
+            gap="5"
+            mt="4"
+            className="bg-white/10 p-3 rounded-xl w-fit border border-white/20"
+          >
+            <Flex align="center" gap="2">
+              <FaDoorOpen size={14} /> បន្ទប់៖{' '}
+              {schedule.classroom?.name || 'TBA'}
+            </Flex>
+            <Flex align="center" gap="2">
+              📍 អាគារ៖ {schedule.classroom?.building?.name || 'AU'}
+            </Flex>
           </Flex>
         </Flex>
       </Card>
 
       {/* Timetable Table Grid */}
-        <RootTable>
-          <HeaderTable>
-            <RowTable isHeader>
-              <CellTable isHeader className="w-32 bg-gray-50 text-center font-bold text-gray-500 uppercase text-[10px] tracking-widest">
-                 ម៉ោងសិក្សា
+      <RootTable>
+        <HeaderTable>
+          <RowTable isHeader>
+            <CellTable
+              isHeader
+              className="w-32 bg-gray-50 text-center font-bold text-gray-500 uppercase text-[10px] tracking-widest"
+            >
+              ម៉ោងសិក្សា
+            </CellTable>
+            {DAYS_OF_WEEK.map((day) => (
+              <CellTable
+                key={day.key}
+                isHeader
+                className="min-w-[180px] text-center bg-gray-50 border-l border-gray-200/50 py-4"
+              >
+                <Text size="3" weight="bold" color="indigo">
+                  {day.label}
+                </Text>
+                <Text
+                  size="1"
+                  className="block text-gray-400 uppercase font-mono tracking-tighter"
+                >
+                  {day.key}
+                </Text>
               </CellTable>
-              {DAYS_OF_WEEK.map((day) => (
-                <CellTable key={day.key} isHeader className="min-w-[180px] text-center bg-gray-50 border-l border-gray-200/50 py-4">
-                  <Text size="3" weight="bold" color="indigo">{day.label}</Text>
-                  <Text size="1" className="block text-gray-400 uppercase font-mono tracking-tighter">{day.key}</Text>
+            ))}
+          </RowTable>
+        </HeaderTable>
+
+        <BodyTable>
+          {/* បង្ហាញ Session តាមរយៈ Map មុខវិជ្ជា */}
+          <RowTable>
+            <CellTable className="bg-gray-50/50 text-center border-r border-gray-100">
+              <Box py="4">
+                <Text
+                  weight="bold"
+                  color="blue"
+                  size="2"
+                  className="block uppercase tracking-wider"
+                >
+                  ម៉ោងទី ១
+                </Text>
+                <Text size="1" color="gray" className="font-mono">
+                  {schedule.courses?.[0]?.sessionTime?.firstSessionStartTime ||
+                    '06:00 PM'}
+                </Text>
+                <Separator size="1" my="2" className="mx-auto w-8" />
+                <Text size="1" color="gray" className="font-mono">
+                  {schedule.courses?.[0]?.sessionTime?.firstSessionEndTime ||
+                    '07:30 PM'}
+                </Text>
+              </Box>
+            </CellTable>
+
+            {DAYS_OF_WEEK.map((day) => {
+              const dayCourses = coursesByDay?.[day.key] || []
+              const course = dayCourses[0] // យកមុខវិជ្ជាទី១ ក្នុងថ្ងៃនោះ
+
+              return (
+                <CellTable
+                  key={day.key}
+                  className="p-4 align-top border-l border-gray-100 group transition-colors hover:bg-blue-50/30"
+                >
+                  {course ? (
+                    <Flex direction="column" gap="3" className="h-full">
+                      <Box>
+                        <Text
+                          weight="bold"
+                          size="3"
+                          className="text-slate-800 leading-tight block mb-1 group-hover:text-blue-600 transition-colors"
+                        >
+                          {course.name}
+                        </Text>
+                        <Badge
+                          size="1"
+                          color="blue"
+                          variant="surface"
+                          className="font-mono opacity-100"
+                        >
+                          {course.phone}
+                        </Badge>
+                      </Box>
+
+                      <div className="mt-auto pt-3 border-t border-gray-100">
+                        <Flex
+                          align="center"
+                          gap="2"
+                          className="text-[11px] text-gray-500"
+                        >
+                          <Box className="p-1 bg-blue-100 text-blue-600 rounded-md">
+                            <FaChalkboardTeacher size={10} />
+                          </Box>
+                          <span className="text-[14px] font-semibold text-slate-600">
+                            {course.teacher?.name || 'គ្រូឧទ្ទេស'}
+                          </span>
+                        </Flex>
+                      </div>
+                    </Flex>
+                  ) : (
+                    <Flex
+                      align="center"
+                      justify="center"
+                      className="h-32 opacity-20 italic"
+                    >
+                      <Text size="1">-</Text>
+                    </Flex>
+                  )}
                 </CellTable>
-              ))}
-            </RowTable>
-          </HeaderTable>
-
-          <BodyTable>
-            {/* បង្ហាញ Session តាមរយៈ Map មុខវិជ្ជា */}
-            <RowTable>
-              <CellTable className="bg-gray-50/50 text-center border-r border-gray-100">
-                <Box py="4">
-                  <Text weight="bold" color="blue" size="2" className="block uppercase tracking-wider">ម៉ោងទី ១</Text>
-                  <Text size="1" color="gray" className="font-mono">
-                    {schedule.courses?.[0]?.sessionTime?.firstSessionStartTime || '06:00 PM'}
-                  </Text>
-                  <Separator size="1" my="2" className="mx-auto w-8" />
-                  <Text size="1" color="gray" className="font-mono">
-                    {schedule.courses?.[0]?.sessionTime?.firstSessionEndTime || '07:30 PM'}
-                  </Text>
-                </Box>
-              </CellTable>
-
-              {DAYS_OF_WEEK.map((day) => {
-                const dayCourses = coursesByDay?.[day.key] || []
-                const course = dayCourses[0] // យកមុខវិជ្ជាទី១ ក្នុងថ្ងៃនោះ
-                
-                return (
-                  <CellTable key={day.key} className="p-4 align-top border-l border-gray-100 group transition-colors hover:bg-blue-50/30">
-                    {course ? (
-                      <Flex direction="column" gap="3" className="h-full">
-                        <Box>
-                          <Text weight="bold" size="3" className="text-slate-800 leading-tight block mb-1 group-hover:text-blue-600 transition-colors">
-                            {course.name}
-                          </Text>
-                          <Badge size="1" color="gray" variant="soft" className="font-mono opacity-60">
-                            {course.code}
-                          </Badge>
-                        </Box>
-                        
-                        <div className="mt-auto pt-3 border-t border-gray-100">
-                          <Flex align="center" gap="2" className="text-[11px] text-gray-500">
-                            <Box className="p-1 bg-blue-100 text-blue-600 rounded-md"><FaChalkboardTeacher size={10}/></Box>
-                            <span className="font-semibold text-slate-600">{course.teacher?.name || 'គ្រូឧទ្ទេស'}</span>
-                          </Flex>
-                        </div>
-                      </Flex>
-                    ) : (
-                      <Flex align="center" justify="center" className="h-32 opacity-20 italic">
-                        <Text size="1">-</Text>
-                      </Flex>
-                    )}
-                  </CellTable>
-                )
-              })}
-            </RowTable>
-          </BodyTable>
-        </RootTable>
- 
+              )
+            })}
+          </RowTable>
+        </BodyTable>
+      </RootTable>
 
       {/* Footer Disclaimer */}
       <Flex justify="center" p="4" className="text-gray-400 text-[10px]">
-         <Text>បញ្ជាក់៖ កាលវិភាគនេះត្រូវបានធ្វើបច្ចុប្បន្នភាពចុងក្រោយនៅថ្ងៃទី {new Date(schedule.updatedAt).toLocaleDateString('kh-KH')}</Text>
+        <Text>
+          បញ្ជាក់៖ កាលវិភាគនេះត្រូវបានធ្វើបច្ចុប្បន្នភាពចុងក្រោយនៅថ្ងៃទី{' '}
+          {new Date(schedule.updatedAt).toLocaleDateString('kh-KH')}
+        </Text>
       </Flex>
     </div>
   )

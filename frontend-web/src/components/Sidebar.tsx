@@ -9,17 +9,19 @@ import {
   RiArrowDownSLine,
   RiArrowRightSLine,
   RiCalendarEventLine,
+  RiNotification2Line,
 } from 'react-icons/ri'
 import { useTranslation } from 'react-i18next'
 import { LiaChalkboardTeacherSolid } from 'react-icons/lia'
 import { AiOutlineSchedule } from 'react-icons/ai'
 import { PiStudent } from 'react-icons/pi'
-import { FaRegUser } from 'react-icons/fa'
 import { Link } from '@tanstack/react-router'
 import { useSidebarStore } from '@/stores/sidebarStore'
 import { useAcademicYears } from '@/hooks/useAcademicYears'
 import type { AcademicYearsType } from '@/types'
 import { useAcademicStore } from '@/stores/useAcademicStore'
+import LogoDestop from '@/assets/au-logo.webp'
+import LogoMobile from '@/assets/au.png'
 
 interface MenuItem {
   key: string
@@ -40,9 +42,17 @@ export default function Sidebar({
 }: SidebarProps) {
   const { isDesktopOpen, isMobileOpen, setMobileSidebar } = useSidebarStore()
   const { t } = useTranslation()
-  
-  const { selectedYearId, selectedYearName, setAcademicYear } = useAcademicStore() as any as { selectedYearId: number | null, selectedYearName: string, setAcademicYear: (id: number, name: string) => void }
-  const { data: academicYears = [], isLoading } = useAcademicYears() as any as { data: AcademicYearsType[], isLoading: boolean }
+
+  const { selectedYearId, selectedYearName, setAcademicYear } =
+    useAcademicStore() as any as {
+      selectedYearId: number | null
+      selectedYearName: string
+      setAcademicYear: (id: number, name: string) => void
+    }
+  const { data: academicYears = [], isLoading } = useAcademicYears() as any as {
+    data: AcademicYearsType[]
+    isLoading: boolean
+  }
 
   useEffect(() => {
     // ប្រសិនបើ Store មិនទាន់មានឆ្នាំសិក្សា ហើយ API ទាញទិន្នន័យរួចរាល់
@@ -56,8 +66,8 @@ export default function Sidebar({
   }, [academicYears, selectedYearId, setAcademicYear])
 
   const currentYearName =
-    academicYears.find((y: AcademicYearsType) => y.id === selectedYearId)?.name ||
-    'ជ្រើសរើសឆ្នាំសិក្សា'
+    academicYears.find((y: AcademicYearsType) => y.id === selectedYearId)
+      ?.name || 'ជ្រើសរើសឆ្នាំសិក្សា'
 
   const actualMobileOpen = mobileOpen !== undefined ? mobileOpen : isMobileOpen
   const actualOnMobileOpenChange = onMobileOpenChange || setMobileSidebar
@@ -117,7 +127,7 @@ export default function Sidebar({
     },
     {
       key: 'notification',
-      icon: <LiaChalkboardTeacherSolid />,
+      icon: <RiNotification2Line />,
       label: 'ការជូនដំណឹង',
       url: '/admin/notification',
     },
@@ -133,15 +143,15 @@ export default function Sidebar({
       label: t('Sidebar.student'),
       url: '/admin/student',
     },
-    {
-      key: 'classes',
-      icon: <AiOutlineSchedule />,
-      label: t('Sidebar.class'),
-      url: '/admin/classes',
-    },
+    // {
+    //   key: 'classes',
+    //   icon: <AiOutlineSchedule />,
+    //   label: t('Sidebar.class'),
+    //   url: '/admin/classes',
+    // },
     {
       key: 'course',
-      icon: <FaRegUser />,
+      icon: <AiOutlineSchedule />,
       label: 'វគ្គសិក្សា',
       url: '/admin/course',
     },
@@ -163,11 +173,19 @@ export default function Sidebar({
       >
         <div className="h-16 flex items-center px-4 border-b border-gray-100 dark:border-gray-700">
           <Link to="/admin/dashboard">
-            <img
-              className={`transition-all duration-300 ${isDesktopOpen ? 'w-36' : 'w-9 h-9'}`}
-              src="https://www.angkor.edu.kh/assets/images/AU-LOGO.png"
-              alt="Logo"
-            />
+            {isDesktopOpen ? (
+              <img
+                className="transition-all duration-300"
+                src={LogoDestop}
+                alt="Logo"
+              />
+            ) : (
+              <img
+                className="transition-all duration-300"
+                src={LogoMobile}
+                alt="Logo"
+              />
+            )}
           </Link>
         </div>
 
@@ -357,7 +375,9 @@ export default function Sidebar({
                 </label>
                 <select
                   value={selectedYearId || ''}
-                  onChange={(e) => setAcademicYear(Number(e.target.value), selectedYearName)}
+                  onChange={(e) =>
+                    setAcademicYear(Number(e.target.value), selectedYearName)
+                  }
                   className="w-full p-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-sm font-semibold outline-none focus:ring-2 focus:ring-blue-500 transition-all shadow-sm"
                 >
                   {isLoading ? (

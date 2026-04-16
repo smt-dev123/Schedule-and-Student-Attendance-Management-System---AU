@@ -8,6 +8,7 @@ import {
   TextField,
   Grid,
   Box,
+  Badge,
 } from '@radix-ui/themes'
 import { useForm, Controller } from 'react-hook-form'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
@@ -17,6 +18,7 @@ import { createStudent } from '@/api/StudentAPI'
 import { getFaculties } from '@/api/FacultyAPI'
 import { getDepartments } from '@/api/DepartmentAPI'
 import { getAcademicLevels } from '@/api/AcademicLevelAPI'
+import { getAcademicYear } from '@/api/AcademicYearAPI'
 
 const StudentCreate = () => {
   const [open, setOpen] = useState(false)
@@ -27,6 +29,7 @@ const StudentCreate = () => {
     handleSubmit,
     control,
     reset,
+    setValue,
     formState: { errors },
   } = useForm<StudentsType>({
     defaultValues: {
@@ -34,8 +37,9 @@ const StudentCreate = () => {
       email: '',
       password: '',
       phone: '',
-      gender: '',
+      gender: 'male',
       educationalStatus: 'enrolled',
+      academicYearId: 1,
     },
   })
 
@@ -43,27 +47,56 @@ const StudentCreate = () => {
     queryKey: ['faculties'],
     queryFn: getFaculties,
   })
+
   const { data: departments = [] } = useQuery({
     queryKey: ['departments'],
     queryFn: getDepartments,
   })
+
   const { data: academicLevels = [] } = useQuery({
     queryKey: ['academicLevels'],
     queryFn: getAcademicLevels,
   })
 
+  const { data: academicYearsRes } = useQuery({
+    queryKey: ['academicYears'],
+    queryFn: getAcademicYear,
+  })
+
+  const academicYears = academicYearsRes || []
+
   useEffect(() => {
-    if (open) reset()
-  }, [open, reset])
+    if (open) {
+      reset()
+
+      if (open && academicYears.length > 0) {
+        // ១. រកឆ្នាំសិក្សាដែលជា "បច្ចុប្បន្ន"
+        const currentYear = academicYears.find((ay: any) => ay.isCurrent)
+
+        // ២. បើគ្មាន 'isCurrent' ទេ យកឆ្នាំដែលបង្កើតក្រោយគេបង្អស់ (ID ធំបំផុត)
+        const latestYear =
+          currentYear || [...academicYears].sort((a, b) => b.id - a.id)[0]
+
+        if (latestYear) {
+          setValue('academicYearId', latestYear.id.toString())
+          // អ្នកអាចកំណត់ Year = 1 និង Semester = 1 ជា default សម្រាប់សិស្សថ្មីផងដែរ
+          setValue('year', 1)
+          setValue('semester', 1)
+        }
+      }
+    }
+  }, [open, reset, academicYears, setValue])
 
   const mutation = useMutation({
     mutationFn: (formData: StudentsType) => createStudent(formData),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['students'] })
-      toast.success('បង្កើតនិស្សិតជោគជ័យ')
+      toast.success('ចុះឈ្មោះនិស្សិតបានជោគជ័យ')
       setOpen(false)
     },
-    onError: () => toast.error('បង្កើតមិនជោគជ័យ'),
+    onError: (error: any) => {
+      toast.error(error?.response?.data?.message || 'ការចុះឈ្មោះមិនជោគជ័យ')
+    },
   })
 
   const onSubmit = (formData: StudentsType) => {
@@ -72,6 +105,7 @@ const StudentCreate = () => {
       facultyId: Number(formData.facultyId),
       departmentId: Number(formData.departmentId),
       academicLevelId: Number(formData.academicLevelId),
+      academicYearId: Number(formData.academicYearId),
       year: formData.year ? Number(formData.year) : null,
       semester: formData.semester ? Number(formData.semester) : null,
       generation: formData.generation ? Number(formData.generation) : null,
@@ -82,24 +116,27 @@ const StudentCreate = () => {
   return (
     <Dialog.Root open={open} onOpenChange={setOpen}>
       <Dialog.Trigger>
-        <Button variant="solid" style={{ cursor: 'pointer' }}>
-          បន្ថែមនិស្សិត
+        <Button variant="solid" color="indigo" style={{ cursor: 'pointer' }}>
+          + បន្ថែមនិស្សិតថ្មី
         </Button>
       </Dialog.Trigger>
 
-      <Dialog.Content maxWidth="650px">
+      <Dialog.Content maxWidth="700px" size="3">
         <Dialog.Title>ចុះឈ្មោះនិស្សិតថ្មី</Dialog.Title>
+        <Dialog.Description size="2" mb="4" color="gray">
+          សូមបំពេញព័ត៌មាននិស្សិតឱ្យបានត្រឹមត្រូវតាមទម្រង់ខាងក្រោម។
+        </Dialog.Description>
 
         <form onSubmit={handleSubmit(onSubmit)}>
           <Flex direction="column" gap="4">
-            <Grid columns="2" gap="4">
-              {/* Name */}
+            <Grid columns={{ initial: '1', md: '2' }} gap="4">
+              {/* ឈ្មោះនិស្សិត */}
               <Box>
                 <Text as="div" size="2" mb="1" weight="bold">
-                  ឈ្មោះនិស្សិត
+                  ឈ្មោះនិស្សិត <span className="text-red-500">*</span>
                 </Text>
                 <TextField.Root
-                  {...register('name', { required: 'ត្រូវបញ្ចូលឈ្មោះ' })}
+                  {...register('name', { required: 'សូមបញ្ចូលឈ្មោះ' })}
                   placeholder="ឧ. សុខ សំណាង"
                 />
                 {errors.name && (
@@ -109,20 +146,46 @@ const StudentCreate = () => {
                 )}
               </Box>
 
-              {/* Email */}
+              {/* ភេទ */}
               <Box>
                 <Text as="div" size="2" mb="1" weight="bold">
-                  អ៊ីម៉ែល
+                  ភេទ <span className="text-red-500">*</span>
+                </Text>
+                <Controller
+                  name="gender"
+                  control={control}
+                  rules={{ required: 'សូមជ្រើសរើសភេទ' }}
+                  render={({ field }) => (
+                    <Select.Root
+                      value={field.value || ''}
+                      onValueChange={field.onChange}
+                    >
+                      <Select.Trigger
+                        style={{ width: '100%' }}
+                        placeholder="ជ្រើសរើសភេទ"
+                      />
+                      <Select.Content>
+                        <Select.Item value="male">ប្រុស (Male)</Select.Item>
+                        <Select.Item value="female">ស្រី (Female)</Select.Item>
+                      </Select.Content>
+                    </Select.Root>
+                  )}
+                />
+                {errors.gender && (
+                  <Text size="1" color="red">
+                    {errors.gender.message}
+                  </Text>
+                )}
+              </Box>
+
+              {/* អ៊ីម៉ែល */}
+              <Box>
+                <Text as="div" size="2" mb="1" weight="bold">
+                  អ៊ីម៉ែល <span className="text-red-500">*</span>
                 </Text>
                 <TextField.Root
-                  {...register('email', {
-                    required: 'ត្រូវបញ្ចូលអ៊ីម៉ែល',
-                    pattern: {
-                      value: /^\S+@\S+$/i,
-                      message: 'ទម្រង់អ៊ីម៉ែលមិនត្រឹមត្រូវ',
-                    },
-                  })}
-                  placeholder="example@mail.com"
+                  {...register('email', { required: 'សូមបញ្ចូលអ៊ីម៉ែល' })}
+                  placeholder="student@example.com"
                 />
                 {errors.email && (
                   <Text size="1" color="red">
@@ -131,39 +194,14 @@ const StudentCreate = () => {
                 )}
               </Box>
 
-              {/* Password */}
+              {/* លេខទូរស័ព្ទ */}
               <Box>
                 <Text as="div" size="2" mb="1" weight="bold">
-                  លេខសម្ងាត់
+                  លេខទូរស័ព្ទ <span className="text-red-500">*</span>
                 </Text>
                 <TextField.Root
-                  type="password"
-                  {...register('password', {
-                    required: 'ត្រូវកំណត់លេខសម្ងាត់',
-                  })}
-                  placeholder="******"
-                />
-                {errors.password && (
-                  <Text size="1" color="red">
-                    {errors.password.message}
-                  </Text>
-                )}
-              </Box>
-
-              {/* Phone */}
-              <Box>
-                <Text as="div" size="2" mb="1" weight="bold">
-                  លេខទូរស័ព្ទ
-                </Text>
-                <TextField.Root
-                  {...register('phone', {
-                    required: 'ត្រូវបញ្ចូលលេខទូរស័ព្ទ',
-                    maxLength: {
-                      value: 15,
-                      message: 'លេខទូរស័ព្ទមិនអាចលើសពី ១៥ខ្ទង់',
-                    },
-                  })}
-                  placeholder="012345678"
+                  {...register('phone', { required: 'សូមបញ្ចូលលេខទូរស័ព្ទ' })}
+                  placeholder="012 345 678"
                 />
                 {errors.phone && (
                   <Text size="1" color="red">
@@ -172,53 +210,80 @@ const StudentCreate = () => {
                 )}
               </Box>
 
-              {/* Gender */}
+              {/* ឆ្នាំសិក្សា (Academic Year) */}
               <Box>
-                <Text as="div" size="2" mb="1" weight="bold">ភេទ</Text>
+                <Text as="div" size="2" mb="1" weight="bold">
+                  ឆ្នាំសិក្សា <span className="text-red-500">*</span>
+                </Text>
                 <Controller
-                  name="gender"
+                  name="academicYearId"
                   control={control}
-                  rules={{ required: 'ត្រូវជ្រើសរើសភេទ' }}
+                  rules={{ required: 'សូមជ្រើសរើសឆ្នាំសិក្សា' }}
                   render={({ field }) => (
-                    <Select.Root value={field.value || ''} onValueChange={field.onChange}>
-                      <Select.Trigger style={{ width: '100%' }} />
+                    <Select.Root
+                      value={field.value?.toString()}
+                      onValueChange={field.onChange}
+                    >
+                      <Select.Trigger
+                        style={{ width: '100%' }}
+                        placeholder="ជ្រើសរើសឆ្នាំសិក្សា"
+                      />
                       <Select.Content>
-                        <Select.Item value="male">ប្រុស (Male)</Select.Item>
-                        <Select.Item value="female">ស្រី (Female)</Select.Item>
+                        {academicYears.map((ay: any) => (
+                          <Select.Item key={ay.id} value={ay.id.toString()}>
+                            {ay.name} {ay.isCurrent && ' (បច្ចុប្បន្ន)'}
+                          </Select.Item>
+                        ))}
                       </Select.Content>
                     </Select.Root>
                   )}
                 />
+                {errors.academicYearId && (
+                  <Text size="1" color="red">
+                    {errors.academicYearId.message}
+                  </Text>
+                )}
               </Box>
-              {/* Educational Status */}
+
+              {/* កម្រិតសិក្សា */}
               <Box>
-                <Text as="div" size="2" mb="1" weight="bold">ស្ថានភាពសិក្សា</Text>
+                <Text as="div" size="2" mb="1" weight="bold">
+                  កម្រិតសិក្សា <span className="text-red-500">*</span>
+                </Text>
                 <Controller
-                  name="educationalStatus"
+                  name="academicLevelId"
                   control={control}
+                  rules={{ required: 'សូមជ្រើសរើសកម្រិតសិក្សា' }}
                   render={({ field }) => (
-                    <Select.Root value={field.value || 'enrolled'} onValueChange={field.onChange}>
-                      <Select.Trigger style={{ width: '100%' }} />
+                    <Select.Root
+                      value={field.value?.toString()}
+                      onValueChange={field.onChange}
+                    >
+                      <Select.Trigger
+                        style={{ width: '100%' }}
+                        placeholder="ជ្រើសរើសកម្រិតសិក្សា"
+                      />
                       <Select.Content>
-                        <Select.Item value="enrolled">កំពុងរៀន (Enrolled)</Select.Item>
-                        <Select.Item value="graduated">បញ្ចប់ការសិក្សា (Graduated)</Select.Item>
-                        <Select.Item value="dropped out">បោះបង់ (Dropped Out)</Select.Item>
-                        <Select.Item value="transferred">ផ្លាស់ប្តូរ (Transferred)</Select.Item>
+                        {academicLevels.map((al: any) => (
+                          <Select.Item key={al.id} value={al.id.toString()}>
+                            {al.level}
+                          </Select.Item>
+                        ))}
                       </Select.Content>
                     </Select.Root>
                   )}
                 />
               </Box>
 
-              {/* Faculty */}
+              {/* មហាវិទ្យាល័យ */}
               <Box>
                 <Text as="div" size="2" mb="1" weight="bold">
-                  មហាវិទ្យាល័យ
+                  មហាវិទ្យាល័យ <span className="text-red-500">*</span>
                 </Text>
                 <Controller
                   name="facultyId"
                   control={control}
-                  rules={{ required: 'ត្រូវជ្រើសរើសមហាវិទ្យាល័យ' }}
+                  rules={{ required: 'សូមជ្រើសរើសមហាវិទ្យាល័យ' }}
                   render={({ field }) => (
                     <Select.Root
                       value={field.value?.toString()}
@@ -238,22 +303,17 @@ const StudentCreate = () => {
                     </Select.Root>
                   )}
                 />
-                {errors.facultyId && (
-                  <Text size="1" color="red">
-                    {errors.facultyId.message}
-                  </Text>
-                )}
               </Box>
 
-              {/* Department */}
+              {/* ដេប៉ាតឺម៉ង់ */}
               <Box>
                 <Text as="div" size="2" mb="1" weight="bold">
-                  ដេប៉ាតឺម៉ង់
+                  ដេប៉ាតឺម៉ង់ <span className="text-red-500">*</span>
                 </Text>
                 <Controller
                   name="departmentId"
                   control={control}
-                  rules={{ required: 'ត្រូវជ្រើសរើសដេប៉ាតឺម៉ង់' }}
+                  rules={{ required: 'សូមជ្រើសរើសដេប៉ាតឺម៉ង់' }}
                   render={({ field }) => (
                     <Select.Root
                       value={field.value?.toString()}
@@ -273,87 +333,76 @@ const StudentCreate = () => {
                     </Select.Root>
                   )}
                 />
-                {errors.departmentId && (
-                  <Text size="1" color="red">
-                    {errors.departmentId.message}
-                  </Text>
-                )}
               </Box>
 
-              {/* Academic Level */}
-              <Box>
-                <Text as="div" size="2" mb="1" weight="bold">
-                  កម្រិតសិក្សា
-                </Text>
-                <Controller
-                  name="academicLevelId"
-                  control={control}
-                  rules={{ required: 'ត្រូវជ្រើសរើសកម្រិតសិក្សា' }}
-                  render={({ field }) => (
-                    <Select.Root
-                      value={field.value?.toString()}
-                      onValueChange={field.onChange}
-                    >
-                      <Select.Trigger
-                        style={{ width: '100%' }}
-                        placeholder="ជ្រើសរើសកម្រិត"
-                      />
-                      <Select.Content>
-                        {academicLevels.map((al: any) => (
-                          <Select.Item key={al.id} value={al.id.toString()}>
-                            {al.level}
-                          </Select.Item>
-                        ))}
-                      </Select.Content>
-                    </Select.Root>
-                  )}
-                />
-                {errors.academicLevelId && (
-                  <Text size="1" color="red">
-                    {errors.academicLevelId.message}
-                  </Text>
-                )}
-              </Box>
-
-              {/* Year & Semester */}
-              <Flex gap="3">
-                <Box flexGrow="1">
+              {/* ឆ្នាំទី និង ឆមាស */}
+              <Grid columns="2" gap="3">
+                <Box>
                   <Text as="div" size="2" mb="1" weight="bold">
                     ឆ្នាំទី
                   </Text>
                   <TextField.Root
                     type="number"
+                    min={1}
+                    max={5}
                     {...register('year')}
-                    placeholder="1"
+                    placeholder="ឧ. 1"
                   />
                 </Box>
-                <Box flexGrow="1">
+                <Box>
                   <Text as="div" size="2" mb="1" weight="bold">
                     ឆមាស
                   </Text>
                   <TextField.Root
                     type="number"
+                    min={1}
+                    max={3}
                     {...register('semester')}
-                    placeholder="1"
+                    placeholder="ឧ. 1"
                   />
                 </Box>
-              </Flex>
+              </Grid>
 
-              {/* Generation */}
+              {/* ជំនាន់ */}
               <Box>
                 <Text as="div" size="2" mb="1" weight="bold">
                   ជំនាន់
                 </Text>
                 <TextField.Root
                   type="number"
+                  min={1}
                   {...register('generation')}
-                  placeholder="ឧ. 10"
+                  placeholder="ឧ. 19"
                 />
               </Box>
             </Grid>
 
-            {/* Form Actions */}
-            <Flex gap="3" mt="4" justify="end">
+            {/* លេខសម្ងាត់ */}
+            <Box>
+              <Text as="div" size="2" mb="1" weight="bold">
+                លេខសម្ងាត់សម្រាប់ចូលប្រើប្រាស់{' '}
+                <span className="text-red-500">*</span>
+              </Text>
+              <TextField.Root
+                type="password"
+                {...register('password', {
+                  required: 'សូមបញ្ចូលលេខសម្ងាត់',
+                  minLength: {
+                    value: 6,
+                    message: 'លេខសម្ងាត់ត្រូវមានយ៉ាងតិច 6 ខ្ទង់',
+                  },
+                })}
+                placeholder="******"
+              />
+              {errors.password && (
+                <Text as="div" size="2" color="red">
+                  {errors.password.message}
+                </Text>
+              )}
+            </Box>
+
+            {/* ប៊ូតុងសកម្មភាព */}
+            <Flex gap="3" mt="6" justify="end">
               <Dialog.Close>
                 <Button
                   variant="soft"
@@ -361,7 +410,7 @@ const StudentCreate = () => {
                   type="button"
                   style={{ cursor: 'pointer' }}
                 >
-                  ចាកចេញ
+                  បោះបង់
                 </Button>
               </Dialog.Close>
               <Button
@@ -369,7 +418,7 @@ const StudentCreate = () => {
                 loading={mutation.isPending}
                 style={{ cursor: 'pointer' }}
               >
-                រក្សាទុក
+                ចុះឈ្មោះនិស្សិត
               </Button>
             </Flex>
           </Flex>
