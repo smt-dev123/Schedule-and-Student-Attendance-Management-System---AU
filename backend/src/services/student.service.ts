@@ -1,0 +1,98 @@
+import type { StudentRepository } from "@/repositories/student.repository";
+import type { Student } from "@/types/academy";
+import type {
+  StudentInput,
+  StudentPromoteInput,
+  StudentQueryInput,
+  StudentUpdateInput,
+} from "@/validators/academy";
+import { HTTPException } from "hono/http-exception";
+
+export class StudentService {
+  constructor(private readonly studentRepo: StudentRepository) {}
+
+  async create(data: StudentInput): Promise<Student> {
+    const student = await this.studentRepo.create(data);
+    if (!student) {
+      throw new HTTPException(400, { message: "Failed to create student" });
+    }
+    return student;
+  }
+
+  async update(id: string, data: StudentUpdateInput): Promise<Student> {
+    if (Object.keys(data).length === 0) {
+      throw new HTTPException(400, {
+        message: "Update requires at least one field",
+      });
+    }
+    let update: Student | undefined;
+    try {
+      update = await this.studentRepo.update(id, data);
+    } catch (error) {
+      throw new HTTPException(500, { message: "Failed to update student" });
+    }
+    if (!update) {
+      throw new HTTPException(404, { message: "Student not found" });
+    }
+    return update;
+  }
+
+  async delete(id: string): Promise<Student> {
+    const student = await this.studentRepo.delete(id);
+    if (!student) {
+      throw new HTTPException(404, { message: "Student not found" });
+    }
+    return student;
+  }
+
+  async promote(data: StudentPromoteInput): Promise<any> {
+    try {
+      const student = await this.studentRepo.promote(data);
+      return student;
+    } catch (error: any) {
+      console.error("Promote Error:", error);
+      throw new HTTPException(500, {
+        message: `Backend Error: ${error.message}`,
+      });
+    }
+  }
+
+  async findById(id: string): Promise<Student> {
+    const student = await this.studentRepo.findById(id);
+    if (!student) {
+      throw new HTTPException(404, { message: "Student not found" });
+    }
+    return student;
+  }
+
+  async findAll(query: StudentQueryInput): Promise<{
+    data: Student[];
+    total: number;
+    page: number;
+    limit: number;
+  }> {
+    return this.studentRepo.findAll(query);
+  }
+
+  async findScheduleByStudentIdAndAcademicYearId(studentId: string) {
+    const result =
+      await this.studentRepo.findScheduleByStudentIdAndAcademicYearId(
+        studentId,
+      );
+    if (!result) {
+      throw new HTTPException(404, { message: "Student not found" });
+    }
+    return result;
+  }
+
+  async findScheduleByStudentIdAndCurrentAcademicYear(studentId: string) {
+    const result =
+      await this.studentRepo.findScheduleByStudentIdAndCurrentAcademicYear(
+        studentId,
+      );
+    if (!result) {
+      throw new HTTPException(404, { message: "Student not found" });
+    }
+    return result;
+  }
+}
