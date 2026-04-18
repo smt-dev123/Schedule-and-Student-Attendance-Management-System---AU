@@ -3,9 +3,9 @@ import { Button, Dialog, Flex, Select, Text, TextField } from '@radix-ui/themes'
 import { Controller, useForm } from 'react-hook-form'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
-import type { DepartmentsType, MajorsType } from '@/types'
+import type { FacultiesType, MajorsType } from '@/types'
 import { createMajors } from '@/api/MajorAPI'
-import { getDepartments } from '@/api/DepartmentAPI'
+import { getFaculties } from '@/api/FacultyAPI'
 
 const MajorCreate = () => {
   const {
@@ -18,9 +18,9 @@ const MajorCreate = () => {
   const queryClient = useQueryClient()
   const [open, setOpen] = useState(false)
 
-  const { data: departments } = useQuery<DepartmentsType[]>({
-    queryKey: ['departments'],
-    queryFn: getDepartments,
+  const { data: faculties } = useQuery<FacultiesType[]>({
+    queryKey: ['faculties'],
+    queryFn: getFaculties,
   })
 
   const mutation = useMutation({
@@ -84,7 +84,7 @@ const MajorCreate = () => {
               </Text>
 
               <Controller
-                name="departmentId"
+                name="facultyId"
                 control={control}
                 render={({ field }) => (
                   <Select.Root
@@ -96,12 +96,12 @@ const MajorCreate = () => {
                       style={{ width: '100%' }}
                     />
                     <Select.Content>
-                      {departments?.map((department) => (
+                      {faculties?.map((faculty) => (
                         <Select.Item
-                          value={String(department.id)}
-                          key={department.id}
+                          value={String(faculty.id)}
+                          key={faculty.id}
                         >
-                          {department.name}
+                          {faculty.name}
                         </Select.Item>
                       ))}
                     </Select.Content>

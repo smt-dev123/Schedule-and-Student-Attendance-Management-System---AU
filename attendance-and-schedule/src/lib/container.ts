@@ -17,6 +17,7 @@ import { TeacherRepository } from "@/repositories/teacher.repository";
 import { TranslationRepository } from "@/repositories/translation.repository";
 import { NotificationRepository } from "@/repositories/notification.repository";
 import { AcademicYearRepository } from "@/repositories/academic-year.repository";
+import { MajorRepository } from "@/repositories/major.repository";
 
 // Services
 import { AcademicLevelService } from "@/services/academic-level.service";
@@ -33,6 +34,7 @@ import { TeacherService } from "@/services/teacher.service";
 import { TranslationService } from "@/services/translation.service";
 import { NotificationService } from "@/services/notification.service";
 import { AcademicYearService } from "@/services/academic-year.service";
+import { MajorService } from "@/services/major.service";
 
 // WebSocket
 import { WebSocketManager } from "@/lib/ws-manager";
@@ -58,6 +60,7 @@ export interface ICradle {
   teacherRepository: TeacherRepository;
   translationRepository: TranslationRepository;
   notificationRepository: NotificationRepository;
+  majorRepository: MajorRepository;
 
   // Services
   academicLevelService: AcademicLevelService;
@@ -74,6 +77,7 @@ export interface ICradle {
   translationService: TranslationService;
   notificationService: NotificationService;
   academicYearService: AcademicYearService;
+  majorService: MajorService;
 }
 
 // Instantiate Infrastructure
@@ -95,6 +99,7 @@ const teacherRepository = new TeacherRepository(db);
 const translationRepository = new TranslationRepository(db);
 const notificationRepository = new NotificationRepository(db);
 const academicYearRepository = new AcademicYearRepository(db);
+const majorRepository = new MajorRepository(db);
 
 // Instantiate Services
 const academicLevelService = new AcademicLevelService(academicLevelRepository);
@@ -123,6 +128,7 @@ const notificationService = new NotificationService(
   wsManager,
 );
 const academicYearService = new AcademicYearService(academicYearRepository);
+const majorService = new MajorService(majorRepository);
 
 export const container: ICradle = {
   db,
@@ -143,6 +149,7 @@ export const container: ICradle = {
   teacherRepository,
   translationRepository,
   notificationRepository,
+  majorRepository,
 
   academicLevelService,
   attendanceService,
@@ -158,4 +165,5 @@ export const container: ICradle = {
   translationService,
   notificationService,
   academicYearService,
+  majorService,
 };

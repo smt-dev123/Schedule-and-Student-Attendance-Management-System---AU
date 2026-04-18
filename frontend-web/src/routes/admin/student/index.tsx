@@ -12,7 +12,6 @@ import { StudentTable } from '@/features/student/StudentTable'
 import FetchData from '@/components/FetchData'
 import StudentCreate from './-actions/Create'
 import { useAcademicStore } from '@/stores/useAcademicStore'
-import StudentPromote from './-actions/StudentPromote'
 import PDFDownload from '@/components/ui/PDFDownload'
 import StudentReport from './-exports/ExportPDF'
 
@@ -126,6 +125,13 @@ function RouteComponent() {
       : (data as any)?.data || (data as any)?.students || []
   }, [data])
 
+  const filteredDepartments = useMemo(() => {
+    if (draft.facultyId === 'all') return []
+    return departments.filter(
+      (d: any) => String(d.facultyId) === draft.facultyId,
+    )
+  }, [departments, draft.facultyId])
+
   return (
     <Flex direction="column" gap="4">
       {/* --- Header Section --- */}
@@ -194,7 +200,10 @@ function RouteComponent() {
             </Text>
             <Select.Root
               value={draft.facultyId}
-              onValueChange={(val) => setDraft({ ...draft, facultyId: val })}
+              onValueChange={(val) => {
+                // នៅពេលដូរ Faculty ត្រូវ Reset Department ទៅ "all"
+                setDraft({ ...draft, facultyId: val, departmentId: 'all' })
+              }}
             >
               <Select.Trigger style={{ minWidth: '150px' }} />
               <Select.Content>
@@ -215,11 +224,12 @@ function RouteComponent() {
             <Select.Root
               value={draft.departmentId}
               onValueChange={(val) => setDraft({ ...draft, departmentId: val })}
+              disabled={draft.facultyId === 'all'}
             >
               <Select.Trigger style={{ minWidth: '150px' }} />
               <Select.Content>
                 <Select.Item value="all">ទាំងអស់</Select.Item>
-                {departments.map((d: any) => (
+                {filteredDepartments.map((d: any) => (
                   <Select.Item key={d.id} value={String(d.id)}>
                     {d.name}
                   </Select.Item>

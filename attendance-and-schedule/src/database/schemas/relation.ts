@@ -10,6 +10,7 @@ import {
   sessionTimes,
   academicYears,
   studentAcademicYears,
+  majors,
 } from "./academic";
 import { buildings, classrooms } from "./infrastructure";
 import { courses } from "./academic";
@@ -47,6 +48,7 @@ export const twoFactorRelations = relations(twoFactor, ({ one }) => ({
 // Academic Relations
 export const facultiesRelations = relations(faculties, ({ many }) => ({
   departments: many(departments),
+  majors: many(majors),
   teachers: many(teachers),
   schedules: many(schedules),
   students: many(students),
@@ -58,6 +60,13 @@ export const departmentsRelations = relations(departments, ({ one, many }) => ({
     references: [faculties.id],
   }),
   schedules: many(schedules),
+}));
+
+export const majorsRelations = relations(majors, ({ one }) => ({
+  faculty: one(faculties, {
+    fields: [majors.facultyId],
+    references: [faculties.id],
+  }),
 }));
 
 export const academicLevelsRelations = relations(

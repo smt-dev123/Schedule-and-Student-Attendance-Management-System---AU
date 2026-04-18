@@ -35,6 +35,17 @@ export const faculties = pgTable("faculties", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+export const majors = pgTable("majors", {
+  id: serial("id").primaryKey(),
+  name: varchar("name").unique().notNull(),
+  description: varchar("description"),
+  facultyId: integer("faculty_id")
+    .notNull()
+    .references(() => faculties.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 export const departments = pgTable(
   "departments",
   {

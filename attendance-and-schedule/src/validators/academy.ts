@@ -68,6 +68,19 @@ export type DepartmentInput = z.infer<typeof departmentSchema>;
 export type DepartmentUpdateInput = z.infer<typeof departmentUpdateSchema>;
 
 /**
+ * Major Schemas
+ */
+export const majorSchema = z.object({
+  name: z.string().min(1, "Major name is required"),
+  description: z.string().optional(),
+  facultyId: z.number().int().positive(),
+});
+export const majorUpdateSchema = majorSchema.partial();
+
+export type MajorInput = z.infer<typeof majorSchema>;
+export type MajorUpdateInput = z.infer<typeof majorUpdateSchema>;
+
+/**
  * Student Schemas
  */
 export const studentSchema = z.object({

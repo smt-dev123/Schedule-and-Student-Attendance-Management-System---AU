@@ -8,6 +8,7 @@ import {
   sessionTimes,
   students,
   teachers,
+  majors,
 } from "@/database/schemas";
 import type { Building, Classroom } from "./infrastructure";
 
@@ -38,6 +39,11 @@ export type AcademicLevel = typeof academicLevels.$inferSelect;
  * Department Type
  */
 export type Department = typeof departments.$inferSelect;
+
+/**
+ * Major Type
+ */
+export type Major = typeof majors.$inferSelect;
 
 /**
  * Course Type
