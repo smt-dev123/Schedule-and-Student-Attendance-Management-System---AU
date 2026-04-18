@@ -143,12 +143,12 @@ export default function Sidebar({
       label: t('Sidebar.student'),
       url: '/admin/student',
     },
-    // {
-    //   key: 'classes',
-    //   icon: <AiOutlineSchedule />,
-    //   label: t('Sidebar.class'),
-    //   url: '/admin/classes',
-    // },
+    {
+      key: 'classes',
+      icon: <AiOutlineSchedule />,
+      label: 'កាលវិភាគសិក្សា',
+      url: '/admin/schedule',
+    },
     {
       key: 'course',
       icon: <AiOutlineSchedule />,

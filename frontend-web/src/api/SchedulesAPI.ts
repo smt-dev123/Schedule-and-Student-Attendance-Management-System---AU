@@ -3,36 +3,33 @@ import type { ScheduleType } from '@/types'
 
 const ENDPOINT = '/schedules'
 
-export const getSchedules = async ({
-  facultyId,
-  departmentId,
-  academicYearId,
-}: {
-  facultyId: number
-  departmentId: number
-  academicYearId?: number
+export const getSchedules = async (params?: {
+  facultyId?: number
+  departmentId?: number
+  academicYearId?: number | null
 }) => {
   const res = await api.get(ENDPOINT, {
-    params: {
-      facultyId,
-      departmentId,
-      academicYearId,
-    },
+    params,
   })
-  return res.data.data ?? []
+  return res.data ?? []
 }
 
-export const createSchedule = async (data: ScheduleType) => {
+export const createSchedule = async (data: any) => {
   const res = await api.post(ENDPOINT, data)
-  return res.data.data
+  return res.data
 }
 
 export const updateSchedule = async (id: number, data: ScheduleType) => {
   const res = await api.put(`${ENDPOINT}/${id}`, data)
-  return res.data.data
+  return res.data
 }
 
 export const deleteSchedule = async (id: number) => {
   const res = await api.delete(`${ENDPOINT}/${id}`)
-  return res.data.data
+  return res.data
+}
+
+export const getScheduleById = async (id: number) => {
+  const res = await api.get(`${ENDPOINT}/${id}`)
+  return res.data
 }

@@ -37,7 +37,7 @@ function RouteComponent() {
           </Text>
           <Flex gap="2">
             <ExportExcel data={data} />
-            <ExportPDF data={data} />
+            {/* <ExportPDF data={data} /> */}
 
             <DepartmentCreate />
           </Flex>

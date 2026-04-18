@@ -35,4 +35,29 @@ router.get(
   },
 );
 
+router.get(
+  "/course/:courseId",
+  authentication,
+  roleMiddleware("teacher", "admin"),
+  async (c) => {
+    const { attendanceService } = c.var.container;
+    const courseId = parseInt(c.req.param("courseId"));
+    const dateStr = c.req.query("date") || new Date().toISOString().split("T")[0];
+    const records = await attendanceService.getAttendanceByCourseAndDate(courseId, new Date(dateStr));
+    return c.json(records);
+  },
+);
+
+router.get(
+  "/report/course/:courseId",
+  authentication,
+  roleMiddleware("teacher", "admin"),
+  async (c) => {
+    const { attendanceService } = c.var.container;
+    const courseId = parseInt(c.req.param("courseId"));
+    const records = await attendanceService.generateAttendanceReportForCourse(courseId);
+    return c.json({ data: records });
+  },
+);
+
 export default router;

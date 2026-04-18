@@ -1,5 +1,5 @@
 import { type DrizzleDb, type Transaction } from "@/database";
-import { academicYears, schedules } from "@/database/schemas";
+import { academicYears, schedules, courses } from "@/database/schemas";
 import type { Schedule, ScheduleByAcademicIsCurrent } from "@/types/academy";
 import type {
   ScheduleInput,
@@ -21,16 +21,44 @@ export class ScheduleRepository {
     return newSchedule!;
   }
 
-  async findAll(): Promise<Schedule[]> {
-    return await this.db.query.schedules.findMany();
+  async findAll(academicYearId?: number): Promise<Schedule[]> {
+    return await this.db.query.schedules.findMany({
+      where: academicYearId ? eq(schedules.academicYearId, academicYearId) : undefined,
+      with: {
+        faculty: true,
+        department: true,
+        academicLevel: true,
+        classroom: {
+          with: {
+            building: true
+          }
+        }
+      }
+    });
   }
 
   async findById(id: number): Promise<Schedule | null> {
     return await this.db.query.schedules
       .findFirst({
         where: eq(schedules.id, id),
+        with: {
+            faculty: true,
+            department: true,
+            academicLevel: true,
+            classroom: {
+                with: {
+                    building: true
+                }
+            },
+            courses: {
+                with: {
+                    teacher: true,
+                    sessionTime: true
+                }
+            }
+        }
       })
-      .then((result) => result || null);
+      .then((result) => (result as any) || null);
   }
 
   async findByUniqueKey(
@@ -63,12 +91,16 @@ export class ScheduleRepository {
   }
 
   async delete(id: number): Promise<Schedule> {
-    const [deletedSchedule] = await this.db
-      .delete(schedules)
-      .where(eq(schedules.id, id))
-      .returning();
+    return await this.db.transaction(async (tx) => {
+      await tx.delete(courses).where(eq(courses.scheduleId, id));
 
-    return deletedSchedule!;
+      const [deletedSchedule] = await tx
+        .delete(schedules)
+        .where(eq(schedules.id, id))
+        .returning();
+
+      return deletedSchedule!;
+    });
   }
 
   async getScheduleByAcademicIsCurrent(

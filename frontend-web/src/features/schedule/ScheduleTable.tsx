@@ -1,11 +1,11 @@
 import { DataTable } from '@/components/table/DataTable'
-import type { UsersType } from '@/types'
-import { UserColumns } from './Columns'
+import type { ScheduleType } from '@/types'
+import { ScheduleColumns } from './Columns'
 
 interface Props {
-  data: UsersType[]
+  data: ScheduleType[]
 }
 
-export function UserTable({ data }: Props) {
-  return <DataTable data={data} columns={UserColumns} />
+export function ScheduleTable({ data }: Props) {
+  return <DataTable data={data} columns={ScheduleColumns} />
 }

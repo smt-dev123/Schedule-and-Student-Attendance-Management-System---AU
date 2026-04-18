@@ -5,13 +5,15 @@ import {
   scheduleSchema,
   scheduleUpdateSchema,
   scheduleWithCoursesSchema,
+  scheduleWithCoursesUpdateSchema
 } from "@/validators/academy";
 
 const router = new Hono();
 
 router.get("/", async (c) => {
   const { scheduleService } = c.var.container;
-  const schedules = await scheduleService.findAll();
+  const academicYearId = c.req.query("academicYearId");
+  const schedules = await scheduleService.findAll(academicYearId ? parseInt(academicYearId) : undefined);
   return c.json(schedules);
 });
 
@@ -29,7 +31,7 @@ router.post("/", zValidator("json", scheduleWithCoursesSchema), async (c) => {
   return c.json(result);
 });
 
-router.put("/:id", zValidator("json", scheduleUpdateSchema), async (c) => {
+router.put("/:id", zValidator("json", scheduleWithCoursesUpdateSchema), async (c) => {
   const { scheduleService } = c.var.container;
   const id = parseInt(c.req.param("id"));
   const data = c.req.valid("json");

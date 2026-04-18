@@ -11,6 +11,8 @@ import { FaArrowLeft, FaPrint, FaFileExcel } from 'react-icons/fa'
 import { useState, useEffect } from 'react'
 import AttendancePDF from './-exports/ExportPDF'
 import { PDFDownloadLink } from '@react-pdf/renderer'
+import { useQuery } from '@tanstack/react-query'
+import { getCourseAttendanceReport } from '@/api/AttendanceAPI'
 
 export const Route = createFileRoute(
   '/admin/course/attendance/report/$attendanceReportId',
@@ -26,69 +28,13 @@ function RouteComponent() {
     setIsClient(true)
   }, [])
 
-  // ទិន្នន័យនិស្សិតដែលអ្នកបានផ្ដល់ឱ្យ
-  const students = [
-    {
-      id: 'ST001',
-      name: 'TOUCH Vitumale',
-      gender: 'ប្រុស',
-      status: 'Enrolled',
-      phone: '+855 97 857 5682',
-      leave: 0,
-      absent: 0,
-      score: 10,
-    },
-    {
-      id: 'ST002',
-      name: 'THOURNG Longdy',
-      gender: 'ប្រុស',
-      status: 'Enrolled',
-      phone: '+855 12 486 8493',
-      leave: 1,
-      absent: 0,
-      score: 9.5,
-    },
-    {
-      id: 'ST003',
-      name: 'SETH Sreynich',
-      gender: 'ស្រី',
-      status: 'Enrolled',
-      phone: '+855 85 961 651',
-      leave: 0,
-      absent: 1,
-      score: 9,
-    },
-    {
-      id: 'ST004',
-      name: 'SREANG Lihour',
-      gender: 'ស្រី',
-      status: 'Enrolled',
-      phone: '+855 85 954 548',
-      leave: 0,
-      absent: 0,
-      score: 10,
-    },
-    {
-      id: 'ST005',
-      name: 'LUY Sokmatra',
-      gender: 'ប្រុស',
-      status: 'Enrolled',
-      phone: '+855 12 496 548',
-      leave: 2,
-      absent: 0,
-      score: 8.5,
-    },
-    {
-      id: 'ST006',
-      name: 'SETH Theara',
-      gender: 'ប្រុស',
-      status: 'Dropped out',
-      phone: '+855 98 846 109',
-      leave: 0,
-      absent: 5,
-      score: 0,
-    },
-  ]
+  const { attendanceReportId } = Route.useParams()
+  const courseId = Number(attendanceReportId)
+
+  const { data: students = [], isLoading } = useQuery({
+    queryKey: ['course_attendance_report', courseId],
+    queryFn: () => getCourseAttendanceReport(courseId),
+  })
 
   return (
     <Box className="p-4 md:p-10 max-w-[1300px] mx-auto rounded bg-white min-h-screen">
@@ -199,12 +145,25 @@ function RouteComponent() {
         </HeaderTable>
 
         <BodyTable>
-          {students.map((student, index) => {
-            const totalAbsent = student.leave + student.absent
-            const attendanceRate =
-              student.status === 'Dropped out'
-                ? '0%'
-                : `${Math.max(0, 100 - totalAbsent * 5)}%`
+          {isLoading ? (
+            <RowTable>
+              <CellTable columSpan={10} className="text-center py-10 text-gray-500">
+                កំពុងទាញយកទិន្នន័យ...
+              </CellTable>
+            </RowTable>
+          ) : students.length === 0 ? (
+            <RowTable>
+              <CellTable columSpan={10} className="text-center py-10 text-gray-500">
+                មិនមានទិន្នន័យនិស្សិត
+              </CellTable>
+            </RowTable>
+          ) : (
+            students.map((student: any, index: number) => {
+              const totalAbsent = student.leave + student.absent
+              const attendanceRate =
+                student.status === 'Dropped out'
+                  ? '0%'
+                  : `${Math.max(0, 100 - totalAbsent * 5)}%`
 
             return (
               <RowTable
@@ -241,7 +200,8 @@ function RouteComponent() {
                 </CellTable>
               </RowTable>
             )
-          })}
+            })
+          )}
         </BodyTable>
       </RootTable>
 

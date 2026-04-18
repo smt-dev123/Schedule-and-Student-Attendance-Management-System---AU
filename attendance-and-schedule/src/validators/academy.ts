@@ -145,13 +145,13 @@ export const courseSchema = z.object({
   name: z.string().min(1, "Course name is required"),
   code: z.string().min(1, "Course code is required"),
   credits: z.number().int().positive(),
-  description: z.string().optional(),
+  description: z.string().nullable().optional(),
   day: dayEnum,
   teacherId: z.string(),
   scheduleId: z.number().int().positive(),
   sessionTimeId: z.number().int().positive(),
-  firstSessionNote: z.string().optional(),
-  secondSessionNote: z.string().optional(),
+  firstSessionNote: z.string().nullable().optional(),
+  secondSessionNote: z.string().nullable().optional(),
   isActive: z.boolean().default(true),
 });
 export const courseUpdateSchema = courseSchema.partial();
@@ -215,9 +215,22 @@ export const scheduleWithCoursesSchema = z.object({
   courses: z.array(courseSchema.omit({ scheduleId: true })),
 });
 
+export const scheduleWithCoursesUpdateSchema = z.object({
+  schedule: scheduleUpdateSchema,
+  courses: z.array(
+    courseSchema.extend({
+      id: z.coerce.number().positive().optional(),
+      scheduleId: z.coerce.number().positive().optional(),
+    }).omit({ scheduleId: true })
+  ),
+});
+
 export type ScheduleInput = z.infer<typeof scheduleSchema>;
 export type ScheduleUpdateInput = z.infer<typeof scheduleUpdateSchema>;
 export type ScheduleUniqueKeyInput = z.infer<typeof scheduleUniqueKeySchema>;
 export type ScheduleWithCoursesInput = z.infer<
   typeof scheduleWithCoursesSchema
+>;
+export type ScheduleWithCoursesUpdateInput = z.infer<
+  typeof scheduleWithCoursesUpdateSchema
 >;

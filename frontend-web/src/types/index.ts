@@ -155,12 +155,13 @@ export interface CoursesType {
   id?: number
   name: string
   code: string
-  credit: number
+  credits: number
   description: string
   day: DayEnum
   teacherId: number
   subjectId: number
   sessionTimeId: number
+  scheduleId: number
   firstSessionNote: string
   secondSessionNote: string
   isActive: boolean
@@ -197,21 +198,28 @@ export interface AttendancesType {
 
 export interface ScheduleType {
   id?: number
-  gradeLavel: string // កម្រិតថ្នាក់
-  generations: string // ជំនាន់
-  year: string // ឆ្នាំទី
-  programId: string // ជំនាញ
-  startDay: string // ថ្ងៃចាប់ផ្ដើម
-  endDay: string // ថ្ងៃបញ្ចប់
-  sessionId: string // វេនសិក្សា
-  classId: string // បន្ទប់
-  buildingId: string // អគារ
-  floor: string // ជាន់ទី
-  time: string // ពេលវេលា
-  studyDaysId: string // ច្ងៃ
-  subjectId: string // មុខវិជ្ជា
-  teacherId: string // ឈ្មោះគ្រូ
-  phone: string // លេខគ្រូ
+  facultyId: number
+  year: number
+  academicLevelId: number
+  generation: number
+  departmentId: number
+  classroomId: number
+  semester: number
+  semesterStart: string
+  semesterEnd: string
+  academicYearId: number
+  studyShift: StudyShiftEnum
+  
+  faculty?: { name: string }
+  department?: { name: string }
+  academicLevel?: { level: string }
+  classroom?: { 
+    name: string
+    building?: { name: string }
+  }
+  academicYear?: { name: string }
+  courses?: CoursesType[]
+  updatedAt?: string
 }
 
 export interface TranslationType {

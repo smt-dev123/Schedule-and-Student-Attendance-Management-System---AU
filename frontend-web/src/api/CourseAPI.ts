@@ -22,3 +22,13 @@ export const deleteCourse = async (id: number) => {
   const res = await api.delete(`${ENDPOINT}/${id}`)
   return res.data.data
 }
+
+export const getCourseById = async (id: number) => {
+  const res = await api.get(`${ENDPOINT}/${id}`)
+  return res.data.data
+}
+
+export const getCourseStudents = async (id: number) => {
+  const res = await api.get(`${ENDPOINT}/${id}/students`)
+  return res.data
+}

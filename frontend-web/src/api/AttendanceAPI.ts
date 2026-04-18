@@ -22,3 +22,18 @@ export const deleteAttendance = async (id: number) => {
     const res = await api.delete(`${ENDPOINT}/${id}`)
     return res.data.data
 }
+
+export const getCourseAttendance = async (courseId: number, date: string) => {
+    const res = await api.get(`/attendance/course/${courseId}?date=${date}`)
+    return res.data
+}
+
+export const markBulkAttendance = async (data: any) => {
+    const res = await api.post(`/attendance/bulk`, data)
+    return res.data
+}
+
+export const getCourseAttendanceReport = async (courseId: number) => {
+    const res = await api.get(`/attendance/report/course/${courseId}`)
+    return res.data.data ?? []
+}

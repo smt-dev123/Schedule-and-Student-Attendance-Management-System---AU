@@ -23,6 +23,7 @@ import { AcademicLevelService } from "@/services/academic-level.service";
 import { AttendanceService } from "@/services/attendace.service";
 import { BuildingService } from "@/services/building.service";
 import { ClassroomService } from "@/services/classroom.service";
+import { CourseService } from "@/services/course.service";
 import { DepartmentService } from "@/services/department.service";
 import { FacultyService } from "@/services/faculty.service";
 import { ScheduleService } from "@/services/schedule.service";
@@ -63,6 +64,7 @@ export interface ICradle {
   attendanceService: AttendanceService;
   buildingService: BuildingService;
   classroomService: ClassroomService;
+  courseService: CourseService;
   departmentService: DepartmentService;
   facultyService: FacultyService;
   scheduleService: ScheduleService;
@@ -96,19 +98,21 @@ const academicYearRepository = new AcademicYearRepository(db);
 
 // Instantiate Services
 const academicLevelService = new AcademicLevelService(academicLevelRepository);
-const attendanceService = new AttendanceService(attendanceRepository);
+const scheduleService = new ScheduleService(
+  scheduleRepository,
+  courseRepository,
+);
+const attendanceService = new AttendanceService(attendanceRepository, scheduleService);
 const buildingService = new BuildingService(buildingRepository, cache);
 const classroomService = new ClassroomService(
   classroomRepository,
   buildingRepository,
   cache,
 );
+const courseService = new CourseService(courseRepository);
 const departmentService = new DepartmentService(departmentRepository);
 const facultyService = new FacultyService(facultyRepository);
-const scheduleService = new ScheduleService(
-  scheduleRepository,
-  courseRepository,
-);
+
 const sessionTimeService = new SessionTimeService(sessionTimeRepository);
 const studentService = new StudentService(studentRepository);
 const teacherService = new TeacherService(teacherRepository);
@@ -144,6 +148,7 @@ export const container: ICradle = {
   attendanceService,
   buildingService,
   classroomService,
+  courseService,
   departmentService,
   facultyService,
   scheduleService,

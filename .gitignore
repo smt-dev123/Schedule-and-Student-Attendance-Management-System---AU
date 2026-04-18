@@ -1,16 +1,16 @@
-attendance-and-schedule/
+
 example/
 
 # Backend (Hono.js)
-backend/node_modules/
-backend/dist/
-backend/build/
-backend/.env
-# backend/.env.*
-backend/uploads/
-backend/logs/
-backend/coverage/
-backend/.nyc_output/
+attendance-and-schedule/node_modules/
+attendance-and-schedule/dist/
+attendance-and-schedule/build/
+attendance-and-schedule/.env
+# attendance-and-schedule/.env.*
+attendance-and-schedule/uploads/
+attendance-and-schedule/logs/
+attendance-and-schedule/coverage/
+attendance-and-schedule/.nyc_output/
 
 # Frontend Web (React.js)
 frontend-web/. DS_Store

@@ -15,81 +15,17 @@ import {
   Callout,
 } from '@radix-ui/themes'
 import { createFileRoute, Link, useRouter } from '@tanstack/react-router'
-import { useState } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import toast from 'react-hot-toast'
 import { FaArrowLeft, FaInfoCircle, FaSave, FaFileAlt } from 'react-icons/fa'
+
+import { getCourseStudents, getCourseById } from '@/api/CourseAPI'
+import { getCourseAttendance, markBulkAttendance } from '@/api/AttendanceAPI'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
 export const Route = createFileRoute('/admin/course/attendance/$attendanceId')({
   component: RouteComponent,
 })
-
-type Student = {
-  id: number
-  code: string
-  name: string
-  gender: string
-  status: string
-}
-
-// ទិន្នន័យសាកល្បង
-const students: Student[] = [
-  {
-    id: 1,
-    code: '0001',
-    name: 'លុយ សុមាត្រា',
-    gender: 'ប្រុស',
-    status: 'កំពុងសិក្សា',
-  },
-  {
-    id: 2,
-    code: '0002',
-    name: 'ស្រៀង លីហួរ',
-    gender: 'ស្រី',
-    status: 'កំពុងសិក្សា',
-  },
-  {
-    id: 3,
-    code: '0003',
-    name: 'ធឿន ឡង់ឌី',
-    gender: 'ប្រុស',
-    status: 'កំពុងសិក្សា',
-  },
-  {
-    id: 4,
-    code: '0004',
-    name: 'ទូច វិទូ',
-    gender: 'ប្រុស',
-    status: 'កំពុងសិក្សា',
-  },
-  {
-    id: 5,
-    code: '0005',
-    name: 'សិទ្ធ ធារ៉ា',
-    gender: 'ប្រុស',
-    status: 'កំពុងសិក្សា',
-  },
-  {
-    id: 6,
-    code: '0006',
-    name: 'សិទ្ធ ស្រីនិច',
-    gender: 'ស្រី',
-    status: 'កំពុងសិក្សា',
-  },
-  {
-    id: 7,
-    code: '0007',
-    name: 'រិទ្ធ ប៊ុនរ៉ាក់',
-    gender: 'ប្រុស',
-    status: 'ឈប់រៀន',
-  },
-  {
-    id: 8,
-    code: '0008',
-    name: 'គឹម ម៉ាលី',
-    gender: 'ស្រី',
-    status: 'ផ្ទេរកាសិក្សា',
-  },
-]
 
 const STATUS_OPTIONS = [
   { label: 'មករៀន', value: 'present', color: 'green' },
@@ -102,36 +38,103 @@ function RouteComponent() {
   useTitle('គ្រប់គ្រងវត្តមាន')
   const router = useRouter()
   const { attendanceId }: any = Route.useParams()
+  const courseId = Number(attendanceId)
+  const today = new Date().toISOString().split('T')[0]
+  const queryClient = useQueryClient()
 
-  // កំណត់ Default ជា 'absent' សម្រាប់អ្នកកំពុងសិក្សាទាំងអស់
-  const [selected, setSelected] = useState<Record<number, string>>(() => {
-    const initial: Record<number, string> = {}
-    students.forEach((s) => {
-      if (s.status === 'កំពុងសិក្សា') initial[s.id] = 'absent'
-    })
-    return initial
+  // 1) Fetch Students for the course
+  const { data: studentsData, isLoading: isLoadStudents } = useQuery({
+    queryKey: ['course_students', courseId],
+    queryFn: () => getCourseStudents(courseId),
+  })
+  const students = studentsData || []
+  
+  // 1.1) Fetch Course Details
+  const { data: course, isLoading: isLoadCourse } = useQuery({
+    queryKey: ['course_detail', courseId],
+    queryFn: () => getCourseById(courseId),
   })
 
-  const [isSubmitting, setIsSubmitting] = useState(false)
+  // 2) Fetch existing attendance for today
+  const { data: existingRecordsData, isLoading: isLoadAttendance } = useQuery({
+    queryKey: ['course_attendance', courseId, today],
+    queryFn: () => getCourseAttendance(courseId, today),
+  })
+  const existingRecords = existingRecordsData || []
 
-  const activeStudents = students.filter((s) => s.status === 'កំពុងសិក្សា')
+  const [selected, setSelected] = useState<Record<string, string>>({})
+
+  // 3) Prepopulate selections
+  useEffect(() => {
+    if (isLoadStudents || isLoadAttendance || isLoadCourse) return
+    const initial: Record<string, string> = {}
+
+    // If existing records found, prepopulate with them
+    if (existingRecords && existingRecords.length > 0) {
+      existingRecords.forEach((record: any) => {
+        initial[record.studentId] = record.status
+      })
+      // Fill the rest with absent
+      students.forEach((s: any) => {
+        if (
+          !initial[s.id] &&
+          s.isActive &&
+          s.educationalStatus === 'enrolled'
+        ) {
+          initial[s.id] = 'absent'
+        }
+      })
+    } else {
+      // Default all enrolled to absent
+      students.forEach((s: any) => {
+        if (s.isActive && s.educationalStatus === 'enrolled') {
+          initial[s.id] = 'absent'
+        }
+      })
+    }
+
+    setSelected(initial)
+  }, [studentsData, existingRecordsData, isLoadStudents, isLoadAttendance])
+
+  const mutation = useMutation({
+    mutationFn: markBulkAttendance,
+    onSuccess: () => {
+      toast.success('រក្សាទុកវត្តមានបានជោគជ័យ!')
+      queryClient.invalidateQueries({
+        queryKey: ['course_attendance', courseId, today],
+      })
+    },
+    onError: (error: any) => {
+      toast.error(
+        error.response?.data?.message || error.message || 'មានបញ្ហាបច្ចេកទេស',
+      )
+    },
+  })
+
+  // activeStudents
+  const activeStudents = useMemo(
+    () =>
+      students.filter(
+        (s: any) => s.isActive && s.educationalStatus === 'enrolled',
+      ),
+    [students],
+  )
 
   // ប្តូរ Status ម្នាក់ៗ
-  const handleSelect = (studentId: number, status: string) => {
+  const handleSelect = (studentId: string, status: string) => {
     setSelected((prev) => ({ ...prev, [studentId]: status }))
   }
 
   // ជ្រើសរើសទាំងអស់ (Select All)
   const handleSelectAll = (status: string) => {
     const newSelection = { ...selected }
-    activeStudents.forEach((s) => {
+    activeStudents.forEach((s: any) => {
       newSelection[s.id] = status
     })
     setSelected(newSelection)
   }
 
   const handleSubmit = async () => {
-    // ឆែកមើលថាគ្រប់គ្នាមាន Status ឬនៅ (ការពារករណី null)
     const markedCount = Object.keys(selected).length
     if (markedCount < activeStudents.length) {
       toast.error('សូមបញ្ចូលវត្តមានឱ្យបានគ្រប់សិស្ស!')
@@ -139,30 +142,18 @@ function RouteComponent() {
     }
 
     const payload = {
-      courseId: Number(attendanceId),
-      date: new Date().toISOString().split('T')[0],
-      session: 1, // ឬតាម dynamic session
-      marks: activeStudents.map((s) => ({
-        studentId: s.id.toString(),
+      courseId: courseId,
+      date: today,
+      session: course?.sessionTime?.shift === 'morning' ? 1 : course?.sessionTime?.shift === 'evening' ? 2 : 3,
+      recordedBy: '1', // hardcoded user string ID for now
+      mark: activeStudents.map((s: any) => ({
+        studentId: s.id,
         status: selected[s.id],
         notes: '',
       })),
     }
 
-    try {
-      setIsSubmitting(true)
-      console.log('Payload to Backend:', payload)
-
-      // កន្លែងនេះដាក់ API Call របស់អ្នក
-      // await api.post('/attendance', payload)
-
-      await new Promise((res) => setTimeout(res, 1000)) // បន្លំការរង់ចាំ
-      toast.success('រក្សាទុកវត្តមានបានជោគជ័យ!')
-    } catch (error: any) {
-      toast.error(error.message || 'មានបញ្ហាបច្ចេកទេស')
-    } finally {
-      setIsSubmitting(false)
-    }
+    mutation.mutate(payload)
   }
 
   return (
@@ -194,7 +185,7 @@ function RouteComponent() {
           <Button variant="soft" color="gray" asChild>
             <Link
               to="/admin/course/attendance/report/$attendanceReportId"
-              params={{ attendanceReportId: '1' }}
+              params={{ attendanceReportId: courseId.toString() }}
             >
               <FaFileAlt /> របាយការណ៍
             </Link>
@@ -203,7 +194,7 @@ function RouteComponent() {
             size="2"
             color="blue"
             onClick={handleSubmit}
-            loading={isSubmitting}
+            loading={mutation.isPending}
           >
             <FaSave /> រក្សាទុកទិន្នន័យ
           </Button>
@@ -217,16 +208,29 @@ function RouteComponent() {
         className="text-center p-6 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl border border-blue-100"
       >
         <Text size="4" weight="bold" className="text-blue-900">
-          ថ្នាក់បរិញ្ញាបត្រ វិទ្យាសាស្រ្ដកុំព្យូទ័រ
+          {course?.schedule?.academicLevel?.level === 'Bachelor'
+            ? 'ថ្នាក់បរិញ្ញាបត្រ'
+            : course?.schedule?.academicLevel?.level === 'Associate'
+              ? 'ថ្នាក់បរិញ្ញាបត្ររង'
+              : course?.schedule?.academicLevel?.level === 'Master'
+                ? 'ថ្នាក់បរិញ្ញាបត្រជាន់ខ្ពស់'
+                : course?.schedule?.academicLevel?.level === 'PhD'
+                  ? 'ថ្នាក់បណ្ឌិត'
+                  : ''}{' '}
+          {course?.schedule?.faculty?.name || '...'}
         </Text>
         <Flex
           gap="4"
           justify="center"
           className="text-blue-700/80 text-sm italic"
         >
-          <Text>ជំនាន់ទី១៩ ឆ្នាំទី៤ ឆមាស២</Text>
+          <Text>
+            ជំនាន់ទី{course?.schedule?.generation || '--'} ឆ្នាំទី{course?.schedule?.year || '--'} ឆមាស{course?.schedule?.semester || '--'}
+          </Text>
           <Text>|</Text>
-          <Text>វេន៖ ពេលយប់</Text>
+          <Text>
+            វេន៖ {course?.schedule?.studyShift === 'morning' ? 'ព្រឹក' : course?.schedule?.studyShift === 'evening' ? 'ល្ងាច' : 'យប់'}
+          </Text>
           <Text>|</Text>
           <Text>កាលបរិច្ឆេទ៖ {new Date().toLocaleDateString('kh-KH')}</Text>
         </Flex>
@@ -257,7 +261,7 @@ function RouteComponent() {
               noRightBorder
               className="bg-blue-600 border-blue-600"
             >
-              ម៉ោងសិក្សា (6:00 PM - 7:30 PM)
+              ម៉ោងសិក្សា ({course?.sessionTime?.firstSessionStartTime || 'TBA'} - {course?.sessionTime?.secondSessionEndTime || 'TBA'})
             </CellTable>
           </RowTable>
 
@@ -276,7 +280,9 @@ function RouteComponent() {
                     onCheckedChange={() => handleSelectAll(opt.value)}
                     checked={
                       activeStudents.length > 0 &&
-                      activeStudents.every((s) => selected[s.id] === opt.value)
+                      activeStudents.every(
+                        (s: any) => selected[s.id] === opt.value,
+                      )
                     }
                   />
                 </Flex>
@@ -286,8 +292,9 @@ function RouteComponent() {
         </HeaderTable>
 
         <Table.Body>
-          {students.map((student, idx) => {
-            const isInactive = student.status !== 'កំពុងសិក្សា'
+          {students.map((student: any, idx: number) => {
+            const isInactive =
+              !student.isActive || student.educationalStatus !== 'enrolled'
             return (
               <Table.Row
                 key={student.id}
@@ -295,20 +302,23 @@ function RouteComponent() {
               >
                 <CellTable className="text-center">{idx + 1}</CellTable>
                 <CellTable className="font-mono text-xs">
-                  {student.code}
+                  {student.phone}
                 </CellTable>
                 <CellTable
                   className={`text-left font-medium ${isInactive ? 'text-gray-400' : 'text-slate-700'}`}
                 >
                   {student.name}
                 </CellTable>
-                <CellTable className="text-center">{student.gender}</CellTable>
                 <CellTable className="text-center">
-                  <Badge
-                    variant="soft"
-                    color={student.status === 'កំពុងសិក្សា' ? 'blue' : 'red'}
-                  >
-                    {student.status}
+                  {student.gender === 'male'
+                    ? 'ប្រុស'
+                    : student.gender === 'female'
+                      ? 'ស្រី'
+                      : student.gender}
+                </CellTable>
+                <CellTable className="text-center">
+                  <Badge variant="soft" color={!isInactive ? 'blue' : 'red'}>
+                    {!isInactive ? 'កំពុងសិក្សា' : student.educationalStatus}
                   </Badge>
                 </CellTable>
 

@@ -1,17 +1,15 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
-import {
-  BookOpen,
-  Clock,
-  CalendarDays,
-  CheckCircle,
-  User,
-  Loader2,
-} from 'lucide-react'
+import { BookOpen, Clock, CalendarDays, CheckCircle, User, Pencil } from 'lucide-react'
 import { useQuery } from '@tanstack/react-query'
 import { useAcademicStore } from '@/stores/useAcademicStore'
 import FetchData from '@/components/FetchData'
-import { getCourses } from '@/api/CourseAPI'
+import { getCourses, deleteCourse } from '@/api/CourseAPI'
 import { Button, Flex, Text } from '@radix-ui/themes'
+import CourseCreate from './-actions/Create'
+import CourseUpdate from './-actions/Update'
+import { useState } from 'react'
+import toast from 'react-hot-toast'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 export const Route = createFileRoute('/admin/course/')({
   component: CourseListComponent,
@@ -19,32 +17,31 @@ export const Route = createFileRoute('/admin/course/')({
 
 function CourseListComponent() {
   const { selectedYearId } = useAcademicStore()
+  const [editingCourse, setEditingCourse] = useState<any>(null)
+  const [isUpdateOpen, setIsUpdateOpen] = useState(false)
 
-  // const { data: apiResponse, isLoading, error } = useQuery({
-  //   queryKey: ['courses', selectedYearId],
-  //   queryFn: () => getCourses(selectedYearId!),
-  //   enabled: !!selectedYearId,
-  // })
-  // const courses = apiResponse?.data
+  const queryClient = useQueryClient()
 
-  // ប្រើប្រាស់ Mock Data បើសិនជា API មិនទាន់មានទិន្នន័យ
-  const courses = [
-    {
-      id: 1,
-      name: 'Data Structure and Algorithm',
-      code: 'CS101',
-      day: 'Monday',
-      sessionTime: {
-        firstSessionStartTime: '06:00',
-        secondSessionEndTime: '07:30',
-      },
-      teacher: { name: 'សេង ស៊ង់' },
-      scheduleId: 101, // សម្រាប់ទៅកាន់ Schedule
-      schedule: { classroom: { name: 'ស្រុកកងមាស' } },
+  const {
+    data: apiResponse,
+    isLoading,
+    error,
+  } = useQuery({
+    queryKey: ['courses', selectedYearId],
+    queryFn: () => getCourses(selectedYearId!),
+    enabled: !!selectedYearId,
+  })
+
+  const courses = apiResponse ?? []
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: number) => deleteCourse(id),
+    onSuccess: () => {
+      toast.success('លុបមុខវិជ្ជាជោគជ័យ')
+      queryClient.invalidateQueries({ queryKey: ['courses'] })
     },
-  ]
-  const isLoading = false
-  const error = null
+    onError: () => toast.error('មិនអាចលុបបានទេ'),
+  })
 
   return (
     <div className="p-4 max-w-7xl mx-auto font-kantumruy">
@@ -53,18 +50,7 @@ function CourseListComponent() {
           គ្រប់គ្រងវគ្គសិក្សា
         </Text>
         <Flex gap="2">
-          {/* Export */}
-
-          <Button variant="outline" style={{ cursor: 'pointer' }}>
-            Export Excel
-          </Button>
-          <Button variant="outline" style={{ cursor: 'pointer' }}>
-            បោះពុម្ភ
-          </Button>
-
-          <Button variant="solid" style={{ cursor: 'pointer' }}>
-            បង្កើតថ្នាក់រៀន
-          </Button>
+          <CourseCreate />
         </Flex>
       </Flex>
       {/* Header */}
@@ -81,7 +67,35 @@ function CourseListComponent() {
                 <div className="p-3 bg-slate-100 text-slate-600 rounded-2xl group-hover:bg-blue-600 group-hover:text-white transition-colors duration-300">
                   <BookOpen size={24} />
                 </div>
-                <BadgeCode code={course.code} />
+                <Flex align="center" gap="3">
+                  <BadgeCode code={course.code} />
+                   <button
+                    className="text-orange-400 hover:text-orange-600 transition-colors"
+                    onClick={(e) => {
+                      e.preventDefault()
+                      setEditingCourse(course)
+                      setIsUpdateOpen(true)
+                    }}
+                  >
+                    <Flex align="center" gap="1">
+                       <Pencil size={14} />
+                       កែប្រែ
+                    </Flex>
+                  </button>
+                  <button
+                    className="text-red-400 hover:text-red-600 transition-colors"
+                    onClick={(e) => {
+                      e.preventDefault()
+                      if (
+                        window.confirm('តើអ្នកពិតជាចង់លុបមុខវិជ្ជានេះមែនទេ?')
+                      ) {
+                        deleteMutation.mutate(course.id)
+                      }
+                    }}
+                  >
+                    លុប
+                  </button>
+                </Flex>
               </div>
 
               {/* Course Info */}
@@ -135,6 +149,12 @@ function CourseListComponent() {
           ))}
         </div>
       </FetchData>
+
+      <CourseUpdate 
+        course={editingCourse} 
+        open={isUpdateOpen} 
+        onOpenChange={setIsUpdateOpen} 
+      />
     </div>
   )
 }

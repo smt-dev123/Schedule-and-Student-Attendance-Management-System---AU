@@ -8,9 +8,13 @@ import type {
 } from "@/validators/attendance";
 import type { AttendanceRepository } from "@/repositories/attendance.repository";
 import { HTTPException } from "hono/http-exception";
+import type { ScheduleService } from "./schedule.service";
 
 export class AttendanceService {
-  constructor(private readonly attendanceRepository: AttendanceRepository) {}
+  constructor(
+    private readonly attendanceRepository: AttendanceRepository,
+    private readonly scheduleService: ScheduleService
+  ) {}
 
   async markBulkAttendance(
     input: BulkAttendanceInput,
@@ -24,19 +28,6 @@ export class AttendanceService {
       notes: mark.notes,
       recordedBy: input.recordedBy,
     }));
-
-    const existenceChecks = await Promise.all(
-      records.map((record) =>
-        this.attendanceRepository.findAttendanceByStudentIdCourseIdAndDate(
-          record.studentId,
-          record.courseId,
-          new Date(record.date),
-        ),
-      ),
-    );
-    if (existenceChecks.some(Boolean)) {
-      throw new HTTPException(409, { message: "Attendance already marked" });
-    }
 
     return this.attendanceRepository.markAttendance(records);
   }
@@ -92,9 +83,55 @@ export class AttendanceService {
     );
   }
 
+  async generateAttendanceReportForCourse(courseId: number) {
+    const students = await this.scheduleService.getStudentsByCourseId(courseId);
+    const attendanceRecords = await this.attendanceRepository.getAttendanceByCourseId(courseId);
+
+    const report = students.map((student) => {
+      const studentRecords = attendanceRecords.filter((record) => record.studentId === student.id);
+      
+      let present = 0;
+      let absent = 0;
+      let late = 0;
+      let excused = 0;
+
+      studentRecords.forEach((record) => {
+        switch (record.status) {
+          case "present": present++; break;
+          case "absent": absent++; break;
+          case "late": late++; break;
+          case "excused": excused++; break;
+        }
+      });
+
+      const totalAbsent = absent + excused; // Mimicking the frontend logic where leave + absent = totalAbsent
+      
+      // Calculate score based on frontend logic: Math.max(0, 100 - (absent + leave) * 5)
+      // Here leave means excused. Wait, frontend uses `student.leave` for excused? We'll map `excused` to `leave`.
+      const score = Math.max(0, 10 - totalAbsent * 0.5); // If percentage is 100-(absent*5), score out of 10 might be 10 - absent*0.5
+
+      return {
+        id: student.id,
+        name: student.name,
+        gender: student.gender,
+        status: student.educationalStatus === "enrolled" ? "Enrolled" : "Dropped out",
+        phone: student.phone,
+        leave: excused,
+        absent: absent,
+        score: student.educationalStatus === "dropped out" ? 0 : score,
+      };
+    });
+
+    return report;
+  }
+
   async getAttendanceByStudentId(
     studentId: string,
   ): Promise<AttendanceRecord[]> {
     return this.attendanceRepository.getAttendanceByStudentId(studentId);
+  }
+
+  async getAttendanceByCourseAndDate(courseId: number, date: Date) {
+    return this.attendanceRepository.getAttendanceByCourseAndDate(courseId, date);
   }
 }

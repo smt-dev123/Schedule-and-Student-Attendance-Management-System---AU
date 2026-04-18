@@ -5,8 +5,8 @@ import {
   RootTable,
   RowTable,
 } from '@/components/ui/tables/table'
-import api from '@/lib/axios'
 import { useAcademicStore } from '@/stores/useAcademicStore'
+import { getScheduleById } from '@/api/SchedulesAPI'
 import {
   Button,
   Flex,
@@ -18,6 +18,7 @@ import {
   Separator,
 } from '@radix-ui/themes'
 import { useQuery } from '@tanstack/react-query'
+import toast from 'react-hot-toast'
 import { createFileRoute, Link, useRouter } from '@tanstack/react-router'
 import {
   FaArrowLeft,
@@ -46,116 +47,12 @@ function RouteComponent() {
   const { scheduleId } = Route.useParams()
   const { selectedYearName } = useAcademicStore()
 
-  // const { data: res, isLoading, error } = useQuery({
-  //   queryKey: ['schedule', scheduleId],
-  //   queryFn: async () => {
-  //     const res = await api.get(`/schedules/${scheduleId}`)
-  //     return res.data
-  //   },
-  // })
+  const { data: res, isLoading, error } = useQuery({
+    queryKey: ['schedule', scheduleId],
+    queryFn: () => getScheduleById(Number(scheduleId)),
+  })
 
-  const res = {
-    id: 1,
-    generation: 19,
-    year: 4,
-    semester: 2,
-    department: {
-      name: 'វិទ្យាសាស្រ្ដ និងបច្ចេកវិទ្យា',
-    },
-    classroom: {
-      name: 'ស្រុកកងមាស',
-      building: {
-        name: 'សៀងណាំ',
-      },
-    },
-    studyShift: 'យប់',
-    courses: [
-      {
-        id: 1,
-        name: 'Introduction to Programming',
-        phone: '012345678',
-        day: 'Monday',
-        teacher: {
-          name: 'សេង ស៊ង់',
-        },
-        sessionTime: {
-          firstSessionStartTime: '06:00',
-          secondSessionEndTime: '07:30',
-        },
-      },
-      {
-        id: 2,
-        name: 'Database Management System',
-        phone: '012345678',
-        day: 'Tuesday',
-        teacher: {
-          name: 'សេង គ្រី',
-        },
-        sessionTime: {
-          firstSessionStartTime: '06:00',
-          secondSessionEndTime: '07:30',
-        },
-      },
-      {
-        id: 3,
-        name: 'Web Development',
-        phone: '012345678',
-        day: 'Wednesday',
-        teacher: {
-          name: 'សេង គ្រី',
-        },
-        sessionTime: {
-          firstSessionStartTime: '06:00',
-          secondSessionEndTime: '07:30',
-        },
-      },
-      {
-        id: 4,
-        name: 'Data Structures and Algorithms',
-        phone: '012345678',
-        day: 'Thursday',
-        teacher: {
-          name: 'សេង ស៊ង់',
-        },
-        sessionTime: {
-          firstSessionStartTime: '06:00',
-          secondSessionEndTime: '07:30',
-        },
-      },
-      {
-        id: 5,
-        name: 'Computer Networks',
-        phone: '012345678',
-        day: 'Friday',
-        teacher: {
-          name: 'សេង ស៊ង់',
-        },
-        sessionTime: {
-          firstSessionStartTime: '06:00',
-          secondSessionEndTime: '07:30',
-        },
-      },
-      {
-        id: 6,
-        name: 'Operating Systems',
-        phone: '012345678',
-        day: 'Saturday',
-        teacher: {
-          name: 'សេង ស៊ង់',
-        },
-        sessionTime: {
-          firstSessionStartTime: '06:00',
-          secondSessionEndTime: '07:30',
-        },
-      },
-    ],
-  }
-
-  const isLoading = false
-  const error = null
-
-  // const schedule = res?.data || res
-  const schedule = res
+  const schedule = res || null
 
   if (isLoading)
     return (
@@ -215,9 +112,9 @@ function RouteComponent() {
           <Button variant="soft" onClick={() => window.print()}>
             <FaPrint /> បោះពុម្ភ
           </Button>
-          <Button variant="solid" asChild>
+          <Button variant="solid" asChild onClick={() => toast.success('មុខងារកែប្រែកំពុងរៀបចំ...')}>
             <Link
-              to="/admin/classes/schedule/$scheduleId/edit"
+              to="/admin/course/schedule/$scheduleId"
               params={{ scheduleId: String(schedule.id) }}
             >
               <FaEdit /> កែប្រែទិន្នន័យ
@@ -389,7 +286,7 @@ function RouteComponent() {
       <Flex justify="center" p="4" className="text-gray-400 text-[10px]">
         <Text>
           បញ្ជាក់៖ កាលវិភាគនេះត្រូវបានធ្វើបច្ចុប្បន្នភាពចុងក្រោយនៅថ្ងៃទី{' '}
-          {new Date(schedule.updatedAt).toLocaleDateString('kh-KH')}
+          {schedule.updatedAt ? new Date(schedule.updatedAt).toLocaleDateString('kh-KH') : 'N/A'}
         </Text>
       </Flex>
     </div>
