@@ -8,7 +8,6 @@ import { ScheduleTable } from '@/features/schedule/ScheduleTable'
 import toast from 'react-hot-toast'
 import ScheduleCreate from './-actions/Create'
 import ScheduleUpdate from './-actions/Update'
-import OverrideCreate from './-actions/OverrideCreate'
 import { useState } from 'react'
 
 export const Route = createFileRoute('/admin/schedule/')({
@@ -53,7 +52,6 @@ function ScheduleListComponent() {
       <Flex justify="between" align="center" mb="4">
         <Text size="5" weight="bold">គ្រប់គ្រងកាលវិភាគសិក្សា</Text>
         <Flex gap="3">
-           <OverrideCreate />
            <ScheduleCreate />
         </Flex>
       </Flex>

@@ -8,6 +8,7 @@ import {
 import { useAcademicStore } from '@/stores/useAcademicStore'
 import { getScheduleById } from '@/api/SchedulesAPI'
 import UpcomingOverrides from '../../schedule/-actions/UpcomingOverrides'
+import OverrideCreate from '../../schedule/-actions/OverrideCreate'
 import {
   Button,
   Flex,
@@ -111,6 +112,7 @@ function RouteComponent() {
           </Box>
         </Flex>
         <Flex gap="2">
+          <OverrideCreate scheduleId={Number(scheduleId)} />
           <Button variant="soft" color="gray">
             <FaFileExport /> Export Excel
           </Button>

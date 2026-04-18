@@ -17,7 +17,11 @@ import { getTeachers } from '@/api/TeacherAPI'
 import { getRoom } from '@/api/RoomAPI'
 import { FaCalendarAlt, FaBan } from 'react-icons/fa'
 
-const OverrideCreate = () => {
+interface Props {
+  scheduleId?: number
+}
+
+const OverrideCreate = ({ scheduleId }: Props) => {
   const queryClient = useQueryClient()
   const [open, setOpen] = useState(false)
 
@@ -40,11 +44,19 @@ const OverrideCreate = () => {
   const isCancelled = watch('isCancelled')
 
   // Fetch courses for the selected date
-  const { data: dailyCourses = [], isLoading: isLoadingCourses } = useQuery({
+  const { data: allDailyCourses = [], isLoading: isLoadingCourses } = useQuery({
     queryKey: ['daily_schedule', selectedDate],
     queryFn: () => getDailySchedule(selectedDate),
     enabled: !!selectedDate && open,
   })
+
+  // Filter courses by scheduleId if provided
+  const dailyCourses = useMemo(() => {
+    if (!scheduleId) return allDailyCourses
+    return (allDailyCourses as any[]).filter(
+      (c: any) => Number(c.scheduleId) === Number(scheduleId),
+    )
+  }, [allDailyCourses, scheduleId])
 
   // Fetch teachers and rooms for overrides
   const { data: teachers = [] } = useQuery({
