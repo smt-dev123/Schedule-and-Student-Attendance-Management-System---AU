@@ -18,6 +18,7 @@ import { TranslationRepository } from "@/repositories/translation.repository";
 import { NotificationRepository } from "@/repositories/notification.repository";
 import { AcademicYearRepository } from "@/repositories/academic-year.repository";
 import { MajorRepository } from "@/repositories/major.repository";
+import { CourseOverrideRepository } from "@/repositories/course-override.repository";
 
 // Services
 import { AcademicLevelService } from "@/services/academic-level.service";
@@ -35,6 +36,7 @@ import { TranslationService } from "@/services/translation.service";
 import { NotificationService } from "@/services/notification.service";
 import { AcademicYearService } from "@/services/academic-year.service";
 import { MajorService } from "@/services/major.service";
+import { CourseOverrideService } from "@/services/course-override.service";
 
 // WebSocket
 import { WebSocketManager } from "@/lib/ws-manager";
@@ -61,6 +63,7 @@ export interface ICradle {
   translationRepository: TranslationRepository;
   notificationRepository: NotificationRepository;
   majorRepository: MajorRepository;
+  courseOverrideRepository: CourseOverrideRepository;
 
   // Services
   academicLevelService: AcademicLevelService;
@@ -78,6 +81,7 @@ export interface ICradle {
   notificationService: NotificationService;
   academicYearService: AcademicYearService;
   majorService: MajorService;
+  courseOverrideService: CourseOverrideService;
 }
 
 // Instantiate Infrastructure
@@ -100,6 +104,7 @@ const translationRepository = new TranslationRepository(db);
 const notificationRepository = new NotificationRepository(db);
 const academicYearRepository = new AcademicYearRepository(db);
 const majorRepository = new MajorRepository(db);
+const courseOverrideRepository = new CourseOverrideRepository(db);
 
 // Instantiate Services
 const academicLevelService = new AcademicLevelService(academicLevelRepository);
@@ -129,6 +134,7 @@ const notificationService = new NotificationService(
 );
 const academicYearService = new AcademicYearService(academicYearRepository);
 const majorService = new MajorService(majorRepository);
+const courseOverrideService = new CourseOverrideService(courseOverrideRepository);
 
 export const container: ICradle = {
   db,
@@ -150,6 +156,7 @@ export const container: ICradle = {
   translationRepository,
   notificationRepository,
   majorRepository,
+  courseOverrideRepository,
 
   academicLevelService,
   attendanceService,
@@ -166,4 +173,5 @@ export const container: ICradle = {
   notificationService,
   academicYearService,
   majorService,
+  courseOverrideService,
 };

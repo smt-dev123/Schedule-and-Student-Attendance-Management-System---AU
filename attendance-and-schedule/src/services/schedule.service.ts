@@ -1,5 +1,5 @@
 import { db } from "@/database";
-import { students, courses } from "@/database/schemas";
+import { students, courses, courseOverrides } from "@/database/schemas";
 import { and, eq } from "drizzle-orm";
 import type { CourseRepository } from "@/repositories/course.repository";
 import { ScheduleRepository } from "@/repositories/schedule.repository";
@@ -189,5 +189,64 @@ export class ScheduleService {
         )
     });
     return matchingStudents;
+  }
+
+  async getDailySchedule(date: string, facultyId?: number) {
+    const dayOfWeek = new Date(date).toLocaleDateString("en-US", { weekday: "long" }) as any;
+
+    // 1. Get all recurring courses for this day of week
+    const recurringCourses = await db.query.courses.findMany({
+      where: eq(courses.day, dayOfWeek),
+      with: {
+        schedule: {
+          with: {
+            faculty: true,
+            department: true,
+            academicLevel: true,
+            academicYear: true,
+            classroom: true,
+          }
+        },
+        teacher: true,
+        sessionTime: true,
+      }
+    });
+
+    // 2. Get overrides for this specific date
+    const overrides = await db.query.courseOverrides.findMany({
+      where: eq(courseOverrides.date, date),
+      with: {
+        replacementTeacher: true,
+        replacementClassroom : true,
+      }
+    });
+
+    // 3. Filter and merge
+    let schedule = recurringCourses.filter(c => {
+        // If there's an override that cancels this course, remove it
+        const override = overrides.find(o => o.originalCourseId === c.id);
+        return !override?.isCancelled;
+    }).map(c => {
+        const override = overrides.find(o => o.originalCourseId === c.id);
+        if (override) {
+            return {
+                ...c,
+                teacher: override.replacementTeacher || c.teacher,
+                classroom: override.replacementClassroom || (c.schedule as any).classroom,
+                isOverridden: true,
+                overrideNote: override.note,
+            };
+        }
+        return {
+            ...c,
+            isOverridden: false,
+        };
+    });
+
+    if (facultyId) {
+        schedule = schedule.filter(c => (c.schedule as any).facultyId === facultyId);
+    }
+
+    return schedule;
   }
 }

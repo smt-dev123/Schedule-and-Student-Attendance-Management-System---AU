@@ -9,6 +9,7 @@ import {
   index,
   text,
   unique,
+  date,
 } from "drizzle-orm/pg-core";
 import {
   academicLevel,
@@ -173,6 +174,20 @@ export const courses = pgTable(
     ),
   ],
 );
+
+export const courseOverrides = pgTable("course_overrides", {
+  id: serial("id").primaryKey(),
+  originalCourseId: integer("original_course_id")
+    .notNull()
+    .references(() => courses.id, { onDelete: "cascade" }),
+  replacementTeacherId: text("replacement_teacher_id").references(() => teachers.id),
+  replacementClassroomId: integer("replacement_classroom_id").references(() => classrooms.id),
+  date: date("date").notNull(),
+  isCancelled: boolean("is_cancelled").default(false),
+  note: varchar("note", { length: 500 }),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
 
 export const teachers = pgTable(
   "teachers",

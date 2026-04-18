@@ -14,6 +14,8 @@ const dayEnum = z.enum([
   "Wednesday",
   "Thursday",
   "Friday",
+  "Saturday",
+  "Sunday",
 ]);
 const studyShiftEnum = z.enum(["morning", "evening", "night"]);
 /**
@@ -231,10 +233,12 @@ export const scheduleWithCoursesSchema = z.object({
 export const scheduleWithCoursesUpdateSchema = z.object({
   schedule: scheduleUpdateSchema,
   courses: z.array(
-    courseSchema.extend({
-      id: z.coerce.number().positive().optional(),
-      scheduleId: z.coerce.number().positive().optional(),
-    }).omit({ scheduleId: true })
+    courseSchema
+      .extend({
+        id: z.coerce.number().positive().optional(),
+        scheduleId: z.coerce.number().positive().optional(),
+      })
+      .omit({ scheduleId: true }),
   ),
 });
 
@@ -246,4 +250,23 @@ export type ScheduleWithCoursesInput = z.infer<
 >;
 export type ScheduleWithCoursesUpdateInput = z.infer<
   typeof scheduleWithCoursesUpdateSchema
+>;
+
+/**
+ * Course Overrides
+ */
+export const courseOverrideSchema = z.object({
+  originalCourseId: z.coerce.number().positive(),
+  replacementTeacherId: z.string().optional().nullable(),
+  replacementClassroomId: z.coerce.number().positive().optional().nullable(),
+  date: z.coerce.date(),
+  isCancelled: z.boolean().default(false),
+  note: z.string().optional().nullable(),
+});
+
+export const courseOverrideUpdateSchema = courseOverrideSchema.partial();
+
+export type CourseOverrideInput = z.infer<typeof courseOverrideSchema>;
+export type CourseOverrideUpdateInput = z.infer<
+  typeof courseOverrideUpdateSchema
 >;

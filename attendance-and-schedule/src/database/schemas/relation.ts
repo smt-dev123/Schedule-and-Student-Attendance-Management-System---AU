@@ -11,6 +11,7 @@ import {
   academicYears,
   studentAcademicYears,
   majors,
+  courseOverrides,
 } from "./academic";
 import { buildings, classrooms } from "./infrastructure";
 import { courses } from "./academic";
@@ -169,7 +170,7 @@ export const sessionTimesRelations = relations(sessionTimes, ({ many }) => ({
 }));
 
 // Course Relations
-export const coursesRelations = relations(courses, ({ one }) => ({
+export const coursesRelations = relations(courses, ({ one, many }) => ({
   teacher: one(teachers, {
     fields: [courses.teacherId],
     references: [teachers.id],
@@ -182,7 +183,26 @@ export const coursesRelations = relations(courses, ({ one }) => ({
     fields: [courses.sessionTimeId],
     references: [sessionTimes.id],
   }),
+  overrides: many(courseOverrides),
 }));
+
+export const courseOverridesRelations = relations(
+  courseOverrides,
+  ({ one }) => ({
+    originalCourse: one(courses, {
+      fields: [courseOverrides.originalCourseId],
+      references: [courses.id],
+    }),
+    replacementTeacher: one(teachers, {
+      fields: [courseOverrides.replacementTeacherId],
+      references: [teachers.id],
+    }),
+    replacementClassroom: one(classrooms, {
+      fields: [courseOverrides.replacementClassroomId],
+      references: [classrooms.id],
+    }),
+  }),
+);
 
 // Attendance Relations
 export const attendanceRecordsRelations = relations(

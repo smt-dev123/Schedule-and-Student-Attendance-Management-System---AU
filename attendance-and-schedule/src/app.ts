@@ -17,6 +17,7 @@ import notificationRoutes from "./routes/notification.routes";
 import authRoutes from "./routes/auth.routes";
 import academicYearRoutes from "./routes/academic-year.routes";
 import majorRoutes from "./routes/major.routes";
+import courseOverrideRoutes from "./routes/course-override.routes";
 import { auth } from "./lib/auth";
 import { errorHandler } from "./middlewares/error";
 import { cors } from "hono/cors";
@@ -66,6 +67,7 @@ app.route("/api/notifications", notificationRoutes);
 app.route("/api/authentications", authRoutes);
 app.route("/api/academic-years", academicYearRoutes);
 app.route("/api/majors", majorRoutes);
+app.route("/api/schedule-overrides", courseOverrideRoutes);
 
 app.onError((e, c) => errorHandler(c, e));
 

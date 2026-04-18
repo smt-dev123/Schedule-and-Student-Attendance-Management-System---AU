@@ -7,6 +7,7 @@ import {
 } from '@/components/ui/tables/table'
 import { useAcademicStore } from '@/stores/useAcademicStore'
 import { getScheduleById } from '@/api/SchedulesAPI'
+import UpcomingOverrides from '../../schedule/-actions/UpcomingOverrides'
 import {
   Button,
   Flex,
@@ -47,7 +48,11 @@ function RouteComponent() {
   const { scheduleId } = Route.useParams()
   const { selectedYearName } = useAcademicStore()
 
-  const { data: res, isLoading, error } = useQuery({
+  const {
+    data: res,
+    isLoading,
+    error,
+  } = useQuery({
     queryKey: ['schedule', scheduleId],
     queryFn: () => getScheduleById(Number(scheduleId)),
   })
@@ -112,14 +117,6 @@ function RouteComponent() {
           <Button variant="soft" onClick={() => window.print()}>
             <FaPrint /> បោះពុម្ភ
           </Button>
-          <Button variant="solid" asChild onClick={() => toast.success('មុខងារកែប្រែកំពុងរៀបចំ...')}>
-            <Link
-              to="/admin/course/schedule/$scheduleId"
-              params={{ scheduleId: String(schedule.id) }}
-            >
-              <FaEdit /> កែប្រែទិន្នន័យ
-            </Link>
-          </Button>
         </Flex>
       </Flex>
 
@@ -166,6 +163,8 @@ function RouteComponent() {
           </Flex>
         </Flex>
       </Card>
+
+      <UpcomingOverrides scheduleId={Number(scheduleId)} />
 
       {/* Timetable Table Grid */}
       <RootTable>
@@ -286,7 +285,9 @@ function RouteComponent() {
       <Flex justify="center" p="4" className="text-gray-400 text-[10px]">
         <Text>
           បញ្ជាក់៖ កាលវិភាគនេះត្រូវបានធ្វើបច្ចុប្បន្នភាពចុងក្រោយនៅថ្ងៃទី{' '}
-          {schedule.updatedAt ? new Date(schedule.updatedAt).toLocaleDateString('kh-KH') : 'N/A'}
+          {schedule.updatedAt
+            ? new Date(schedule.updatedAt).toLocaleDateString('kh-KH')
+            : 'N/A'}
         </Text>
       </Flex>
     </div>
