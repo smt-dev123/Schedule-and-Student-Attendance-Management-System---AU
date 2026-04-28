@@ -17,6 +17,7 @@ import { TeacherRepository } from "@/repositories/teacher.repository";
 import { TranslationRepository } from "@/repositories/translation.repository";
 import { NotificationRepository } from "@/repositories/notification.repository";
 import { AcademicYearRepository } from "@/repositories/academic-year.repository";
+import { ScheduleOverrideRepository } from "@/repositories/schedule-override.repository";
 
 // Services
 import { AcademicLevelService } from "@/services/academic-level.service";
@@ -33,6 +34,7 @@ import { TranslationService } from "@/services/translation.service";
 import { NotificationService } from "@/services/notification.service";
 import { AcademicYearService } from "@/services/academic-year.service";
 import { CourseService } from "@/services/course.service";
+import { ScheduleOverrideService } from "@/services/schedule-override.service";
 
 // WebSocket
 import { WebSocketManager } from "@/lib/ws-manager";
@@ -61,6 +63,7 @@ export interface ICradle {
   translationRepository: TranslationRepository;
   notificationRepository: NotificationRepository;
   skillRepository: SkillRepository;
+  scheduleOverrideRepository: ScheduleOverrideRepository;
 
   // Services
   academicLevelService: AcademicLevelService;
@@ -78,6 +81,7 @@ export interface ICradle {
   academicYearService: AcademicYearService;
   courseService: CourseService;
   skillService: SkillService;
+  scheduleOverrideService: ScheduleOverrideService;
 }
 
 // Instantiate Infrastructure
@@ -100,6 +104,7 @@ const translationRepository = new TranslationRepository(db);
 const notificationRepository = new NotificationRepository(db);
 const academicYearRepository = new AcademicYearRepository(db);
 const skillRepository = new SkillRepository(db);
+const scheduleOverrideRepository = new ScheduleOverrideRepository(db);
 // Instantiate Services
 const academicLevelService = new AcademicLevelService(academicLevelRepository);
 const attendanceService = new AttendanceService(
@@ -136,6 +141,7 @@ const notificationService = new NotificationService(
 const academicYearService = new AcademicYearService(academicYearRepository);
 const courseService = new CourseService(courseRepository);
 const skillService = new SkillService(skillRepository);
+const scheduleOverrideService = new ScheduleOverrideService(scheduleOverrideRepository, db);
 
 export const container: ICradle = {
   db,
@@ -157,6 +163,7 @@ export const container: ICradle = {
   translationRepository,
   notificationRepository,
   skillRepository,
+  scheduleOverrideRepository,
 
   academicLevelService,
   attendanceService,
@@ -173,4 +180,5 @@ export const container: ICradle = {
   academicYearService,
   courseService,
   skillService,
+  scheduleOverrideService,
 };

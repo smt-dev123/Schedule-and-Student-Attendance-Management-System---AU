@@ -48,7 +48,7 @@ function RouteComponent() {
     queryFn: () => getCourseStudents(courseId),
   })
   const students = studentsData || []
-  
+
   // 1.1) Fetch Course Details
   const { data: course, isLoading: isLoadCourse } = useQuery({
     queryKey: ['course_detail', courseId],
@@ -144,8 +144,16 @@ function RouteComponent() {
     const payload = {
       courseId: courseId,
       date: today,
-      session: course?.sessionTime?.shift === 'morning' ? 1 : course?.sessionTime?.shift === 'evening' ? 2 : 3,
-      recordedBy: '1', // hardcoded user string ID for now
+      session:
+        course?.schedule?.sessionTime?.shift === 'morning'
+          ? 1
+          : course?.schedule?.sessionTime?.shift === 'evening'
+            ? 2
+            : 3,
+      academicYearId: course?.academicYearId,
+      facultyId: course?.schedule?.faculty?.id,
+      departmentId: course?.schedule?.department?.id,
+      recordedBy: 1, // hardcoded for now, coerce to number
       mark: activeStudents.map((s: any) => ({
         studentId: s.id,
         status: selected[s.id],
@@ -157,22 +165,26 @@ function RouteComponent() {
   }
 
   return (
-    <div className="mx-auto p-2 md:p-2 space-y-4">
+    <div className="mx-auto space-y-4">
       {/* Header Section */}
       <Flex
         justify="between"
         align="center"
-        className="bg-white p-4 rounded-xl shadow-sm border border-gray-100"
+        className="bg-white dark:bg-gray-900 p-4 rounded-xl shadow-sm border border-gray-100 dark:border-gray-800"
       >
         <Flex gap="4" align="center">
           <button
             onClick={() => router.history.back()}
-            className="p-2.5 bg-gray-50 hover:bg-gray-200 rounded-full transition-colors"
+            className="p-2.5 bg-gray-50 dark:bg-gray-800  hover:bg-gray-200 dark:hover:bg-gray-700 rounded-full transition-colors"
           >
-            <FaArrowLeft className="text-gray-600" />
+            <FaArrowLeft className="text-gray-600 dark:text-white" />
           </button>
           <Flex direction="column">
-            <Text size="5" weight="bold" className="text-slate-800">
+            <Text
+              size="5"
+              weight="bold"
+              className="text-slate-800 dark:text-white"
+            >
               សម្រង់វត្តមាននិស្សិត
             </Text>
             {/* <Text size="2" color="gray">
@@ -205,9 +217,9 @@ function RouteComponent() {
       <Flex
         direction="column"
         gap="1"
-        className="text-center p-6 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl border border-blue-100"
+        className="text-center p-6 bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-700"
       >
-        <Text size="4" weight="bold" className="text-blue-900">
+        <Text size="4" weight="bold" className="text-slate-800 dark:text-white">
           {course?.schedule?.academicLevel?.level === 'Bachelor'
             ? 'ថ្នាក់បរិញ្ញាបត្រ'
             : course?.schedule?.academicLevel?.level === 'Associate'
@@ -225,11 +237,18 @@ function RouteComponent() {
           className="text-blue-700/80 text-sm italic"
         >
           <Text>
-            ជំនាន់ទី{course?.schedule?.generation || '--'} ឆ្នាំទី{course?.schedule?.year || '--'} ឆមាស{course?.schedule?.semester || '--'}
+            ជំនាន់ទី{course?.schedule?.generation || '--'} ឆ្នាំទី
+            {course?.schedule?.year || '--'} ឆមាស
+            {course?.schedule?.semester || '--'}
           </Text>
           <Text>|</Text>
           <Text>
-            វេន៖ {course?.schedule?.studyShift === 'morning' ? 'ព្រឹក' : course?.schedule?.studyShift === 'evening' ? 'ល្ងាច' : 'យប់'}
+            វេន៖{' '}
+            {course?.schedule?.studyShift === 'morning'
+              ? 'ព្រឹក'
+              : course?.schedule?.studyShift === 'evening'
+                ? 'ល្ងាច'
+                : 'យប់'}
           </Text>
           <Text>|</Text>
           <Text>កាលបរិច្ឆេទ៖ {new Date().toLocaleDateString('kh-KH')}</Text>
@@ -261,7 +280,9 @@ function RouteComponent() {
               noRightBorder
               className="bg-blue-600 border-blue-600"
             >
-              ម៉ោងសិក្សា ({course?.sessionTime?.firstSessionStartTime || 'TBA'} - {course?.sessionTime?.secondSessionEndTime || 'TBA'})
+              ម៉ោងសិក្សា (
+              {course?.schedule?.sessionTime?.firstSessionStartTime || 'TBA'} -{' '}
+              {course?.schedule?.sessionTime?.secondSessionEndTime || 'TBA'})
             </CellTable>
           </RowTable>
 
@@ -302,10 +323,10 @@ function RouteComponent() {
               >
                 <CellTable className="text-center">{idx + 1}</CellTable>
                 <CellTable className="font-mono text-xs">
-                  {student.phone}
+                  {student.code}
                 </CellTable>
                 <CellTable
-                  className={`text-left font-medium ${isInactive ? 'text-gray-400' : 'text-slate-700'}`}
+                  className={`text-left font-medium dark:text-white ${isInactive ? 'text-gray-400' : 'text-slate-700'}`}
                 >
                   {student.name}
                 </CellTable>

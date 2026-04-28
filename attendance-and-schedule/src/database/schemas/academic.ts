@@ -10,6 +10,7 @@ import {
   text,
   unique,
   numeric,
+  date,
 } from "drizzle-orm/pg-core";
 import {
   academicLevel,
@@ -267,6 +268,31 @@ export const studentAcademicYears = pgTable(
     uniqueIndex("unique_student_academic_year").on(
       table.studentId,
       table.academicYearId,
+    ),
+  ],
+);
+
+export const scheduleOverrides = pgTable(
+  "schedule_overrides",
+  {
+    id: serial("id").primaryKey(),
+    originalCourseId: integer("original_course_id")
+      .notNull()
+      .references(() => courses.id, { onDelete: "cascade" }),
+    date: date("date").notNull(),
+    replacementTeacherId: integer("replacement_teacher_id")
+      .references(() => teachers.id, { onDelete: "set null" }),
+    replacementClassroomId: integer("replacement_classroom_id")
+      .references(() => classrooms.id, { onDelete: "set null" }),
+    isCancelled: boolean("is_cancelled").default(false),
+    note: varchar("note"),
+    createdAt: timestamp("created_at").defaultNow(),
+    updatedAt: timestamp("updated_at").defaultNow(),
+  },
+  (table) => [
+    uniqueIndex("unique_schedule_override").on(
+      table.originalCourseId,
+      table.date,
     ),
   ],
 );

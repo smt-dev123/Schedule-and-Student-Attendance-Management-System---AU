@@ -26,7 +26,12 @@ export class ScheduleRepository {
         department: { columns: { id: true, name: true } },
         academicLevel: { columns: { id: true, level: true } },
         academicYear: { columns: { id: true, name: true } },
-        classroom: { columns: { id: true, name: true } },
+        classroom: {
+          columns: { id: true, name: true },
+          with: {
+            building: { columns: { id: true, name: true } },
+          },
+        },
         sessionTime: {
           columns: {
             id: true,
@@ -53,7 +58,12 @@ export class ScheduleRepository {
         department: { columns: { id: true, name: true } },
         academicLevel: { columns: { id: true, level: true } },
         academicYear: { columns: { id: true, name: true } },
-        classroom: { columns: { id: true, name: true } },
+        classroom: {
+          columns: { id: true, name: true },
+          with: {
+            building: { columns: { id: true, name: true } },
+          },
+        },
         sessionTime: {
           columns: {
             id: true,

@@ -245,3 +245,27 @@ export const skillQuerySchema = z.object({
 export const skillIdParamSchema = z.object({
   id: z.coerce.number().positive(),
 });
+
+/* Schedule Override Schemas */
+export const scheduleOverrideSchema = z.object({
+  originalCourseId: z.coerce.number().positive(),
+  date: z.string(), // Drizzle date type expects string YYYY-MM-DD
+  replacementTeacherId: z.coerce.number().positive().nullable().optional(),
+  replacementClassroomId: z.coerce.number().positive().nullable().optional(),
+  isCancelled: z.boolean().default(false),
+  note: z.string().nullable().optional(),
+});
+export const scheduleOverrideUpdateSchema = scheduleOverrideSchema.partial();
+export const scheduleOverrideQuerySchema = z.object({
+  date: z.string().optional(),
+  page: z.coerce.number().positive().default(1),
+  limit: z.coerce.number().positive().default(10),
+});
+export const scheduleOverrideIdParamSchema = z.object({
+  id: z.coerce.number().positive(),
+});
+
+export type ScheduleOverrideInput = z.infer<typeof scheduleOverrideSchema>;
+export type ScheduleOverrideUpdateInput = z.infer<
+  typeof scheduleOverrideUpdateSchema
+>;

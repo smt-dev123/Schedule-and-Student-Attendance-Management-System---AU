@@ -17,6 +17,13 @@ router.get("/:id", async (c) => {
   return c.json({ data: course });
 });
 
+router.get("/:id/students", async (c) => {
+  const { courseService } = c.var.container;
+  const id = parseInt(c.req.param("id"));
+  const students = await courseService.getCourseStudents(id);
+  return c.json({ data: students });
+});
+
 router.post("/", zValidator("json", courseSchema), async (c) => {
   const { courseService } = c.var.container;
   const data = c.req.valid("json");

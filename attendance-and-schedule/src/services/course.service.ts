@@ -40,4 +40,8 @@ export class CourseService {
       throw new HTTPException(404, { message: "Course not found" });
     }
   }
+
+  async getCourseStudents(courseId: number): Promise<any[]> {
+    return this.courseRepo.getCourseStudents(courseId);
+  }
 }

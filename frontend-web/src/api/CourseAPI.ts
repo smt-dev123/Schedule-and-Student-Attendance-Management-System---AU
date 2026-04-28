@@ -30,5 +30,5 @@ export const getCourseById = async (id: number) => {
 
 export const getCourseStudents = async (id: number) => {
   const res = await api.get(`${ENDPOINT}/${id}/students`)
-  return res.data
+  return res.data.data ?? []
 }

@@ -129,12 +129,15 @@ export class AttendanceRepository {
       this.db
         .select({
           studentId: attendanceSummaries.studentId,
-          studentName: students.name,
+          name: students.name,
+          gender: students.gender,
+          phone: students.phone,
+          status: students.educationalStatus,
           total: attendanceSummaries.totalAttendance,
           present: attendanceSummaries.presentAttendance,
           absent: attendanceSummaries.absentAttendance,
           late: attendanceSummaries.lateAttendance,
-          excused: attendanceSummaries.excusedAttendance,
+          leave: attendanceSummaries.excusedAttendance,
           presentPct: attendanceSummaries.presentPercentage,
           absentPct: attendanceSummaries.absentPercentage,
           latePct: attendanceSummaries.latePercentage,
@@ -142,6 +145,7 @@ export class AttendanceRepository {
           withdrawFromExam: attendanceSummaries.withdrawFromExam,
           makeUpClass: attendanceSummaries.makeUpClass,
           courseName: courses.name,
+          score: sql<number>`GREATEST(0, 10 - (${attendanceSummaries.absentAttendance} * 0.5 + ${attendanceSummaries.excusedAttendance} * 0.25))`, // Mock score logic, adjust if needed
         })
         .from(attendanceSummaries)
         .innerJoin(students, eq(students.id, attendanceSummaries.studentId))
@@ -233,12 +237,12 @@ export class AttendanceRepository {
         latePercentage: sql`ROUND((${attendanceSummaries.lateAttendance}::numeric    / NULLIF(${attendanceSummaries.totalCourseSessions}, 0)) * 100, 2)`,
         excusedPercentage: sql`ROUND((${attendanceSummaries.excusedAttendance}::numeric / NULLIF(${attendanceSummaries.totalCourseSessions}, 0)) * 100, 2)`,
         withdrawFromExam: sql`
-        (${attendanceSummaries.excusedAttendance}::numeric / NULLIF(${attendanceSummaries.totalCourseSessions}, 0)) * 100 >= 30 and < 60 
-        OR (${attendanceSummaries.absentAttendance}::numeric / NULLIF(${attendanceSummaries.totalCourseSessions}, 0)) * 100 >= 20 and < 30
-        OR ((${attendanceSummaries.absentAttendance} + ${attendanceSummaries.excusedAttendance})::numeric / NULLIF(${attendanceSummaries.totalCourseSessions}, 0)) * 100 >= 25 and < 30
+        ((${attendanceSummaries.excusedAttendance}::numeric / NULLIF(${attendanceSummaries.totalCourseSessions}, 0)) * 100 >= 30 AND (${attendanceSummaries.excusedAttendance}::numeric / NULLIF(${attendanceSummaries.totalCourseSessions}, 0)) * 100 < 60)
+        OR ((${attendanceSummaries.absentAttendance}::numeric / NULLIF(${attendanceSummaries.totalCourseSessions}, 0)) * 100 >= 20 AND (${attendanceSummaries.absentAttendance}::numeric / NULLIF(${attendanceSummaries.totalCourseSessions}, 0)) * 100 < 30)
+        OR (((${attendanceSummaries.absentAttendance} + ${attendanceSummaries.excusedAttendance})::numeric / NULLIF(${attendanceSummaries.totalCourseSessions}, 0)) * 100 >= 25 AND ((${attendanceSummaries.absentAttendance} + ${attendanceSummaries.excusedAttendance})::numeric / NULLIF(${attendanceSummaries.totalCourseSessions}, 0)) * 100 < 30)
       `,
         makeUpClass: sql`
-        (${attendanceSummaries.excusedAttendance}::numeric / NULLIF(${attendanceSummaries.totalCourseSessions}, 0)) * 100 >= 60 and <= 100
+        ((${attendanceSummaries.excusedAttendance}::numeric / NULLIF(${attendanceSummaries.totalCourseSessions}, 0)) * 100 >= 60 AND (${attendanceSummaries.excusedAttendance}::numeric / NULLIF(${attendanceSummaries.totalCourseSessions}, 0)) * 100 <= 100)
       `,
         updatedAt: new Date(),
       })

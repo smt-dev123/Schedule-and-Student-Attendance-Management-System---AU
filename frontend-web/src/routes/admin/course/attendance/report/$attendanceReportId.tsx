@@ -9,10 +9,10 @@ import { Button, Flex, Text, Box } from '@radix-ui/themes'
 import { createFileRoute, useRouter } from '@tanstack/react-router'
 import { FaArrowLeft, FaFileExcel } from 'react-icons/fa'
 import { useState, useEffect } from 'react'
-import AttendancePDF from './-exports/ExportPDF'
-import { PDFDownloadLink } from '@react-pdf/renderer'
 import { useQuery } from '@tanstack/react-query'
 import { getCourseAttendanceReport } from '@/api/AttendanceAPI'
+
+import { getCourseById } from '@/api/CourseAPI'
 
 export const Route = createFileRoute(
   '/admin/course/attendance/report/$attendanceReportId',
@@ -36,8 +36,13 @@ function RouteComponent() {
     queryFn: () => getCourseAttendanceReport(courseId),
   })
 
+  const { data: course, isLoading: isLoadCourse } = useQuery({
+    queryKey: ['course', courseId],
+    queryFn: () => getCourseById(courseId),
+  })
+
   return (
-    <Box className="p-4 md:p-10 max-w-[1300px] mx-auto rounded bg-white min-h-screen">
+    <Box className="mx-auto rounded">
       {/* Action Buttons */}
       <Flex justify="between" align="center" mb="6" className="print:hidden">
         <Button
@@ -70,13 +75,15 @@ function RouteComponent() {
             របាយការណ៍វត្តមាន និងពិន្ទុប្រចាំឆមាស
           </Text>
         </Box>
-        <Box className="text-sm space-y-1 text-slate-600">
+        <Box className="text-sm space-y-1 text-slate-600 dark:text-slate-200">
           <Text as="div">
-            ឆ្នាំទី ៤ ឆមាស ១ | ជំនាញ៖ វិទ្យាសាស្រ្ដកុំព្យូទ័រ
+            ឆ្នាំទី {course?.schedule?.year || '--'} ឆមាសទី {course?.schedule?.semester || '--'} | ជំនាញ៖ {course?.schedule?.department?.name || '--'}
           </Text>
           <Text as="div">
             មុខវិជ្ជា៖{' '}
-            <span className="font-bold text-slate-900">Web Development</span>
+            <span className="font-bold text-slate-900 dark:text-slate-200">
+              {course?.name || '--'}
+            </span>
           </Text>
         </Box>
       </Box>
@@ -123,7 +130,7 @@ function RouteComponent() {
         </HeaderTable>
 
         <BodyTable>
-          {isLoading ? (
+          {isLoading || isLoadCourse ? (
             <RowTable>
               <CellTable
                 columSpan={10}
@@ -143,29 +150,30 @@ function RouteComponent() {
             </RowTable>
           ) : (
             students.map((student: any, index: number) => {
-              const totalAbsent = student.leave + student.absent
+              const totalAbsent = Number(student.leave || 0) + Number(student.absent || 0)
+              const statusStr = String(student.status || '').toLowerCase()
               const attendanceRate =
-                student.status === 'Dropped out'
+                statusStr === 'dropped out'
                   ? '0%'
                   : `${Math.max(0, 100 - totalAbsent * 5)}%`
 
               return (
                 <RowTable
                   key={index}
-                  className={`text-center ${student.status === 'Dropped out' ? 'bg-red-50/30' : ''}`}
+                  className={`text-center ${statusStr === 'dropped out' ? 'bg-red-50/30' : ''}`}
                 >
                   <CellTable>{index + 1}</CellTable>
                   <CellTable className="text-left font-medium uppercase text-[13px]">
                     {student.name}
                   </CellTable>
-                  <CellTable>{student.gender}</CellTable>
+                  <CellTable>{student.gender === 'male' ? 'ប្រុស' : student.gender === 'female' ? 'ស្រី' : student.gender}</CellTable>
                   <CellTable className="font-mono text-[12px]">
                     {student.phone}
                   </CellTable>
                   <CellTable>
                     <Text
                       size="1"
-                      color={student.status === 'Enrolled' ? 'green' : 'red'}
+                      color={statusStr === 'enrolled' ? 'green' : 'red'}
                     >
                       {student.status}
                     </Text>
@@ -193,7 +201,7 @@ function RouteComponent() {
 
       {/* Note Section */}
       <Box mt="6" className="grid grid-cols-2 gap-8 items-start">
-        <Box className="border border-slate-200 p-4 rounded-lg bg-slate-50/50">
+        <Box className="border border-slate-200 p-4 rounded-lg bg-slate-50/50 dark:bg-slate-800">
           <Text as="div" size="2" weight="bold" mb="2" className="underline">
             សម្គាល់៖
           </Text>

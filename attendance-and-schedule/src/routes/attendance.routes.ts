@@ -13,7 +13,7 @@ const router = new Hono<{ Variables: Variables }>();
 router.post(
   "/bulk",
   authentication,
-  roleMiddleware("teacher"),
+  roleMiddleware("admin", "staff", "teacher"),
   zValidator("json", bulkAttendanceSchema),
   async (c) => {
     const user = c.get("user");
@@ -27,7 +27,7 @@ router.post(
 router.get(
   "/student/:id",
   authentication,
-  roleMiddleware("staff"),
+  roleMiddleware("admin", "staff", "teacher"),
   async (c) => {
     const id = c.req.param("id");
     const { attendanceService } = c.get("container");
@@ -41,7 +41,7 @@ router.get(
 router.get(
   "/report",
   authentication,
-  roleMiddleware("staff"),
+  roleMiddleware("admin", "staff", "teacher"),
   zValidator("query", attendanceReportQuerySchema),
   async (c) => {
     const query = c.req.valid("query");

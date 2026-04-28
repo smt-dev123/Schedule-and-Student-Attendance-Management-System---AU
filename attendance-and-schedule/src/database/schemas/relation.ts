@@ -11,6 +11,7 @@ import {
   academicYears,
   studentAcademicYears,
   skills,
+  scheduleOverrides,
 } from "./academic";
 import { buildings, classrooms } from "./infrastructure";
 import { courses } from "./academic";
@@ -124,6 +125,7 @@ export const teachersRelations = relations(teachers, ({ one, many }) => ({
   }),
   courses: many(courses),
   attendanceRecords: many(attendanceRecords),
+  scheduleOverrides: many(scheduleOverrides),
 }));
 
 export const studentsRelations = relations(students, ({ one, many }) => ({
@@ -189,6 +191,7 @@ export const classroomsRelations = relations(classrooms, ({ one, many }) => ({
     references: [buildings.id],
   }),
   schedules: many(schedules),
+  scheduleOverrides: many(scheduleOverrides),
 }));
 
 export const sessionTimesRelations = relations(sessionTimes, ({ many }) => ({
@@ -210,6 +213,7 @@ export const coursesRelations = relations(courses, ({ one, many }) => ({
     references: [academicYears.id],
   }),
   attendanceRecords: many(attendanceRecords),
+  scheduleOverrides: many(scheduleOverrides),
 }));
 
 // Attendance Relations
@@ -260,6 +264,24 @@ export const notificationRecipientsRelations = relations(
     student: one(students, {
       fields: [notificationRecipients.studentId],
       references: [students.id],
+    }),
+  }),
+);
+
+export const scheduleOverridesRelations = relations(
+  scheduleOverrides,
+  ({ one }) => ({
+    originalCourse: one(courses, {
+      fields: [scheduleOverrides.originalCourseId],
+      references: [courses.id],
+    }),
+    replacementTeacher: one(teachers, {
+      fields: [scheduleOverrides.replacementTeacherId],
+      references: [teachers.id],
+    }),
+    replacementClassroom: one(classrooms, {
+      fields: [scheduleOverrides.replacementClassroomId],
+      references: [classrooms.id],
     }),
   }),
 );

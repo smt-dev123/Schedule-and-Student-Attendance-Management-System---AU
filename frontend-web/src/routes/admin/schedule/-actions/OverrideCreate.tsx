@@ -25,19 +25,13 @@ const OverrideCreate = ({ scheduleId }: Props) => {
   const queryClient = useQueryClient()
   const [open, setOpen] = useState(false)
 
-  const {
-    control,
-    register,
-    handleSubmit,
-    reset,
-    watch,
-    setValue,
-  } = useForm<any>({
-    defaultValues: {
-      date: new Date().toISOString().split('T')[0],
-      isCancelled: false,
-    },
-  })
+  const { control, register, handleSubmit, reset, watch, setValue } =
+    useForm<any>({
+      defaultValues: {
+        date: new Date().toISOString().split('T')[0],
+        isCancelled: false,
+      },
+    })
 
   const selectedDate = watch('date')
   const selectedCourseId = watch('originalCourseId')
@@ -76,7 +70,9 @@ const OverrideCreate = ({ scheduleId }: Props) => {
 
   // Find selected course details
   const selectedCourse = useMemo(() => {
-    return dailyCourses.find((c: any) => String(c.id) === String(selectedCourseId))
+    return dailyCourses.find(
+      (c: any) => String(c.id) === String(selectedCourseId),
+    )
   }, [dailyCourses, selectedCourseId])
 
   const mutation = useMutation({
@@ -96,8 +92,12 @@ const OverrideCreate = ({ scheduleId }: Props) => {
     const payload = {
       ...data,
       originalCourseId: Number(data.originalCourseId),
-      replacementTeacherId: data.replacementTeacherId ? String(data.replacementTeacherId) : null,
-      replacementClassroomId: data.replacementClassroomId ? Number(data.replacementClassroomId) : null,
+      replacementTeacherId: data.replacementTeacherId
+        ? String(data.replacementTeacherId)
+        : null,
+      replacementClassroomId: data.replacementClassroomId
+        ? Number(data.replacementClassroomId)
+        : null,
       date: new Date(data.date),
     }
     mutation.mutate(payload)
@@ -148,28 +148,42 @@ const OverrideCreate = ({ scheduleId }: Props) => {
                     disabled={isLoadingCourses || dailyCourses.length === 0}
                   >
                     <Select.Trigger
-                      placeholder={isLoadingCourses ? "កំពុងទាញទិន្នន័យ..." : dailyCourses.length === 0 ? "មិនមានម៉ោងសិក្សាទេ" : "ជ្រើសរើសមុខវិជ្ជា"}
+                      placeholder={
+                        isLoadingCourses
+                          ? 'កំពុងទាញទិន្នន័យ...'
+                          : dailyCourses.length === 0
+                            ? 'មិនមានម៉ោងសិក្សាទេ'
+                            : 'ជ្រើសរើសមុខវិជ្ជា'
+                      }
                       style={{ width: '100%' }}
                     />
                     <Select.Content position="popper">
                       {(dailyCourses as any[]).map((course: any) => (
                         <Select.Item key={course.id} value={String(course.id)}>
-                          {course.name} ({course.sessionTime?.firstSessionStartTime} - {course.teacher?.name})
+                          {course.name} (
+                          {course.sessionTime?.firstSessionStartTime} -{' '}
+                          {course.teacher?.name})
                         </Select.Item>
                       ))}
                     </Select.Content>
                   </Select.Root>
                 )}
               />
-              {dailyCourses.length === 0 && !isLoadingCourses && selectedDate && (
-                <Text size="1" color="gray" mt="1">មិនមានកាលវិភាគសម្រាប់ថ្ងៃចន្ទ/អង្គារ... នេះទេ</Text>
-              )}
+              {dailyCourses.length === 0 &&
+                !isLoadingCourses &&
+                selectedDate && (
+                  <Text size="1" color="gray" mt="1">
+                    មិនមានកាលវិភាគសម្រាប់ថ្ងៃចន្ទ/អង្គារ... នេះទេ
+                  </Text>
+                )}
             </Box>
 
             {selectedCourse && (
               <Box className="bg-blue-50 p-3 rounded-lg border border-blue-100 italic">
                 <Text size="2" color="blue">
-                  កាលវិភាគដើម៖ {selectedCourse.name} បង្រៀនដោយ {selectedCourse.teacher?.name} នៅបន្ទប់ {selectedCourse.schedule?.classroom?.name}
+                  កាលវិភាគដើម៖ {selectedCourse.name} បង្រៀនដោយ{' '}
+                  {selectedCourse.teacher?.name} នៅបន្ទប់{' '}
+                  {selectedCourse.schedule?.classroom?.name}
                 </Text>
               </Box>
             )}
@@ -178,18 +192,21 @@ const OverrideCreate = ({ scheduleId }: Props) => {
 
             <Box>
               <Flex gap="4" align="center" mb="3">
-                 <Text weight="bold">ការកំណត់ថ្មី</Text>
-                 <Flex align="center" gap="2">
-                    <input 
-                      type="checkbox" 
-                      id="isCancelled" 
-                      {...register('isCancelled')}
-                      className="w-4 h-4"
-                    />
-                    <label htmlFor="isCancelled" className="text-sm text-red-600 font-bold flex align-center gap-1">
-                      <FaBan /> រំលាយការបង្រៀន (Cancel Course)
-                    </label>
-                 </Flex>
+                <Text weight="bold">ការកំណត់ថ្មី</Text>
+                <Flex align="center" gap="2">
+                  <input
+                    type="checkbox"
+                    id="isCancelled"
+                    {...register('isCancelled')}
+                    className="w-4 h-4"
+                  />
+                  <label
+                    htmlFor="isCancelled"
+                    className="text-sm text-red-600 font-bold flex align-center gap-1"
+                  >
+                    <FaBan /> ឈប់សម្រាក
+                  </label>
+                </Flex>
               </Flex>
 
               {!isCancelled && (
@@ -206,7 +223,10 @@ const OverrideCreate = ({ scheduleId }: Props) => {
                           value={field.value ? String(field.value) : undefined}
                           onValueChange={field.onChange}
                         >
-                          <Select.Trigger placeholder="រក្សាទុកគ្រូដើម" style={{ width: '100%' }} />
+                          <Select.Trigger
+                            placeholder="រក្សាទុកគ្រូដើម"
+                            style={{ width: '100%' }}
+                          />
                           <Select.Content position="popper">
                             {(teachers as any[]).map((t: any) => (
                               <Select.Item key={t.id} value={String(t.id)}>
@@ -231,7 +251,10 @@ const OverrideCreate = ({ scheduleId }: Props) => {
                           value={field.value ? String(field.value) : undefined}
                           onValueChange={field.onChange}
                         >
-                          <Select.Trigger placeholder="រក្សាទុកបន្ទប់ដើម" style={{ width: '100%' }} />
+                          <Select.Trigger
+                            placeholder="រក្សាទុកបន្ទប់ដើម"
+                            style={{ width: '100%' }}
+                          />
                           <Select.Content position="popper">
                             {(rooms as any[]).map((r: any) => (
                               <Select.Item key={r.id} value={String(r.id)}>
@@ -260,11 +283,20 @@ const OverrideCreate = ({ scheduleId }: Props) => {
 
           <Flex gap="3" mt="6" justify="end">
             <Dialog.Close>
-              <Button variant="soft" color="gray" type="button" style={{ cursor: 'pointer' }}>
+              <Button
+                variant="soft"
+                color="gray"
+                type="button"
+                style={{ cursor: 'pointer' }}
+              >
                 បោះបង់
               </Button>
             </Dialog.Close>
-            <Button type="submit" loading={mutation.isPending} style={{ cursor: 'pointer' }}>
+            <Button
+              type="submit"
+              loading={mutation.isPending}
+              style={{ cursor: 'pointer' }}
+            >
               រក្សាទុក
             </Button>
           </Flex>

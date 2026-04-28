@@ -67,7 +67,7 @@ function CourseListComponent() {
           {courses.map((course: any) => (
             <div
               key={course.id}
-              className="group relative bg-white border border-gray-100 rounded-[32px] p-6 shadow-sm hover:shadow-xl transition-all duration-300 border-b-4 hover:border-b-blue-500"
+              className="group relative bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-6 shadow-sm hover:shadow-xl transition-all duration-300 border-b-4 hover:border-b-blue-500"
             >
               {/* Header Card */}
               <div className="flex justify-between items-start mb-5">
@@ -106,12 +106,12 @@ function CourseListComponent() {
               </div>
 
               {/* Course Info */}
-              <h3 className="text-xl font-bold text-gray-800 mb-4 line-clamp-1">
+              <h3 className="text-xl font-bold text-gray-800 dark:text-white mb-4 line-clamp-1">
                 {course.name}
               </h3>
 
               <div className="space-y-3 mb-8">
-                <div className="flex items-center text-sm text-gray-500">
+                <div className="flex items-center text-sm text-gray-500 dark:text-white">
                   <Clock size={16} className="mr-2 text-blue-500" />
                   <span>
                     {course.day} |{' '}
@@ -119,11 +119,13 @@ function CourseListComponent() {
                     {course.schedule?.sessionTime?.secondSessionEndTime}
                   </span>
                 </div>
-                <div className="flex items-center text-sm text-gray-500">
+                <div className="flex items-center text-sm text-gray-500 dark:text-white">
                   <User size={16} className="mr-2 text-blue-500" />
-                  <span className="truncate">គ្រូ៖ {course.teacher?.name}</span>
+                  <span className="truncate">
+                    គ្រូបង្រៀន៖ {course.teacher?.name}
+                  </span>
                 </div>
-                <div className="flex items-center text-sm text-gray-500 font-medium">
+                <div className="flex items-center text-sm text-gray-500 font-medium dark:text-white">
                   <div className="w-4 h-4 rounded-full bg-blue-100 flex items-center justify-center mr-2">
                     <div className="w-1.5 h-1.5 rounded-full bg-blue-600"></div>
                   </div>
@@ -134,7 +136,7 @@ function CourseListComponent() {
               {/* Action Buttons: Schedule & Attendance */}
               <div className="grid grid-cols-2 gap-3 pt-5 border-t border-gray-50">
                 <Link
-                  to="/admin/course/schedule/$scheduleId"
+                  to="/admin/schedule/$scheduleId"
                   params={{
                     scheduleId: String(course.scheduleId || course.id),
                   }}
@@ -167,14 +169,10 @@ function CourseListComponent() {
   )
 }
 
-// Sub-component សម្រាប់បង្ហាញកូដមុខវិជ្ជា
 function BadgeCode({ code }: { code: string }) {
   return (
     <div className="flex flex-col items-end">
-      <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
-        Code
-      </span>
-      <span className="text-sm font-mono font-bold text-slate-700 italic">
+      <span className="text-md font-mono font-bold text-slate-700 dark:text-white italic">
         {code || 'N/A'}
       </span>
     </div>

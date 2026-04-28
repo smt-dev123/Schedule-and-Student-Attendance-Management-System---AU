@@ -1,9 +1,9 @@
 // repository
 import { type DrizzleDb, type Transaction } from "@/database";
-import { courses } from "@/database/schemas";
+import { courses, students } from "@/database/schemas";
 import type { Course } from "@/types/academy";
 import type { CourseInput, CourseUpdateInput } from "@/validators/academy";
-import { eq, sql } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 
 const SESSION_DURATION = 1.5; // hours per session
 
@@ -14,11 +14,36 @@ export class CourseRepository {
     const client = tx ?? this.db;
     return client.query.courses.findFirst({
       where: eq(courses.id, id),
+      with: {
+        schedule: {
+          with: {
+            faculty: true,
+            academicLevel: true,
+            sessionTime: true,
+            classroom: true,
+            department: true,
+          },
+        },
+        teacher: true,
+      },
     });
   }
 
   async findAll(): Promise<Course[]> {
-    return this.db.query.courses.findMany();
+    return this.db.query.courses.findMany({
+      with: {
+        schedule: {
+          with: {
+            faculty: true,
+            academicLevel: true,
+            sessionTime: true,
+            classroom: true,
+            department: true,
+          },
+        },
+        teacher: true,
+      },
+    });
   }
 
   async create(data: CourseInput): Promise<Course | undefined> {
@@ -94,5 +119,26 @@ export class CourseRepository {
       .where(eq(courses.id, id))
       .returning();
     return course;
+  }
+
+  async getCourseStudents(courseId: number): Promise<any[]> {
+    const course = await this.db.query.courses.findFirst({
+      where: eq(courses.id, courseId),
+      with: { schedule: true },
+    });
+
+    if (!course || !course.schedule) return [];
+
+    const { schedule } = course;
+    return this.db.query.students.findMany({
+      where: and(
+        eq(students.facultyId, schedule.facultyId),
+        eq(students.departmentId, schedule.departmentId),
+        eq(students.academicLevelId, schedule.academicLevelId),
+        eq(students.generation, schedule.generation),
+        eq(students.semester, schedule.semester),
+        eq(students.academicYearId, schedule.academicYearId),
+      ),
+    });
   }
 }

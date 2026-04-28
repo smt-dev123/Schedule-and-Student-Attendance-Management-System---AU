@@ -34,6 +34,6 @@ export const markBulkAttendance = async (data: any) => {
 }
 
 export const getCourseAttendanceReport = async (courseId: number) => {
-    const res = await api.get(`/attendance/report/course/${courseId}`)
+    const res = await api.get(`/attendance/report`, { params: { courseId } })
     return res.data.data ?? []
 }

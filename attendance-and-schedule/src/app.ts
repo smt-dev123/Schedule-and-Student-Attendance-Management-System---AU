@@ -21,6 +21,7 @@ import { serveStatic } from "hono/bun";
 import { secureHeaders } from "hono/secure-headers";
 import skillRoutes from "./routes/skill.routes";
 import courseRoutes from "./routes/course.routes";
+import scheduleOverrideRoutes from "./routes/schedule-override.routes";
 
 const app = new Hono();
 
@@ -68,6 +69,7 @@ app.route("/api/notifications", notificationRoutes);
 app.route("/api/academic-years", academicYearRoutes);
 app.route("/api/skills", skillRoutes);
 app.route("/api/courses", courseRoutes);
+app.route("/api/schedule-overrides", scheduleOverrideRoutes);
 
 app.onError((e, c) => errorHandler(c, e));
 

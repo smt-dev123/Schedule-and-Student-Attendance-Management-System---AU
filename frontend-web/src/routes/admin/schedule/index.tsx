@@ -17,10 +17,16 @@ export const Route = createFileRoute('/admin/schedule/')({
 function ScheduleListComponent() {
   const { selectedYearId } = useAcademicStore()
   const queryClient = useQueryClient()
-  const [editingScheduleId, setEditingScheduleId] = useState<number | null>(null)
+  const [editingScheduleId, setEditingScheduleId] = useState<number | null>(
+    null,
+  )
   const [isUpdateOpen, setIsUpdateOpen] = useState(false)
 
-  const { data: schedulesResponse, isLoading, error } = useQuery({
+  const {
+    data: schedulesResponse,
+    isLoading,
+    error,
+  } = useQuery({
     queryKey: ['schedules', selectedYearId],
     queryFn: () => getSchedules({ academicYearId: selectedYearId! }),
     enabled: !!selectedYearId,
@@ -37,33 +43,34 @@ function ScheduleListComponent() {
     onError: () => toast.error('មិនអាចលុបបានទេ'),
   })
 
-  // បន្ថែម onDelete និង onEdit ទៅក្នុង data ដើម្បីឱ្យ Table cell ងាយស្រួលហៅ
   const enrichedSchedules = schedules.map((s: any) => ({
     ...s,
     onDelete: (id: number) => deleteMutation.mutate(id),
     onEdit: (id: number) => {
       setEditingScheduleId(id)
       setIsUpdateOpen(true)
-    }
+    },
   }))
 
   return (
     <Box p="4">
       <Flex justify="between" align="center" mb="4">
-        <Text size="5" weight="bold">គ្រប់គ្រងកាលវិភាគសិក្សា</Text>
+        <Text size="5" weight="bold">
+          គ្រប់គ្រងកាលវិភាគសិក្សា
+        </Text>
         <Flex gap="3">
-           <ScheduleCreate />
+          <ScheduleCreate />
         </Flex>
       </Flex>
- 
+
       <FetchData isLoading={isLoading} error={error} data={schedules}>
         <ScheduleTable data={enrichedSchedules} />
       </FetchData>
 
-      <ScheduleUpdate 
-        scheduleId={editingScheduleId} 
-        open={isUpdateOpen} 
-        onOpenChange={setIsUpdateOpen} 
+      <ScheduleUpdate
+        scheduleId={editingScheduleId}
+        open={isUpdateOpen}
+        onOpenChange={setIsUpdateOpen}
       />
     </Box>
   )
