@@ -93,8 +93,8 @@ const MajorUpdate = ({ data }: Props) => {
                 មុខជំនាញ
               </Text>
               <TextField.Root
-                {...register('name', { required: 'សូមបញ្ចូលឈ្មោះមុខជំនាញ' })}
-                placeholder="ឈ្មោះមុខជំនាញ"
+                {...register('name', { required: 'សូមបំពេញឈ្មោះមុខជំនាញ' })}
+                placeholder="សូមបំពេញឈ្មោះមុខជំនាញ"
               />
               {errors.name && (
                 <Text size="2" color="red">
@@ -105,34 +105,22 @@ const MajorUpdate = ({ data }: Props) => {
 
             <label>
               <Text as="div" size="2" mb="1" weight="bold">
-                ការពិពណ៌នា
-              </Text>
-              <TextField.Root
-                {...register('description')}
-                placeholder="ការពិពណ៌នា"
-              />
-            </label>
-
-            <label>
-              <Text as="div" size="2" mb="1" weight="bold">
                 ដេប៉ាតេម៉ង់
               </Text>
 
               <Controller
                 name="facultyId"
                 control={control}
-                rules={{ required: 'សូមជ្រើសរើសដេប៉ាតេម៉ង់' }}
                 render={({ field }) => (
                   <Select.Root
-                    // Convert field value to string for Radix compatibility
-                    value={field.value ? String(field.value) : ''}
+                    defaultValue={field.value?.toString() ?? ''}
                     onValueChange={(val) => field.onChange(Number(val))}
                   >
                     <Select.Trigger
-                      placeholder="ជ្រើសរើសដេប៉ាតេម៉ង់"
+                      placeholder="ដេប៉ាតេម៉ង់"
                       style={{ width: '100%' }}
                     />
-                    <Select.Content position="popper">
+                    <Select.Content>
                       {faculties?.map((faculty) => (
                         <Select.Item
                           value={String(faculty.id)}
@@ -145,23 +133,16 @@ const MajorUpdate = ({ data }: Props) => {
                   </Select.Root>
                 )}
               />
-              {errors.facultyId && (
-                <Text size="2" color="red">
-                  {errors.facultyId.message}
-                </Text>
-              )}
             </label>
           </Flex>
 
           <Flex gap="3" mt="4" justify="end">
             <Dialog.Close>
-              <Button variant="soft" color="gray" type="button">
+              <Button variant="soft" color="gray">
                 ចាកចេញ
               </Button>
             </Dialog.Close>
-            <Button type="submit" loading={mutation.isPending}>
-              រក្សាទុក
-            </Button>
+            <Button type="submit">រក្សាទុក</Button>
           </Flex>
         </form>
       </Dialog.Content>

@@ -85,8 +85,10 @@ const FacultyUpdate = ({ data }: Props) => {
                   មហាវិទ្យាល័យ
                 </Text>
                 <TextField.Root
-                  {...register('name', { required: 'Name is required' })}
-                  placeholder="Enter faculty name"
+                  {...register('name', {
+                    required: 'សូមបញ្ចូលឈ្មោះមហាវិទ្យាល័យ',
+                  })}
+                  placeholder="សូមបញ្ចូលឈ្មោះមហាវិទ្យាល័យ"
                 />
                 {errors.name && (
                   <Text size="2" color="red">
@@ -101,8 +103,13 @@ const FacultyUpdate = ({ data }: Props) => {
                 </Text>
                 <TextField.Root
                   {...register('description')}
-                  placeholder="Enter description"
+                  placeholder="សូមបញ្ចូលការពិពណ៌នា"
                 />
+                {errors.description && (
+                  <Text size="2" color="red">
+                    {errors.description.message}
+                  </Text>
+                )}
               </label>
             </Flex>
 
@@ -112,7 +119,9 @@ const FacultyUpdate = ({ data }: Props) => {
                   ចាកចេញ
                 </Button>
               </Dialog.Close>
-              <Button type="submit">រក្សាទុក</Button>
+              <Button type="submit">
+                {mutation.isPending ? 'កំពុងរក្សាទុក...' : 'រក្សាទុក'}
+              </Button>
             </Flex>
           </form>
         </Dialog.Content>

@@ -54,11 +54,13 @@ const DepartmentCreate = () => {
           <Flex direction="column" gap="3">
             <label>
               <Text as="div" size="2" mb="1" weight="bold">
-                តេប៉ាតឺម៉ង់
+                ដេប៉ាតេម៉ង់
               </Text>
               <TextField.Root
-                {...register('name', { required: 'Name is required' })}
-                placeholder="Enter department name"
+                {...register('name', {
+                  required: 'សូមបញ្ចូលឈ្មោះដេប៉ាតេម៉ង់',
+                })}
+                placeholder="សូមបញ្ចូលឈ្មោះដេប៉ាតេម៉ង់"
               />
               {errors.name && (
                 <Text size="2" color="red">
@@ -74,15 +76,23 @@ const DepartmentCreate = () => {
               <Controller
                 name="facultyId"
                 control={control}
+                rules={{
+                  required: 'សូមជ្រើសរើសមហាវិទ្យាល័យ',
+                }}
                 render={({ field }) => (
                   <Select.Root
                     defaultValue={field.value?.toString() ?? ''}
                     onValueChange={(val) => field.onChange(Number(val))}
                   >
                     <Select.Trigger
-                      placeholder="ដេប៉ាតេម៉ង់"
+                      placeholder="សូមជ្រើសរើសមហាវិទ្យាល័យ"
                       style={{ width: '100%' }}
                     />
+                    {errors.facultyId && (
+                      <Text size="2" color="red">
+                        {errors.facultyId.message}
+                      </Text>
+                    )}
                     <Select.Content>
                       {faculties?.map((faculty) => (
                         <Select.Item

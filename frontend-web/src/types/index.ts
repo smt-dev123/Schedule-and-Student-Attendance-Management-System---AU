@@ -20,8 +20,8 @@ export interface RoomType {
 
 export interface GradeLevelType {
   id?: number
-  level: string
-  description: string
+  level: AcademicLevelEnum
+  description?: string
 }
 
 export interface AcademicLevelType {
@@ -130,11 +130,13 @@ export interface TeachersType {
 
 export interface StudentsType {
   id?: string
+  studentCode: string
   name: string
   phone: string
   email: string
   password: string
   facultyId: number
+  skillId: number
   departmentId: number
   academicLevelId: number
   academicYearId: number | null
@@ -156,28 +158,19 @@ export interface CoursesType {
   name: string
   code: string
   credits: number
-  description: string
+  description?: string
   day: DayEnum
   teacherId: number
-  subjectId: number
-  sessionTimeId: number
   scheduleId: number
-  firstSessionNote: string
-  secondSessionNote: string
+  hours: string
+  academicYearId: number
   isActive: boolean
 
   teacher?: {
     id?: number
     name?: string
   }
-  subject?: {
-    id?: number
-    name?: string
-  }
-  sessionTime?: {
-    id?: number
-    name?: string
-  }
+  schedule?: ScheduleType
 }
 
 export interface AttendancesType {
@@ -209,15 +202,17 @@ export interface ScheduleType {
   semesterEnd: string
   academicYearId: number
   studyShift: StudyShiftEnum
-  
+  sessionTimeId: number
+
   faculty?: { name: string }
   department?: { name: string }
   academicLevel?: { level: string }
-  classroom?: { 
+  classroom?: {
     name: string
     building?: { name: string }
   }
   academicYear?: { name: string }
+  sessionTime?: SessionTimeType
   courses?: CoursesType[]
   updatedAt?: string
 }

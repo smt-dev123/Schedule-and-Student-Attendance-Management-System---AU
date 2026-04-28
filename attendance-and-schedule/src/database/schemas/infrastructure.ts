@@ -26,8 +26,8 @@ export const classrooms = pgTable(
   "classrooms",
   {
     id: serial("classroom_id").primaryKey(),
-    classroomNumber: integer("classroom_number").unique().notNull(),
-    name: varchar("name").unique().notNull(),
+    classroomNumber: integer("classroom_number").notNull(),
+    name: varchar("name").notNull(),
     floor: integer("floor").notNull(),
     buildingId: integer("building_id")
       .notNull()
@@ -40,6 +40,10 @@ export const classrooms = pgTable(
     uniqueIndex("unique_building_classroom_number").on(
       table.buildingId,
       table.classroomNumber,
+    ),
+    uniqueIndex("unique_building_classroom_name").on(
+      table.buildingId,
+      table.name,
     ),
   ],
 );

@@ -6,16 +6,21 @@ export const getTeachers = async () => {
   return res.data?.data ?? []
 }
 
-export const createTeachers = async (newTeachers: TeachersType) => {
-  const res = await api.post('/teachers', newTeachers)
+export const createTeachers = async (data: any) => {
+  const res = await api.post('/teachers', data, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  })
   return res.data?.data ?? []
 }
 
-export const updateTeachers = async (
-  id: string,
-  updateTeachers: TeachersType,
-) => {
-  const res = await api.put(`/teachers/${id}`, updateTeachers)
+export const updateTeachers = async (id: string, data: any) => {
+  const res = await api.put(`/teachers/${id}`, data, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  })
   return res.data?.data
 }
 

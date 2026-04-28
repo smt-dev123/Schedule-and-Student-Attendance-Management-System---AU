@@ -58,24 +58,14 @@ const MajorCreate = () => {
                 មុខជំនាញ
               </Text>
               <TextField.Root
-                {...register('name', { required: 'Name is required' })}
-                placeholder="Enter room name"
+                {...register('name', { required: 'សូមបំពេញឈ្មោះមុខជំនាញ' })}
+                placeholder="សូមបំពេញឈ្មោះមុខជំនាញ"
               />
               {errors.name && (
                 <Text size="2" color="red">
                   {errors.name.message}
                 </Text>
               )}
-            </label>
-
-            <label>
-              <Text as="div" size="2" mb="1" weight="bold">
-                ការពិពណ៌នា
-              </Text>
-              <TextField.Root
-                {...register('description')}
-                placeholder="Enter description"
-              />
             </label>
 
             <label>

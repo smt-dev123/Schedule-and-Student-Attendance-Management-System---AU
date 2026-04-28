@@ -51,8 +51,10 @@ const FacultyCreate = () => {
                 មហាវិទ្យាល័យ
               </Text>
               <TextField.Root
-                {...register('name', { required: 'Name is required' })}
-                placeholder="Enter faculty name"
+                {...register('name', {
+                  required: 'សូមបញ្ចូលឈ្មោះមហាវិទ្យាល័យ',
+                })}
+                placeholder="សូមបញ្ចូលឈ្មោះមហាវិទ្យាល័យ"
               />
               {errors.name && (
                 <Text size="2" color="red">
@@ -67,8 +69,13 @@ const FacultyCreate = () => {
               </Text>
               <TextField.Root
                 {...register('description')}
-                placeholder="Enter description"
+                placeholder="សូមបញ្ចូលការពិពណ៌នា"
               />
+              {errors.description && (
+                <Text size="2" color="red">
+                  {errors.description.message}
+                </Text>
+              )}
             </label>
           </Flex>
 

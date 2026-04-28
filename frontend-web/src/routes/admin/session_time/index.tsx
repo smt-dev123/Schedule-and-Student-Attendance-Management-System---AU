@@ -34,18 +34,7 @@ function RouteComponent() {
           <Text size="5" className="font-bold">
             តារាងម៉ោងសិក្សា
           </Text>
-          <Flex gap="2">
-            {/* Export */}
-            <Button variant="outline" style={{ cursor: 'pointer' }}>
-              Export Excel
-            </Button>
-
-            <Button variant="outline" style={{ cursor: 'pointer' }}>
-              បោះពុម្ភ
-            </Button>
-
-            <SessionTimeCreate />
-          </Flex>
+          <SessionTimeCreate />
         </div>
       </Flex>
       <SessionTimeTable data={data} />

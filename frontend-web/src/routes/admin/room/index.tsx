@@ -4,8 +4,6 @@ import { Flex, Text } from '@radix-ui/themes'
 import { useQuery } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
 import RoomCreate from './-actions/Create'
-import ExportExcel from './-exports/ExportExcel'
-import ExportPDF from './-exports/ExportPDF'
 import { useTitle } from '@/hooks/useTitle'
 import FetchData from '@/components/FetchData'
 import { useState } from 'react'
@@ -37,14 +35,12 @@ function RouteComponent() {
       <Flex direction="column" gap="2" mb="4">
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between gap-2">
-          <Text size="5" className="font-bold">
-            តារាងបន្ទប់សិក្សា
-          </Text>
           <Flex gap="2">
-            <ExportExcel data={data} />
-            <ExportPDF data={data} />
-            <RoomCreate />
+            <Text size="5" className="font-bold">
+              តារាងបន្ទប់សិក្សា
+            </Text>
           </Flex>
+          <RoomCreate />
         </div>
       </Flex>
 

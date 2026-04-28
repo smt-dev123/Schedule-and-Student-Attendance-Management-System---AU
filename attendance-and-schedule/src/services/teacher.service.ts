@@ -1,46 +1,84 @@
 import { TeacherRepository } from "@/repositories/teacher.repository";
-import type { Teacher } from "@/types/academy";
 import type {
-  TeacherInput,
+  CreateTeacher,
+  Teacher,
   TeacherQueryInput,
-  TeacherUpdateInput,
-} from "@/validators/academy";
+  UpdateTeacher,
+} from "@/types/academy";
+import { deleteFile, FILENAME_PATTERN, URL_PATTERN } from "@/utils/upload";
 import { HTTPException } from "hono/http-exception";
+import { basename } from "node:path";
 
 export class TeacherService {
   constructor(private readonly teacherRepo: TeacherRepository) {}
 
-  async create(data: TeacherInput): Promise<Teacher> {
+  async create(data: CreateTeacher): Promise<Teacher> {
     return this.teacherRepo.create(data);
   }
 
-  async update(id: string, data: TeacherUpdateInput): Promise<Teacher> {
-    if (Object.keys(data).length === 0) {
-      throw new HTTPException(400, {
-        message: "Update requires at least one field",
-      });
+  async update(
+    id: number,
+    data: UpdateTeacher,
+    imageURL?: string,
+    imageName?: string,
+  ): Promise<Teacher> {
+    if (Object.keys(data).length === 0 && !imageURL) {
+      throw new HTTPException(400, { message: "No data provided" });
     }
-    let update: Teacher | undefined;
-    try {
-      update = await this.teacherRepo.update(id, data);
-    } catch (error) {
-      throw new HTTPException(500, { message: "Failed to update teacher" });
+    if (imageURL && !URL_PATTERN.test(imageURL)) {
+      throw new HTTPException(400, { message: "Invalid image URL" });
     }
-    if (!update) {
-      throw new HTTPException(404, { message: "Teacher not found" });
+    if (imageName && !FILENAME_PATTERN.test(imageName)) {
+      throw new HTTPException(400, { message: "Invalid file name" });
     }
-    return update;
-  }
-
-  async delete(id: string): Promise<Teacher> {
-    const teacher = this.teacherRepo.delete(id);
+    const teacher = await this.teacherRepo.findById(id);
     if (!teacher) {
       throw new HTTPException(404, { message: "Teacher not found" });
+    }
+    const currentFileName = teacher.image ? basename(teacher.image) : null;
+    const isImageChanged = !!imageName;
+    const payload =
+      isImageChanged && imageURL && imageName
+        ? { ...data, image: imageURL }
+        : data;
+
+    try {
+      const updated = await this.teacherRepo.update(id, payload);
+      if (!updated) {
+        throw new HTTPException(404, { message: "Teacher not found" });
+      }
+
+      if (isImageChanged && currentFileName) {
+        try {
+          await deleteFile(currentFileName);
+        } catch {
+          console.log("Failed to delete old profile image");
+        }
+      }
+
+      return updated;
+    } catch (error) {
+      if (error instanceof HTTPException) throw error;
+      throw new HTTPException(500, { message: "Failed to update teacher" });
+    }
+  }
+
+  async delete(id: number): Promise<Teacher> {
+    const teacher = await this.teacherRepo.delete(id);
+    if (!teacher) {
+      throw new HTTPException(404, { message: "Teacher not found" });
+    }
+    if (teacher.image) {
+      try {
+        await deleteFile(basename(teacher.image));
+      } catch {
+        console.log("Failed to delete profile image");
+      }
     }
     return teacher;
   }
 
-  async findById(id: string): Promise<Teacher> {
+  async findById(id: number): Promise<Teacher> {
     const teacher = await this.teacherRepo.findById(id);
     if (!teacher) {
       throw new HTTPException(404, { message: "Teacher not found" });

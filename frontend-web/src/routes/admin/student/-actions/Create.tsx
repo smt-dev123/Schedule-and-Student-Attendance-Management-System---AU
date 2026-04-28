@@ -8,7 +8,6 @@ import {
   TextField,
   Grid,
   Box,
-  Badge,
 } from '@radix-ui/themes'
 import { useForm, Controller } from 'react-hook-form'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
@@ -19,6 +18,7 @@ import { getFaculties } from '@/api/FacultyAPI'
 import { getDepartments } from '@/api/DepartmentAPI'
 import { getAcademicLevels } from '@/api/AcademicLevelAPI'
 import { getAcademicYear } from '@/api/AcademicYearAPI'
+import { getMajors } from '@/api/MajorAPI'
 
 const StudentCreate = () => {
   const [open, setOpen] = useState(false)
@@ -30,6 +30,7 @@ const StudentCreate = () => {
     control,
     reset,
     setValue,
+    watch,
     formState: { errors },
   } = useForm<StudentsType>({
     defaultValues: {
@@ -42,15 +43,21 @@ const StudentCreate = () => {
       academicYearId: 1,
     },
   })
+  const facultyId = watch('facultyId')
 
   const { data: faculties = [] } = useQuery({
     queryKey: ['faculties'],
     queryFn: getFaculties,
   })
 
+  const { data: majors = [] } = useQuery({
+    queryKey: ['majors', facultyId],
+    queryFn: () => getMajors(),
+  })
+
   const { data: departments = [] } = useQuery({
-    queryKey: ['departments'],
-    queryFn: getDepartments,
+    queryKey: ['departments', facultyId],
+    queryFn: () => getDepartments(),
   })
 
   const { data: academicLevels = [] } = useQuery({
@@ -87,8 +94,15 @@ const StudentCreate = () => {
     }
   }, [open, reset, academicYears, setValue])
 
+  useEffect(() => {
+    if (facultyId) {
+      setValue('departmentId', 0)
+      setValue('skillId', 0)
+    }
+  }, [facultyId, setValue])
+
   const mutation = useMutation({
-    mutationFn: (formData: StudentsType) => createStudent(formData),
+    mutationFn: (formData: any) => createStudent(formData),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['students'] })
       toast.success('ចុះឈ្មោះនិស្សិតបានជោគជ័យ')
@@ -100,17 +114,31 @@ const StudentCreate = () => {
   })
 
   const onSubmit = (formData: StudentsType) => {
-    const payload = {
-      ...formData,
-      facultyId: Number(formData.facultyId),
-      departmentId: Number(formData.departmentId),
-      academicLevelId: Number(formData.academicLevelId),
-      academicYearId: Number(formData.academicYearId),
-      year: formData.year ? Number(formData.year) : null,
-      semester: formData.semester ? Number(formData.semester) : null,
-      generation: formData.generation ? Number(formData.generation) : null,
-    }
-    mutation.mutate(payload)
+    const data = new FormData()
+
+    // Required strings
+    data.append('name', formData.name)
+    data.append('email', formData.email)
+    data.append('password', formData.password)
+    data.append('phone', formData.phone)
+    data.append('studentCode', formData.studentCode)
+    data.append('gender', formData.gender)
+    data.append('educationalStatus', formData.educationalStatus)
+
+    // Required numbers (coerced by backend)
+    data.append('facultyId', String(formData.facultyId))
+    data.append('departmentId', String(formData.departmentId))
+    data.append('academicLevelId', String(formData.academicLevelId))
+    data.append('academicYearId', String(formData.academicYearId))
+    data.append('skillId', String(formData.skillId))
+
+    // Optional numbers
+    if (formData.year) data.append('year', String(formData.year))
+    if (formData.semester) data.append('semester', String(formData.semester))
+    if (formData.generation)
+      data.append('generation', String(formData.generation))
+
+    mutation.mutate(data)
   }
 
   return (
@@ -130,6 +158,24 @@ const StudentCreate = () => {
         <form onSubmit={handleSubmit(onSubmit)}>
           <Flex direction="column" gap="4">
             <Grid columns={{ initial: '1', md: '2' }} gap="4">
+              {/* លេខសម្គាល់ */}
+              <Box>
+                <Text as="div" size="2" mb="1" weight="bold">
+                  លេខសម្គាល់ <span className="text-red-500">*</span>
+                </Text>
+                <TextField.Root
+                  {...register('studentCode', {
+                    required: 'សូមបញ្ចូលលេខសម្គាល់',
+                  })}
+                  placeholder="CS001"
+                />
+                {errors.studentCode && (
+                  <Text size="1" color="red">
+                    {errors.studentCode.message}
+                  </Text>
+                )}
+              </Box>
+
               {/* ឈ្មោះនិស្សិត */}
               <Box>
                 <Text as="div" size="2" mb="1" weight="bold">
@@ -137,7 +183,7 @@ const StudentCreate = () => {
                 </Text>
                 <TextField.Root
                   {...register('name', { required: 'សូមបញ្ចូលឈ្មោះ' })}
-                  placeholder="ឧ. សុខ សំណាង"
+                  placeholder="ឧ. លុយ សុមាត្រា"
                 />
                 {errors.name && (
                   <Text size="1" color="red">
@@ -327,6 +373,36 @@ const StudentCreate = () => {
                         {departments.map((d: any) => (
                           <Select.Item key={d.id} value={d.id.toString()}>
                             {d.name}
+                          </Select.Item>
+                        ))}
+                      </Select.Content>
+                    </Select.Root>
+                  )}
+                />
+              </Box>
+
+              {/* ជំនាញ */}
+              <Box>
+                <Text as="div" size="2" mb="1" weight="bold">
+                  ជំនាញ <span className="text-red-500">*</span>
+                </Text>
+                <Controller
+                  name="skillId"
+                  control={control}
+                  rules={{ required: 'សូមជ្រើសរើសជំនាញ' }}
+                  render={({ field }) => (
+                    <Select.Root
+                      value={field.value?.toString()}
+                      onValueChange={field.onChange}
+                    >
+                      <Select.Trigger
+                        style={{ width: '100%' }}
+                        placeholder="ជ្រើសរើសជំនាញ"
+                      />
+                      <Select.Content>
+                        {majors.map((m: any) => (
+                          <Select.Item key={m.id} value={m.id.toString()}>
+                            {m.name}
                           </Select.Item>
                         ))}
                       </Select.Content>

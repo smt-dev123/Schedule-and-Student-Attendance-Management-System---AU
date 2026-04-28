@@ -1,18 +1,21 @@
-import { type DrizzleDb } from "@/database";
+import { type DrizzleDb, type Transaction } from "@/database";
 import {
   academicYears,
   schedules,
   studentAcademicYears,
   students,
 } from "@/database/schemas";
-import type { Student } from "@/types/academy";
 import type {
-  StudentInput,
+  CreateStudent,
+  Student,
   StudentPromoteInput,
+} from "@/types/academy";
+import { generateId } from "@/utils/generate-id";
+import type {
   StudentQueryInput,
   StudentUpdateInput,
 } from "@/validators/academy";
-import { and, count, eq, ilike, inArray, SQL } from "drizzle-orm";
+import { and, count, eq, ilike, SQL } from "drizzle-orm";
 
 export class StudentRepository {
   constructor(private readonly db: DrizzleDb) {}
@@ -42,22 +45,10 @@ export class StudentRepository {
       conditions.push(eq(students.facultyId, Number(facultyId)));
     if (departmentId && departmentId !== "all")
       conditions.push(eq(students.departmentId, Number(departmentId)));
+    if (academicYearId && academicYearId !== "all")
+      conditions.push(eq(students.academicYearId, Number(academicYearId)));
     if (academicLevelId && academicLevelId !== "all")
       conditions.push(eq(students.academicLevelId, Number(academicLevelId)));
-
-    if (academicYearId && academicYearId !== "all") {
-      conditions.push(
-        inArray(
-          students.id,
-          this.db
-            .select({ studentId: studentAcademicYears.studentId })
-            .from(studentAcademicYears)
-            .where(
-              eq(studentAcademicYears.academicYearId, Number(academicYearId)),
-            ),
-        ),
-      );
-    }
 
     const where = conditions.length > 0 ? and(...conditions) : undefined;
 
@@ -80,138 +71,93 @@ export class StudentRepository {
     return { data, total, page: safePage, limit: safeLimit };
   }
 
-  async findById(id: string): Promise<Student | undefined> {
+  async findById(id: number): Promise<Student | undefined> {
     return this.db.query.students.findFirst({
       where: eq(students.id, id),
     });
   }
 
-  async create(data: StudentInput): Promise<Student | undefined> {
-    return await this.db.transaction(async (tx) => {
-      const [student] = await tx.insert(students).values(data).returning();
-
-      if (!student) return undefined;
-      await tx.insert(studentAcademicYears).values({
-        studentId: String(student.id),
-        academicYearId: data.academicYearId,
-      });
-
-      return student;
+  async findByUserId(id: string): Promise<Student | undefined> {
+    return this.db.query.students.findFirst({
+      where: eq(students.userId, id),
     });
   }
 
-  async promote(data: StudentPromoteInput): Promise<any> {
-    return await this.db.transaction(async (tx) => {
-      await tx
-        .insert(studentAcademicYears)
-        .values({
-          studentId: data.studentId,
-          academicYearId: Number(data.academicYearId),
-        })
-        .onConflictDoNothing();
-
-      const [updatedStudent] = await tx
-        .update(students)
-        .set({
-          academicYearId: Number(data.academicYearId),
-          year: Number(data.year),
-          semester: Number(data.semester),
-        })
-        .where(eq(students.id, data.studentId))
-        .returning();
-
-      return updatedStudent;
-    });
+  async create(
+    data: CreateStudent,
+    tx: Transaction,
+  ): Promise<Student | undefined> {
+    const studentId = generateId();
+    const [student] = await tx
+      .insert(students)
+      .values({ ...data, id: studentId })
+      .returning();
+    return student;
   }
 
   async update(
-    id: string,
+    id: number,
     data: StudentUpdateInput,
   ): Promise<Student | undefined> {
     const [student] = await this.db
       .update(students)
-      .set(data)
+      .set({ ...data, updatedAt: new Date() })
       .where(eq(students.id, id))
       .returning();
     return student;
   }
 
-  async delete(id: string): Promise<Student | undefined> {
-    const [deletedStudent] = await this.db
+  async delete(id: number): Promise<Student | undefined> {
+    const [student] = await this.db
       .delete(students)
       .where(eq(students.id, id))
       .returning();
-    return deletedStudent;
+    return student;
   }
 
-  async findByFilter(filter: {
+  async findByFilter(data: {
     facultyId?: number;
     departmentId?: number;
     generation?: number;
   }): Promise<Student[]> {
     const conditions: SQL[] = [];
-    if (filter.facultyId)
-      conditions.push(eq(students.facultyId, filter.facultyId));
-    if (filter.departmentId)
-      conditions.push(eq(students.departmentId, filter.departmentId));
-    if (filter.generation)
-      conditions.push(eq(students.generation, filter.generation));
-
-    const where = conditions.length > 0 ? and(...conditions) : undefined;
+    if (data.facultyId) conditions.push(eq(students.facultyId, data.facultyId));
+    if (data.departmentId)
+      conditions.push(eq(students.departmentId, data.departmentId));
+    if (data.generation)
+      conditions.push(eq(students.generation, data.generation));
 
     return this.db.query.students.findMany({
-      where,
+      where: conditions.length > 0 ? and(...conditions) : undefined,
     });
   }
 
-  async findScheduleByStudentIdAndAcademicYearId(studentId: string) {
-    const [student, currentYear] = await Promise.all([
-      this.db.query.students.findFirst({
-        where: eq(students.id, studentId),
-        columns: { id: true, academicLevelId: true, departmentId: true },
-      }),
-      this.db.query.academicYears.findFirst({
-        where: eq(academicYears.isCurrent, true),
-        columns: { id: true },
-      }),
-    ]);
-
-    if (!student || !currentYear) return null;
-    if (!student.academicLevelId || !student.departmentId) return null;
-
-    return this.db.query.studentAcademicYears.findFirst({
-      where: and(
-        eq(studentAcademicYears.studentId, studentId),
-        eq(studentAcademicYears.academicYearId, currentYear.id),
-      ),
-      with: {
-        academicYear: {
-          with: {
-            schedules: {
-              where: (schedules, { and, eq }) =>
-                and(
-                  eq(schedules.academicLevelId, student.academicLevelId!),
-                  eq(schedules.departmentId, student.departmentId!),
-                ),
-              with: {
-                courses: {
-                  with: {
-                    teacher: true,
-                    sessionTime: true,
-                  },
-                },
-              },
-            },
-          },
-        },
-      },
-    });
+  async updateStudentAcademicYear(
+    facultyId: number,
+    departmentId: number,
+    academicYearId: number,
+    academicLevelId: number,
+    tx: Transaction,
+  ): Promise<void> {
+    await tx
+      .update(students)
+      .set({ academicYearId, updatedAt: new Date() })
+      .where(
+        and(
+          eq(students.facultyId, facultyId),
+          eq(students.departmentId, departmentId),
+          eq(students.academicLevelId, academicLevelId),
+        ),
+      );
   }
 
-  async findScheduleByStudentIdAndCurrentAcademicYear(studentId: string) {
+  async findScheduleByStudentIdAndCurrentAcademicYear(
+    userId: string,
+    semester: number,
+  ) {
     const [student, currentYear] = await Promise.all([
       this.db.query.students.findFirst({
-        where: eq(students.id, studentId),
+        where: eq(students.userId, userId),
         columns: { id: true, academicLevelId: true, departmentId: true },
       }),
       this.db.query.academicYears.findFirst({
@@ -225,18 +171,67 @@ export class StudentRepository {
 
     return this.db.query.schedules.findMany({
       where: and(
-        eq(schedules.academicLevelId, student.academicLevelId),
         eq(schedules.departmentId, student.departmentId),
+        eq(schedules.academicLevelId, student.academicLevelId),
         eq(schedules.academicYearId, currentYear.id),
+        eq(schedules.semester, semester),
       ),
+      columns: {
+        generation: true,
+        semester: true,
+        semesterStart: true,
+        semesterEnd: true,
+        studyShift: true,
+      },
       with: {
-        courses: {
+        academicYear: { columns: { name: true } },
+        faculty: { columns: { name: true } },
+        department: { columns: { name: true } },
+        academicLevel: { columns: { level: true } },
+        classroom: {
+          columns: { name: true },
           with: {
-            teacher: true,
-            sessionTime: true,
+            building: { columns: { name: true } },
+          },
+        },
+        courses: {
+          columns: {
+            name: true,
+            code: true,
+            credits: true,
+            day: true,
+            hours: true,
+          },
+          with: {
+            teacher: { columns: { name: true, phone: true } },
           },
         },
       },
+    });
+  }
+
+  async promote(data: StudentPromoteInput): Promise<Student | undefined> {
+    return await this.db.transaction(async (tx) => {
+      await tx
+        .insert(studentAcademicYears)
+        .values({
+          studentId: data.studentId,
+          academicYearId: Number(data.academicYearId),
+        })
+        .onConflictDoNothing();
+
+      const [updatedStudent] = await tx
+        .update(students)
+        .set({
+          academicYearId: Number(data.academicYearId),
+          semester: Number(data.semester),
+          year: Number(data.year),
+          updatedAt: new Date(),
+        })
+        .where(eq(students.id, data.studentId))
+        .returning();
+
+      return updatedStudent;
     });
   }
 }

@@ -1,13 +1,13 @@
 import { Hono } from "hono";
 import { upgradeWebSocket } from "hono/bun";
 import { zValidator } from "@hono/zod-validator";
-import { z } from "zod";
 import { HTTPException } from "hono/http-exception";
-import { auth } from "@/lib/auth";
+import type { Variables } from "@/types/middleware";
 import authentication from "@/middlewares/auth";
-import { markAsReadSchema } from "@/validators/notification";
+import requirePermission from "@/middlewares/permission";
+import { createNotificationSchema } from "@/validators/notification";
 
-const router = new Hono();
+const router = new Hono<{ Variables: Variables }>();
 
 router.get("/", async (c) => {
   const { notificationService } = c.var.container;
@@ -17,17 +17,9 @@ router.get("/", async (c) => {
 
 router.post(
   "/broadcast",
-  zValidator(
-    "json",
-    z.object({
-      title: z.string(),
-      message: z.string(),
-      facultyId: z.number(),
-      targetDepartment: z.number().optional(),
-      targetGeneration: z.number().optional(),
-      priority: z.enum(["low", "normal", "high"]).optional(),
-    }),
-  ),
+  authentication,
+  requirePermission("notification", "create"),
+  zValidator("json", createNotificationSchema),
   async (c) => {
     const { notificationService } = c.var.container;
     const data = c.req.valid("json");
@@ -36,43 +28,94 @@ router.post(
   },
 );
 
-router.get("/my-notifications", authentication, async (c) => {
-  const { notificationService } = c.var.container;
-  const { id } = c.get("user");
-  const notifications = await notificationService.findMyNotifications(id);
-  return c.json(notifications);
-});
+router.get(
+  "/my-notifications",
+  authentication,
+  requirePermission("notification", "read-own"),
+  async (c) => {
+    const { notificationService } = c.var.container;
+    const { id } = c.get("user");
+    const notifications = await notificationService.findMyNotifications(id);
+    return c.json(notifications);
+  },
+);
 
-router.patch("/read/:id", authentication, async (c) => {
-  const { notificationService } = c.var.container;
-  const { id } = c.get("user");
-  const { id: recipientId } = c.req.param();
-  const result = await notificationService.markAsRead(Number(recipientId), id);
-  return c.json(result);
-});
+router.patch(
+  "/read/:id",
+  authentication,
+  requirePermission("notification", "read-own"),
+  async (c) => {
+    const { notificationService } = c.var.container;
+    const id = parseInt(c.req.param("id"), 10);
+    if (isNaN(id)) {
+      throw new HTTPException(400, { message: "Invalid notification ID" });
+    }
+    const result = await notificationService.markAsRead(id);
+    return c.json(result);
+  },
+);
 
 router.get(
   "/ws",
-  upgradeWebSocket(async (c) => {
+  authentication,
+  (c, next) => {
+    const user = c.get("user");
+    if (!user) throw new HTTPException(401, { message: "Unauthorized" });
+    return next();
+  },
+  upgradeWebSocket((c) => {
     const { wsManager } = c.var.container;
-    const session = await auth.api.getSession(c.req.raw);
+    const user = c.get("user");
 
-    if (!session) {
+    if (!user) {
       console.warn(`[WS] ${c.req.path} — Unauthorized`);
       throw new HTTPException(401, { message: "Unauthorized" });
     }
 
-    const userId = session.user.id;
+    const userId = user.id;
 
     return {
-      onOpen(event, ws) {
+      onOpen(_event, ws) {
         wsManager.addClient(userId, ws);
         console.log(`WebSocket opened for user: ${userId}`);
       },
-      onMessage(event, ws) {
-        console.log(`Message from user ${userId}: ${event.data}`);
+      async onMessage(event, ws) {
+        const { notificationService } = c.var.container;
+        try {
+          const payload = JSON.parse(event.data as string);
+
+          if (payload.type === "NEW_NOTIFICATION" && user.role === "staff") {
+            const data = createNotificationSchema.parse(payload.data);
+            const notification =
+              await notificationService.createBroadcast(data);
+            ws.send(
+              JSON.stringify({
+                type: "NOTIFICATION_CREATED",
+                data: notification,
+              }),
+            );
+          } else if (payload.type === "ping") {
+            ws.send(JSON.stringify({ type: "pong" }));
+          } else {
+            console.warn(
+              `[WS] Unhandled message type from ${userId}:`,
+              payload.type,
+            );
+          }
+        } catch (error) {
+          console.error(`[WS] Error processing message from ${userId}:`, error);
+          ws.send(
+            JSON.stringify({
+              type: "ERROR",
+              message:
+                error instanceof Error
+                  ? error.message
+                  : "Invalid message format",
+            }),
+          );
+        }
       },
-      onClose(event, ws) {
+      onClose(_event, ws) {
         wsManager.removeClient(userId, ws);
         console.log(`WebSocket closed for user: ${userId}`);
       },

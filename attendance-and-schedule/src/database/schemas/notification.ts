@@ -8,7 +8,6 @@ import {
   boolean,
 } from "drizzle-orm/pg-core";
 import { faculties, students } from "./academic";
-import { notificationPriority } from "./enums";
 
 export const notifications = pgTable("notifications", {
   id: serial("id").primaryKey(),
@@ -19,7 +18,7 @@ export const notifications = pgTable("notifications", {
     .notNull(),
   targetDepartment: integer("target_department"),
   targetGeneration: integer("target_generation"),
-  priority: notificationPriority("priority").default("normal"),
+  priority: varchar("priority", { length: 20 }).default("normal"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -28,7 +27,7 @@ export const notificationRecipients = pgTable("notification_recipients", {
   notificationId: integer("notification_id")
     .references(() => notifications.id)
     .notNull(),
-  studentId: text("student_id")
+  studentId: integer("student_id")
     .references(() => students.id)
     .notNull(),
   isRead: boolean("is_read").default(false),

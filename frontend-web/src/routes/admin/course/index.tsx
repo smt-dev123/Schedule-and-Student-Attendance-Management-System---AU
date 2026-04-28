@@ -1,10 +1,17 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
-import { BookOpen, Clock, CalendarDays, CheckCircle, User, Pencil } from 'lucide-react'
+import {
+  BookOpen,
+  Clock,
+  CalendarDays,
+  CheckCircle,
+  User,
+  Pencil,
+} from 'lucide-react'
 import { useQuery } from '@tanstack/react-query'
 import { useAcademicStore } from '@/stores/useAcademicStore'
 import FetchData from '@/components/FetchData'
 import { getCourses, deleteCourse } from '@/api/CourseAPI'
-import { Button, Flex, Text } from '@radix-ui/themes'
+import { Flex, Text } from '@radix-ui/themes'
 import CourseCreate from './-actions/Create'
 import CourseUpdate from './-actions/Update'
 import { useState } from 'react'
@@ -44,7 +51,7 @@ function CourseListComponent() {
   })
 
   return (
-    <div className="p-4 max-w-7xl mx-auto font-kantumruy">
+    <div className="p-4 font-kantumruy">
       <Flex justify="between" mb="4">
         <Text size="5" className="font-bold">
           គ្រប់គ្រងវគ្គសិក្សា
@@ -69,7 +76,7 @@ function CourseListComponent() {
                 </div>
                 <Flex align="center" gap="3">
                   <BadgeCode code={course.code} />
-                   <button
+                  <button
                     className="text-orange-400 hover:text-orange-600 transition-colors"
                     onClick={(e) => {
                       e.preventDefault()
@@ -78,8 +85,8 @@ function CourseListComponent() {
                     }}
                   >
                     <Flex align="center" gap="1">
-                       <Pencil size={14} />
-                       កែប្រែ
+                      <Pencil size={14} />
+                      កែប្រែ
                     </Flex>
                   </button>
                   <button
@@ -107,8 +114,9 @@ function CourseListComponent() {
                 <div className="flex items-center text-sm text-gray-500">
                   <Clock size={16} className="mr-2 text-blue-500" />
                   <span>
-                    {course.day} | {course.sessionTime?.firstSessionStartTime} -{' '}
-                    {course.sessionTime?.secondSessionEndTime}
+                    {course.day} |{' '}
+                    {course.schedule?.sessionTime?.firstSessionStartTime} -{' '}
+                    {course.schedule?.sessionTime?.secondSessionEndTime}
                   </span>
                 </div>
                 <div className="flex items-center text-sm text-gray-500">
@@ -150,10 +158,10 @@ function CourseListComponent() {
         </div>
       </FetchData>
 
-      <CourseUpdate 
-        course={editingCourse} 
-        open={isUpdateOpen} 
-        onOpenChange={setIsUpdateOpen} 
+      <CourseUpdate
+        course={editingCourse}
+        open={isUpdateOpen}
+        onOpenChange={setIsUpdateOpen}
       />
     </div>
   )

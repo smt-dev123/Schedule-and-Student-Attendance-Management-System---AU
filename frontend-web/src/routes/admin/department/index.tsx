@@ -5,8 +5,6 @@ import { Flex, Text } from '@radix-ui/themes'
 import { useQuery } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
 import DepartmentCreate from './-actions/Create'
-import ExportExcel from './-exports/ExportExcel'
-import ExportPDF from './-exports/ExportPDF'
 import FetchData from '@/components/FetchData'
 
 export const Route = createFileRoute('/admin/department/')({
@@ -35,12 +33,7 @@ function RouteComponent() {
           <Text size="5" className="font-bold">
             តារាងតេប៉ាតឺម៉ង់
           </Text>
-          <Flex gap="2">
-            <ExportExcel data={data} />
-            {/* <ExportPDF data={data} /> */}
-
-            <DepartmentCreate />
-          </Flex>
+          <DepartmentCreate />
         </div>
       </Flex>
       <DepartmentTable data={data} />

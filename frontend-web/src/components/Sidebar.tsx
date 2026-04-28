@@ -106,8 +106,8 @@ export default function Sidebar({
           label: t('Sidebar.Study.faculty'),
           url: '/admin/faculty',
         },
-        { key: 'major', label: t('Sidebar.Study.major'), url: '/admin/major' },
         { key: 'department', label: 'ដេប៉ាតឺម៉ង់', url: '/admin/department' },
+        { key: 'major', label: t('Sidebar.Study.major'), url: '/admin/major' },
         {
           key: 'grade_level',
           label: t('Sidebar.Study.level'),

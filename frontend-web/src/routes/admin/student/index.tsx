@@ -224,6 +224,7 @@ function RouteComponent() {
             <Select.Root
               value={draft.departmentId}
               onValueChange={(val) => setDraft({ ...draft, departmentId: val })}
+              // បិទមិនឱ្យរើស បើមិនទាន់រើស Faculty (Optional)
               disabled={draft.facultyId === 'all'}
             >
               <Select.Trigger style={{ minWidth: '150px' }} />

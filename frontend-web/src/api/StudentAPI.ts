@@ -1,5 +1,4 @@
 import api from '@/lib/axios'
-import type { StudentsType } from '@/types'
 
 const ENDPOINT = '/students'
 
@@ -23,7 +22,7 @@ export const getStudents = async (
       limit,
     },
   })
-  return res.data?.data ?? []
+  return res.data
 }
 
 export const promoteStudent = async (data: {
@@ -36,13 +35,21 @@ export const promoteStudent = async (data: {
   return res.data
 }
 
-export const createStudent = async (data: StudentsType) => {
-  const res = await api.post(ENDPOINT, data)
+export const createStudent = async (data: any) => {
+  const res = await api.post(ENDPOINT, data, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  })
   return res.data
 }
 
-export const updateStudent = async (id: string, data: StudentsType) => {
-  const res = await api.put(`${ENDPOINT}/${id}`, data)
+export const updateStudent = async (id: string, data: any) => {
+  const res = await api.put(`${ENDPOINT}/${id}`, data, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  })
   return res.data
 }
 

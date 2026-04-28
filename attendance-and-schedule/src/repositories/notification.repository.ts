@@ -5,6 +5,7 @@ import {
 } from "@/database/schemas/notification";
 import { eq, and } from "drizzle-orm";
 import {
+  type MarkAsRead,
   type Notification,
   type NotificationRecipient,
 } from "@/types/notification";
@@ -25,7 +26,7 @@ export class NotificationRepository {
   }
 
   async createRecipients(
-    data: { notificationId: number; studentId: string }[],
+    data: { notificationId: number; studentId: number }[],
   ): Promise<void> {
     await this.db.insert(notificationRecipients).values(data);
   }
@@ -43,33 +44,38 @@ export class NotificationRepository {
   }
 
   async findUnreadByStudent(
-    studentId: string,
+    studentId: number,
   ): Promise<NotificationRecipient[]> {
     return this.db.query.notificationRecipients.findMany({
+      columns: {
+        id: true,
+        isRead: true,
+      },
       where: and(
         eq(notificationRecipients.studentId, studentId),
         eq(notificationRecipients.isRead, false),
       ),
       with: {
-        notification: true,
+        notification: {
+          columns: {
+            title: true,
+            message: true,
+            priority: true,
+          },
+        },
       },
     });
   }
 
-  async markAsRead(
-    recipientId: number,
-    studentId: string,
-  ): Promise<NotificationRecipient | undefined> {
+  async markAsRead(recipientId: number): Promise<MarkAsRead | undefined> {
     const [updated] = await this.db
       .update(notificationRecipients)
       .set({ isRead: true, readAt: new Date() })
-      .where(
-        and(
-          eq(notificationRecipients.id, recipientId),
-          eq(notificationRecipients.studentId, studentId),
-        ),
-      )
-      .returning();
+      .where(eq(notificationRecipients.id, recipientId))
+      .returning({
+        id: notificationRecipients.id,
+        isRead: notificationRecipients.isRead,
+      });
     return updated;
   }
 

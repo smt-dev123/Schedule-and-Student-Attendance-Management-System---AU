@@ -12,20 +12,22 @@ import sessionTimeRoutes from "./routes/session-time.routes";
 import studentRoutes from "./routes/student.routes";
 import teacherRoutes from "./routes/teacher.routes";
 import translationRoutes from "./routes/translation.routes";
-import courseRoutes from "./routes/course.routes";
 import notificationRoutes from "./routes/notification.routes";
-import authRoutes from "./routes/auth.routes";
 import academicYearRoutes from "./routes/academic-year.routes";
-import majorRoutes from "./routes/major.routes";
-import courseOverrideRoutes from "./routes/course-override.routes";
 import { auth } from "./lib/auth";
 import { errorHandler } from "./middlewares/error";
 import { cors } from "hono/cors";
+import { serveStatic } from "hono/bun";
+import { secureHeaders } from "hono/secure-headers";
+import skillRoutes from "./routes/skill.routes";
+import courseRoutes from "./routes/course.routes";
 
 const app = new Hono();
 
 app.use("*", logger());
-app.use("*", diMiddleware);
+app.use("/api/*", diMiddleware);
+app.use(secureHeaders());
+app.use("*", serveStatic({ root: "./" }));
 app.use(
   "*",
   cors({
@@ -60,14 +62,12 @@ app.route("/api/faculties", facultyRoutes);
 app.route("/api/schedules", scheduleRoutes);
 app.route("/api/session-times", sessionTimeRoutes);
 app.route("/api/students", studentRoutes);
-app.route("/api/courses", courseRoutes);
 app.route("/api/teachers", teacherRoutes);
 app.route("/api/translations", translationRoutes);
 app.route("/api/notifications", notificationRoutes);
-app.route("/api/authentications", authRoutes);
 app.route("/api/academic-years", academicYearRoutes);
-app.route("/api/majors", majorRoutes);
-app.route("/api/schedule-overrides", courseOverrideRoutes);
+app.route("/api/skills", skillRoutes);
+app.route("/api/courses", courseRoutes);
 
 app.onError((e, c) => errorHandler(c, e));
 

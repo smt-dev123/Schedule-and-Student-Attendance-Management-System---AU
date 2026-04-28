@@ -20,11 +20,9 @@ import {
   Separator,
 } from '@radix-ui/themes'
 import { useQuery } from '@tanstack/react-query'
-import toast from 'react-hot-toast'
-import { createFileRoute, Link, useRouter } from '@tanstack/react-router'
+import { createFileRoute, useRouter } from '@tanstack/react-router'
 import {
   FaArrowLeft,
-  FaEdit,
   FaFileExport,
   FaPrint,
   FaChalkboardTeacher,
@@ -42,6 +40,7 @@ const DAYS_OF_WEEK = [
   { key: 'thursday', label: 'ព្រហស្បតិ៍' },
   { key: 'friday', label: 'សុក្រ' },
   { key: 'saturday', label: 'សៅរ៍' },
+  { key: 'sunday', label: 'អាទិត្យ' },
 ]
 
 function RouteComponent() {
@@ -80,15 +79,16 @@ function RouteComponent() {
     )
 
   // រៀបចំ Grouping courses by day
-  const coursesByDay = schedule.courses?.reduce((acc: any, course: any) => {
-    const dayKey = course.day.toLowerCase()
-    if (!acc[dayKey]) acc[dayKey] = []
-    acc[dayKey].push(course)
-    return acc
-  }, {})
+  const coursesByDay =
+    schedule.courses?.reduce((acc: any, course: any) => {
+      const dayKey = course.day.toLowerCase()
+      if (!acc[dayKey]) acc[dayKey] = []
+      acc[dayKey].push(course)
+      return acc
+    }, {}) || {}
 
   return (
-    <div className="p-4 md:p-6 max-w-[1400px] mx-auto space-y-6 print:p-0">
+    <div className="p-4 md:p-6 mx-auto space-y-6 print:p-0">
       {/* Header Actions - លាក់នៅពេល Print */}
       <Flex justify="between" align="center" className="print:hidden">
         <Flex gap="3" align="center">
@@ -174,9 +174,11 @@ function RouteComponent() {
           <RowTable isHeader>
             <CellTable
               isHeader
-              className="w-32 bg-gray-50 text-center font-bold text-gray-500 uppercase text-[10px] tracking-widest"
+              className="w-32 bg-gray-50 text-center font-bold text-gray-500 uppercase tracking-widest"
             >
-              ម៉ោងសិក្សា
+              <Text size="3" weight="bold" color="indigo">
+                ម៉ោងសិក្សា
+              </Text>
             </CellTable>
             {DAYS_OF_WEEK.map((day) => (
               <CellTable
@@ -209,17 +211,42 @@ function RouteComponent() {
                   size="2"
                   className="block uppercase tracking-wider"
                 >
-                  ម៉ោងទី ១
+                  ម៉ោងសិក្សា
                 </Text>
-                <Text size="1" color="gray" className="font-mono">
-                  {schedule.courses?.[0]?.sessionTime?.firstSessionStartTime ||
-                    '06:00 PM'}
+                {/* <Text
+                  size="2"
+                  color="indigo"
+                  weight="bold"
+                  className="font-mono"
+                >
+                  {schedule.sessionTime?.firstSessionStartTime || '07:30'} -{' '}
+                  {schedule.sessionTime?.secondSessionEndTime || '11:15'}
                 </Text>
-                <Separator size="1" my="2" className="mx-auto w-8" />
-                <Text size="1" color="gray" className="font-mono">
-                  {schedule.courses?.[0]?.sessionTime?.firstSessionEndTime ||
-                    '07:30 PM'}
-                </Text>
+                <Separator size="1" my="2" className="mx-auto w-8" /> */}
+                <Flex
+                  direction="column"
+                  gap="1"
+                  className="text-[10px] text-gray-500"
+                >
+                  <Text
+                    size="2"
+                    color="indigo"
+                    weight="bold"
+                    className="font-mono"
+                  >
+                    {schedule.sessionTime?.firstSessionStartTime} -{' '}
+                    {schedule.sessionTime?.firstSessionEndTime}
+                  </Text>
+                  <Text
+                    size="2"
+                    color="indigo"
+                    weight="bold"
+                    className="font-mono"
+                  >
+                    {schedule.sessionTime?.secondSessionStartTime} -{' '}
+                    {schedule.sessionTime?.secondSessionEndTime}
+                  </Text>
+                </Flex>
               </Box>
             </CellTable>
 
@@ -233,7 +260,11 @@ function RouteComponent() {
                   className="p-4 align-top border-l border-gray-100 group transition-colors hover:bg-blue-50/30"
                 >
                   {course ? (
-                    <Flex direction="column" gap="3" className="h-full">
+                    <Flex
+                      direction="column"
+                      gap="2"
+                      className="flex flex-col justify-center items-center h-full"
+                    >
                       <Box>
                         <Text
                           weight="bold"
@@ -244,26 +275,29 @@ function RouteComponent() {
                         </Text>
                         <Badge
                           size="1"
-                          color="blue"
+                          color="indigo"
                           variant="surface"
-                          className="font-mono opacity-100"
+                          className="font-mono"
                         >
-                          {course.phone}
+                          {course.code}
                         </Badge>
                       </Box>
 
                       <div className="mt-auto pt-3 border-t border-gray-100">
                         <Flex
                           align="center"
-                          gap="2"
-                          className="text-[11px] text-gray-500"
+                          className="text-[14px] text-gray-500"
                         >
-                          <Box className="p-1 bg-blue-100 text-blue-600 rounded-md">
-                            <FaChalkboardTeacher size={10} />
-                          </Box>
-                          <span className="text-[14px] font-semibold text-slate-600">
-                            {course.teacher?.name || 'គ្រូឧទ្ទេស'}
-                          </span>
+                          <Flex direction="column" gap="1">
+                            <Text className="font-semibold text-slate-600">
+                              {course.teacher?.name || 'គ្រូឧទ្ទេស'}
+                            </Text>
+                            {course.teacher?.phone && (
+                              <Text className="text-gray-600 font-mono">
+                                {course.teacher.phone}
+                              </Text>
+                            )}
+                          </Flex>
                         </Flex>
                       </div>
                     </Flex>
@@ -284,7 +318,7 @@ function RouteComponent() {
       </RootTable>
 
       {/* Footer Disclaimer */}
-      <Flex justify="center" p="4" className="text-gray-400 text-[10px]">
+      <Flex justify="center" p="4" className="text-gray-600 text-[12px]">
         <Text>
           បញ្ជាក់៖ កាលវិភាគនេះត្រូវបានធ្វើបច្ចុប្បន្នភាពចុងក្រោយនៅថ្ងៃទី{' '}
           {schedule.updatedAt

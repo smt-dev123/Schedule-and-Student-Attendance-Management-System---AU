@@ -37,3 +37,5 @@ tests
 
 src/database/seeds
 src/validators/user.ts
+
+uploads/*

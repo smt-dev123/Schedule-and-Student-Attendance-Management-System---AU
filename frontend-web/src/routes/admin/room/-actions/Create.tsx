@@ -63,31 +63,11 @@ const RoomCreate = () => {
                   required: 'សូមបញ្ចូលបន្ទប់សិក្សា',
                   minLength: { value: 3, message: 'យ៉ាងហោចណាស់ ៣ខ្ទង់' },
                 })}
-                placeholder="Enter room name"
+                placeholder="សូមបញ្ចូលឈ្មោះបន្ទប់"
               />
               {errors.name && (
                 <Text size="2" color="red">
                   {errors.name.message}
-                </Text>
-              )}
-            </label>
-
-            {/* Floor */}
-            <label>
-              <Text as="div" size="2" mb="1" weight="bold">
-                ជាន់បន្ទប់សិក្សា
-              </Text>
-              <TextField.Root
-                {...register('classroomNumber', {
-                  valueAsNumber: true,
-                  required: 'សូមបញ្ចូលលេខជាន់'
-                })}
-                placeholder="Enter room number"
-                type="number"
-              />
-              {errors.classroomNumber && (
-                <Text size="2" color="red">
-                  {errors.classroomNumber.message}
                 </Text>
               )}
             </label>
@@ -99,14 +79,33 @@ const RoomCreate = () => {
               <TextField.Root
                 {...register('floor', {
                   valueAsNumber: true,
-                  required: 'សូមបញ្ចូលលេខជាន់'
+                  required: 'សូមបញ្ចូលលេខជាន់',
                 })}
-                placeholder="Enter floor number"
+                placeholder="សូមបញ្ចូលលេខជាន់"
                 type="number"
               />
               {errors.floor && (
                 <Text size="2" color="red">
                   {errors.floor.message}
+                </Text>
+              )}
+            </label>
+
+            <label>
+              <Text as="div" size="2" mb="1" weight="bold">
+                លេខបន្ទប់សិក្សា
+              </Text>
+              <TextField.Root
+                {...register('classroomNumber', {
+                  valueAsNumber: true,
+                  required: 'សូមបញ្ចូលលេខបន្ទប់សិក្សា',
+                })}
+                placeholder="សូមបញ្ចូលលេខបន្ទប់សិក្សា"
+                type="number"
+              />
+              {errors.classroomNumber && (
+                <Text size="2" color="red">
+                  {errors.classroomNumber.message}
                 </Text>
               )}
             </label>

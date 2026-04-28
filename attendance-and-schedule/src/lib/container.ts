@@ -17,15 +17,12 @@ import { TeacherRepository } from "@/repositories/teacher.repository";
 import { TranslationRepository } from "@/repositories/translation.repository";
 import { NotificationRepository } from "@/repositories/notification.repository";
 import { AcademicYearRepository } from "@/repositories/academic-year.repository";
-import { MajorRepository } from "@/repositories/major.repository";
-import { CourseOverrideRepository } from "@/repositories/course-override.repository";
 
 // Services
 import { AcademicLevelService } from "@/services/academic-level.service";
 import { AttendanceService } from "@/services/attendace.service";
 import { BuildingService } from "@/services/building.service";
 import { ClassroomService } from "@/services/classroom.service";
-import { CourseService } from "@/services/course.service";
 import { DepartmentService } from "@/services/department.service";
 import { FacultyService } from "@/services/faculty.service";
 import { ScheduleService } from "@/services/schedule.service";
@@ -35,11 +32,12 @@ import { TeacherService } from "@/services/teacher.service";
 import { TranslationService } from "@/services/translation.service";
 import { NotificationService } from "@/services/notification.service";
 import { AcademicYearService } from "@/services/academic-year.service";
-import { MajorService } from "@/services/major.service";
-import { CourseOverrideService } from "@/services/course-override.service";
+import { CourseService } from "@/services/course.service";
 
 // WebSocket
 import { WebSocketManager } from "@/lib/ws-manager";
+import { SkillRepository } from "@/repositories/skill.repository";
+import { SkillService } from "@/services/skill.service";
 
 export interface ICradle {
   // Infrastructure
@@ -62,15 +60,13 @@ export interface ICradle {
   teacherRepository: TeacherRepository;
   translationRepository: TranslationRepository;
   notificationRepository: NotificationRepository;
-  majorRepository: MajorRepository;
-  courseOverrideRepository: CourseOverrideRepository;
+  skillRepository: SkillRepository;
 
   // Services
   academicLevelService: AcademicLevelService;
   attendanceService: AttendanceService;
   buildingService: BuildingService;
   classroomService: ClassroomService;
-  courseService: CourseService;
   departmentService: DepartmentService;
   facultyService: FacultyService;
   scheduleService: ScheduleService;
@@ -80,8 +76,8 @@ export interface ICradle {
   translationService: TranslationService;
   notificationService: NotificationService;
   academicYearService: AcademicYearService;
-  majorService: MajorService;
-  courseOverrideService: CourseOverrideService;
+  courseService: CourseService;
+  skillService: SkillService;
 }
 
 // Instantiate Infrastructure
@@ -103,28 +99,33 @@ const teacherRepository = new TeacherRepository(db);
 const translationRepository = new TranslationRepository(db);
 const notificationRepository = new NotificationRepository(db);
 const academicYearRepository = new AcademicYearRepository(db);
-const majorRepository = new MajorRepository(db);
-const courseOverrideRepository = new CourseOverrideRepository(db);
-
+const skillRepository = new SkillRepository(db);
 // Instantiate Services
 const academicLevelService = new AcademicLevelService(academicLevelRepository);
-const scheduleService = new ScheduleService(
-  scheduleRepository,
+const attendanceService = new AttendanceService(
+  db,
+  attendanceRepository,
   courseRepository,
 );
-const attendanceService = new AttendanceService(attendanceRepository, scheduleService);
 const buildingService = new BuildingService(buildingRepository, cache);
 const classroomService = new ClassroomService(
   classroomRepository,
   buildingRepository,
   cache,
 );
-const courseService = new CourseService(courseRepository);
 const departmentService = new DepartmentService(departmentRepository);
 const facultyService = new FacultyService(facultyRepository);
-
+const scheduleService = new ScheduleService(
+  db,
+  scheduleRepository,
+  courseRepository,
+  studentRepository,
+);
 const sessionTimeService = new SessionTimeService(sessionTimeRepository);
-const studentService = new StudentService(studentRepository);
+const studentService = new StudentService(
+  studentRepository,
+  attendanceRepository,
+);
 const teacherService = new TeacherService(teacherRepository);
 const translationService = new TranslationService(translationRepository);
 const notificationService = new NotificationService(
@@ -133,8 +134,8 @@ const notificationService = new NotificationService(
   wsManager,
 );
 const academicYearService = new AcademicYearService(academicYearRepository);
-const majorService = new MajorService(majorRepository);
-const courseOverrideService = new CourseOverrideService(courseOverrideRepository);
+const courseService = new CourseService(courseRepository);
+const skillService = new SkillService(skillRepository);
 
 export const container: ICradle = {
   db,
@@ -155,14 +156,12 @@ export const container: ICradle = {
   teacherRepository,
   translationRepository,
   notificationRepository,
-  majorRepository,
-  courseOverrideRepository,
+  skillRepository,
 
   academicLevelService,
   attendanceService,
   buildingService,
   classroomService,
-  courseService,
   departmentService,
   facultyService,
   scheduleService,
@@ -172,6 +171,6 @@ export const container: ICradle = {
   translationService,
   notificationService,
   academicYearService,
-  majorService,
-  courseOverrideService,
+  courseService,
+  skillService,
 };

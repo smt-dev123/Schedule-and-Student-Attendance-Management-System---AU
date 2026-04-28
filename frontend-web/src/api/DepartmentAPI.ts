@@ -6,6 +6,11 @@ export const getDepartments = async () => {
   return res.data
 }
 
+export const getDepartmentId = async (id: number) => {
+  const res = await api.get(`/departments/${id}`)
+  return res.data
+}
+
 export const createDepartments = async (newDepartments: DepartmentsType) => {
   const res = await api.post('/departments', newDepartments)
   return res.data

@@ -2,6 +2,8 @@ import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { db } from "@/database";
 import { twoFactor } from "better-auth/plugins";
+import { admin as adminPlugin } from "better-auth/plugins/admin";
+import { ac, manager, staff, student, teacher } from "./permission";
 
 export const auth = betterAuth({
   database: drizzleAdapter(db, {
@@ -19,13 +21,16 @@ export const auth = betterAuth({
   email: {
     enabled: true,
   },
-  plugins: [twoFactor()],
-  user: {
-    additionalFields: {
-      role: {
-        type: "string",
-        default: "user",
+  plugins: [
+    twoFactor(),
+    adminPlugin({
+      ac,
+      roles: {
+        staff,
+        student,
+        teacher,
+        manager,
       },
-    },
-  },
+    }),
+  ],
 });

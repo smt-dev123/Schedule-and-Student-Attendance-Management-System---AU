@@ -1,5 +1,4 @@
 import api from '@/lib/axios'
-import type { ScheduleType } from '@/types'
 
 const ENDPOINT = '/schedules'
 
@@ -19,7 +18,7 @@ export const createSchedule = async (data: any) => {
   return res.data
 }
 
-export const updateSchedule = async (id: number, data: ScheduleType) => {
+export const updateSchedule = async (id: number, data: any) => {
   const res = await api.put(`${ENDPOINT}/${id}`, data)
   return res.data
 }

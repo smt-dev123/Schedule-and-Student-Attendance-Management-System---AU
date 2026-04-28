@@ -3,12 +3,13 @@ import RoomUpdate from '@/routes/admin/room/-actions/Update'
 import type { RoomType } from '@/types'
 import { Flex, IconButton } from '@radix-ui/themes'
 import type { ColumnDef } from '@tanstack/react-table'
-import { FaRegEdit, FaRegEye, FaRegTrashAlt } from 'react-icons/fa'
+import { FaRegEye } from 'react-icons/fa'
 
 export const RoomColumns: ColumnDef<RoomType>[] = [
   { accessorKey: 'id', header: 'ល.រ' },
   { accessorKey: 'name', header: 'បន្ទប់សិក្សា' },
-  { accessorKey: 'number', header: 'ជាន់បន្ទប់សិក្សា' },
+  { accessorKey: 'floor', header: 'ជាន់ទី' },
+  { accessorKey: 'classroomNumber', header: 'លេខបន្ទប់' },
   { accessorKey: 'building.name', header: 'អាគារសិក្សា' },
   {
     id: 'room-actions',

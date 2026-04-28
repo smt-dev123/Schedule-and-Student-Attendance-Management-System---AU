@@ -4,7 +4,7 @@ import StudentUpdate from '@/routes/admin/student/-actions/Update'
 import type { StudentsType } from '@/types'
 import { Badge, Flex, IconButton, Text } from '@radix-ui/themes'
 import type { ColumnDef } from '@tanstack/react-table'
-import { FaRegEdit, FaRegEye } from 'react-icons/fa'
+import { FaRegEye } from 'react-icons/fa'
 
 export const STUDENT_STATUS = {
   ACTIVE: 'សកម្ម',
@@ -49,22 +49,20 @@ export const StudentColumns: ColumnDef<StudentsType>[] = [
       </Text>
     ),
   },
+  { accessorKey: 'email', header: 'អ៊ីម៉ែល' },
+  { accessorKey: 'phone', header: 'លេខទូរស័ព្ទ' },
   {
     accessorKey: 'status',
     header: 'ស្ថានភាព',
     cell: ({ row }) => {
-      const status = row.original.educationalStatus || 'enrolled'
+      const status = row.original.educationalStatus || 'ENROLLED'
       return (
-        <Badge color={getStatusColor(status)} variant="soft">
+        <Badge color={getStatusColor(status as string)} variant="surface">
           {status}
         </Badge>
       )
     },
   },
-
-  { accessorKey: 'email', header: 'អ៊ីម៉ែល' },
-  { accessorKey: 'phone', header: 'លេខទូរស័ព្ទ' },
-
   {
     id: 'student-actions',
     header: 'សកម្មភាព',

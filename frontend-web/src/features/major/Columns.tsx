@@ -9,7 +9,6 @@ export const MajorColumns: ColumnDef<MajorsType>[] = [
   { accessorKey: 'id', header: 'ល.រ' },
   { accessorKey: 'name', header: 'មុខជំនាញ' },
   { accessorKey: 'faculty.name', header: 'មហាវិទ្យាល័យ' },
-  { accessorKey: 'description', header: 'ការពិពណ៌នា', enableSorting: false },
   {
     id: 'major-actions',
     header: 'សកម្មភាព',

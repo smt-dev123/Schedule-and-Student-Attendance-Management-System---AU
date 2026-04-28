@@ -2,8 +2,11 @@ import { NotificationRepository } from "@/repositories/notification.repository";
 import { StudentRepository } from "@/repositories/student.repository";
 import { WebSocketManager } from "@/lib/ws-manager";
 import { HTTPException } from "hono/http-exception";
-import type { Notification, NotificationRecipient } from "@/types/notification";
-import type { CreateNotificationInput } from "@/validators/notification";
+import type {
+  MarkAsRead,
+  Notification,
+  NotificationRecipient,
+} from "@/types/notification";
 
 export class NotificationService {
   constructor(
@@ -12,63 +15,75 @@ export class NotificationService {
     private readonly wsManager: WebSocketManager,
   ) {}
 
-  async createBroadcast(data: CreateNotificationInput): Promise<Notification> {
-    let notification: Notification;
-    try {
-      notification = await this.notificationRepo.create(data);
-    } catch (error) {
-      throw new HTTPException(500, {
-        message: "Failed to create notification",
+  async createBroadcast(data: {
+    title: string;
+    message: string;
+    facultyId: number;
+    targetDepartment?: number;
+    targetGeneration?: number;
+    priority?: string;
+  }): Promise<Notification> {
+    const notification = await this.notificationRepo
+      .create(data)
+      .catch((error) => {
+        console.error("[Notification] Failed to create:", error);
+        throw new HTTPException(500, {
+          message: "Failed to create notification",
+        });
       });
-    }
 
-    if (!notification) {
-      throw new HTTPException(500, {
-        message: "Failed to create notification",
+    const targetStudents = await this.studentRepo
+      .findByFilter({
+        facultyId: data.facultyId,
+        departmentId: data.targetDepartment,
+        generation: data.targetGeneration,
+      })
+      .catch((error) => {
+        console.error("[Notification] Failed to fetch target students:", error);
+        throw new HTTPException(500, {
+          message: "Failed to fetch target students",
+        });
       });
-    }
 
-    const targetStudents = await this.studentRepo.findByFilter({
-      facultyId: data.facultyId,
-      departmentId: data.targetDepartment,
-      generation: data.targetGeneration,
+    if (targetStudents.length === 0) return notification;
+
+    await this.notificationRepo
+      .createRecipients(
+        targetStudents.map((s) => ({
+          notificationId: notification.id,
+          studentId: s.id,
+        })),
+      )
+      .catch((error) => {
+        console.error("[Notification] Failed to create recipients:", error);
+        throw new HTTPException(500, {
+          message: "Failed to create recipients",
+        });
+      });
+
+    targetStudents.forEach((student) => {
+      const userId = (student as any).userId;
+      if (userId) {
+        this.wsManager.sendToUser(userId, {
+          type: "NEW_NOTIFICATION",
+          data: notification,
+        });
+      }
     });
-
-    if (targetStudents.length > 0) {
-      const recipients = targetStudents.map((s) => ({
-        notificationId: notification.id,
-        studentId: s.id,
-      }));
-
-      await this.notificationRepo.createRecipients(recipients);
-
-      targetStudents.forEach((s) => {
-        try {
-          this.wsManager.sendToUser(s.id, {
-            type: "NEW_NOTIFICATION",
-            data: notification,
-          });
-        } catch {}
-      });
-    }
 
     return notification;
   }
 
-  async findMyNotifications(
-    studentId: string,
-  ): Promise<NotificationRecipient[]> {
-    return this.notificationRepo.findUnreadByStudent(studentId);
+  async findMyNotifications(userId: string): Promise<NotificationRecipient[]> {
+    const student = await this.studentRepo.findByUserId(userId);
+    if (!student) {
+      throw new HTTPException(404, { message: "Student not found" });
+    }
+    return this.notificationRepo.findUnreadByStudent(student.id);
   }
 
-  async markAsRead(
-    recipientId: number,
-    studentId: string,
-  ): Promise<NotificationRecipient> {
-    const updated = await this.notificationRepo.markAsRead(
-      recipientId,
-      studentId,
-    );
+  async markAsRead(recipientId: number): Promise<MarkAsRead> {
+    const updated = await this.notificationRepo.markAsRead(recipientId);
     if (!updated) {
       throw new HTTPException(404, {
         message: "Notification recipient not found",

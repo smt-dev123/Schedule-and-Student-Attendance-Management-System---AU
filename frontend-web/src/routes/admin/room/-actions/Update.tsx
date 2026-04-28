@@ -21,6 +21,9 @@ interface Props {
 }
 
 const RoomUpdate = ({ data }: Props) => {
+  const [open, setOpen] = useState(false)
+  const queryClient = useQueryClient()
+
   const {
     control,
     register,
@@ -28,21 +31,15 @@ const RoomUpdate = ({ data }: Props) => {
     reset,
     formState: { errors },
   } = useForm<RoomType>({
-    defaultValues: {
-      name: data.name,
-      number: data.number,
-      buildingId: data.buildingId,
-    },
+    defaultValues: data,
   })
-
-  const queryClient = useQueryClient()
-  const [open, setOpen] = useState(false)
 
   const { data: buildings } = useQuery<BuildingType[]>({
     queryKey: ['buildings'],
-    queryFn: getBuilding,
+    queryFn: () => getBuilding('all'),
   })
 
+  // Update Mutation
   const mutation = useMutation({
     mutationFn: (formData: RoomType) => updateRoom(Number(data.id), formData),
     onSuccess: () => {
@@ -59,73 +56,112 @@ const RoomUpdate = ({ data }: Props) => {
     mutation.mutate(formData)
   }
 
-  // បច្ចុប្បន្នភាព Form រាល់ពេល Dialog បើក ឬ data ផ្លាស់ប្តូរ
+  // Reset form when dialog opens or data changes
   useEffect(() => {
     if (open) {
-      reset({
-        name: data.name,
-        number: data.number,
-        buildingId: data.buildingId,
-      })
+      reset(data)
     }
   }, [open, data, reset])
 
   return (
     <Dialog.Root open={open} onOpenChange={setOpen}>
       <Dialog.Trigger>
-        <IconButton size="1" color="blue" variant="surface" style={{ cursor: 'pointer' }}>
+        <IconButton
+          size="1"
+          color="blue"
+          variant="surface"
+          style={{ cursor: 'pointer' }}
+        >
           <FaRegEdit />
         </IconButton>
       </Dialog.Trigger>
 
       <Dialog.Content maxWidth="450px">
-        <Dialog.Title>កែប្រែ</Dialog.Title>
+        <Dialog.Title>កែប្រែព័ត៌មានបន្ទប់</Dialog.Title>
 
         <form onSubmit={handleSubmit(onSubmit)}>
           <Flex direction="column" gap="3">
-            {/* Room Name */}
+            {/* Room name */}
             <label>
-              <Text as="div" size="2" mb="1" weight="bold">បន្ទប់សិក្សា</Text>
+              <Text as="div" size="2" mb="1" weight="bold">
+                បន្ទប់សិក្សា
+              </Text>
               <TextField.Root
-                {...register('name', { 
-                  required: 'សូមបញ្ចូលឈ្មោះបន្ទប់',
-                  minLength: { value: 3, message: 'ឈ្មោះត្រូវមានយ៉ាងតិច ៣ តួ' } 
+                {...register('name', {
+                  required: 'សូមបញ្ចូលបន្ទប់សិក្សា',
+                  minLength: { value: 3, message: 'យ៉ាងហោចណាស់ ៣ខ្ទង់' },
                 })}
-                placeholder="Enter room name"
+                placeholder="សូមបញ្ចូលឈ្មោះបន្ទប់"
               />
-              {errors.name && <Text size="2" color="red">{errors.name.message}</Text>}
+              {errors.name && (
+                <Text size="2" color="red">
+                  {errors.name.message}
+                </Text>
+              )}
             </label>
 
-            {/* Room Number */}
             <label>
-              <Text as="div" size="2" mb="1" weight="bold">លេខបន្ទប់ / ជាន់</Text>
+              <Text as="div" size="2" mb="1" weight="bold">
+                ជាន់បន្ទប់សិក្សា
+              </Text>
               <TextField.Root
-                {...register('number', {
+                {...register('floor', {
                   valueAsNumber: true,
-                  required: 'សូមបញ្ចូលលេខបន្ទប់'
+                  required: 'សូមបញ្ចូលលេខជាន់',
                 })}
+                placeholder="សូមបញ្ចូលលេខជាន់"
                 type="number"
-                placeholder="Enter room number"
               />
-              {errors.number && <Text size="2" color="red">{errors.number.message}</Text>}
+              {errors.floor && (
+                <Text size="2" color="red">
+                  {errors.floor.message}
+                </Text>
+              )}
             </label>
 
-            {/* Building Select - កែចំណុច value */}
             <label>
-              <Text as="div" size="2" mb="1" weight="bold">អាគារសិក្សា</Text>
+              <Text as="div" size="2" mb="1" weight="bold">
+                លេខបន្ទប់សិក្សា
+              </Text>
+              <TextField.Root
+                {...register('classroomNumber', {
+                  valueAsNumber: true,
+                  required: 'សូមបញ្ចូលលេខបន្ទប់សិក្សា',
+                })}
+                placeholder="សូមបញ្ចូលលេខបន្ទប់សិក្សា"
+                type="number"
+              />
+              {errors.classroomNumber && (
+                <Text size="2" color="red">
+                  {errors.classroomNumber.message}
+                </Text>
+              )}
+            </label>
+
+            {/* Building Select */}
+            <label>
+              <Text as="div" size="2" mb="1" weight="bold">
+                អាគារសិក្សា
+              </Text>
+
               <Controller
                 name="buildingId"
                 control={control}
                 render={({ field }) => (
                   <Select.Root
-                    // ត្រូវប្រើ field.value (ID) មិនមែន data.building.name ទេ
-                    value={String(field.value)} 
+                    value={field.value?.toString() ?? ''}
                     onValueChange={(val) => field.onChange(Number(val))}
                   >
-                    <Select.Trigger style={{ width: '100%' }} />
+                    <Select.Trigger
+                      placeholder="ជ្រើសរើសអាគារ"
+                      style={{ width: '100%' }}
+                    />
                     <Select.Content>
                       {buildings?.map((building) => (
-                        <Select.Item value={String(building.id)} key={building.id}>
+                        <Select.Item
+                          value={String(building.id)}
+                          key={building.id}
+                        >
                           {building.name}
                         </Select.Item>
                       ))}
@@ -138,13 +174,16 @@ const RoomUpdate = ({ data }: Props) => {
 
           <Flex gap="3" mt="4" justify="end">
             <Dialog.Close>
-              <Button variant="soft" color="gray">ចាកចេញ</Button>
+              <Button variant="soft" color="gray">
+                ចាកចេញ
+              </Button>
             </Dialog.Close>
-            <Button type="submit" loading={mutation.isPending}>រក្សាទុក</Button>
+            <Button type="submit">រក្សាទុក</Button>
           </Flex>
         </form>
       </Dialog.Content>
     </Dialog.Root>
   )
 }
+
 export default RoomUpdate

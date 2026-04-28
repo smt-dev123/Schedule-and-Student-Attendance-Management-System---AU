@@ -1,24 +1,25 @@
 import { Hono } from "hono";
 import { zValidator } from "@hono/zod-validator";
-import { bulkAttendanceSchema } from "@/validators/attendance";
+import {
+  bulkAttendanceSchema,
+  attendanceReportQuerySchema,
+} from "@/validators/attendance";
 import { roleMiddleware } from "@/middlewares/roles";
 import authentication from "@/middlewares/auth";
+import type { Variables } from "@/types/middleware";
 
-const router = new Hono();
+const router = new Hono<{ Variables: Variables }>();
 
 router.post(
   "/bulk",
   authentication,
-  roleMiddleware("teacher", "admin"),
+  roleMiddleware("teacher"),
   zValidator("json", bulkAttendanceSchema),
   async (c) => {
     const user = c.get("user");
-    const { attendanceService } = c.var.container;
     const data = c.req.valid("json");
-    const result = await attendanceService.markBulkAttendance({
-      ...data,
-      recordedBy: user.id,
-    });
+    const { attendanceService } = c.get("container");
+    const result = await attendanceService.markBulkAttendance(data, user.id);
     return c.json(result);
   },
 );
@@ -26,37 +27,27 @@ router.post(
 router.get(
   "/student/:id",
   authentication,
-  roleMiddleware("teacher", "admin"),
+  roleMiddleware("staff"),
   async (c) => {
-    const { attendanceService } = c.var.container;
     const id = c.req.param("id");
-    const records = await attendanceService.getAttendanceByStudentId(id);
+    const { attendanceService } = c.get("container");
+    const records = await attendanceService.getAttendanceByStudentId(
+      Number(id),
+    );
     return c.json(records);
   },
 );
 
 router.get(
-  "/course/:courseId",
+  "/report",
   authentication,
-  roleMiddleware("teacher", "admin"),
+  roleMiddleware("staff"),
+  zValidator("query", attendanceReportQuerySchema),
   async (c) => {
-    const { attendanceService } = c.var.container;
-    const courseId = parseInt(c.req.param("courseId"));
-    const dateStr = c.req.query("date") || new Date().toISOString().split("T")[0];
-    const records = await attendanceService.getAttendanceByCourseAndDate(courseId, new Date(dateStr));
+    const query = c.req.valid("query");
+    const { attendanceService } = c.get("container");
+    const records = await attendanceService.attendanceReport(query);
     return c.json(records);
-  },
-);
-
-router.get(
-  "/report/course/:courseId",
-  authentication,
-  roleMiddleware("teacher", "admin"),
-  async (c) => {
-    const { attendanceService } = c.var.container;
-    const courseId = parseInt(c.req.param("courseId"));
-    const records = await attendanceService.generateAttendanceReportForCourse(courseId);
-    return c.json({ data: records });
   },
 );
 

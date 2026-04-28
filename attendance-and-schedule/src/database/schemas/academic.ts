@@ -9,7 +9,7 @@ import {
   index,
   text,
   unique,
-  date,
+  numeric,
 } from "drizzle-orm/pg-core";
 import {
   academicLevel,
@@ -36,17 +36,6 @@ export const faculties = pgTable("faculties", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-export const majors = pgTable("majors", {
-  id: serial("id").primaryKey(),
-  name: varchar("name").unique().notNull(),
-  description: varchar("description"),
-  facultyId: integer("faculty_id")
-    .notNull()
-    .references(() => faculties.id),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
-});
-
 export const departments = pgTable(
   "departments",
   {
@@ -62,6 +51,16 @@ export const departments = pgTable(
     uniqueIndex("unique_faculty_department").on(table.facultyId, table.name),
   ],
 );
+
+export const skills = pgTable("skills", {
+  id: serial("id").primaryKey(),
+  name: varchar("name").unique().notNull(),
+  facultyId: integer("faculty_id")
+    .notNull()
+    .references(() => faculties.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
 
 export const sessionTimes = pgTable(
   "session_times",
@@ -116,12 +115,15 @@ export const schedules = pgTable(
     semester: integer("semester").notNull(),
     semesterStart: timestamp("semester_start").notNull(),
     semesterEnd: timestamp("semester_end").notNull(),
-    studyShift: studyShiftEnum("study_shift").default("morning"),
+    studyShift: studyShiftEnum("study_shift").notNull().default("morning"), // ← notNull added
     classroomId: integer("classroom_id")
       .notNull()
       .references(() => classrooms.id),
-    createdAt: timestamp("created_at").defaultNow(),
-    updatedAt: timestamp("updated_at").defaultNow(),
+    sessionTimeId: integer("session_time_id")
+      .notNull()
+      .references(() => sessionTimes.id),
+    createdAt: timestamp("created_at").defaultNow().notNull(), // ← notNull added
+    updatedAt: timestamp("updated_at").defaultNow().notNull(), // ← notNull added
   },
   (table) => [
     uniqueIndex("unique_schedule_identifier").on(
@@ -131,6 +133,7 @@ export const schedules = pgTable(
       table.semester,
       table.year,
       table.departmentId,
+      table.studyShift, // ← added: two shifts can share the same cohort/semester
     ),
     index("idx_schedule_faculty_generation").on(
       table.facultyId,
@@ -139,6 +142,7 @@ export const schedules = pgTable(
   ],
 );
 
+// schema
 export const courses = pgTable(
   "courses",
   {
@@ -148,20 +152,25 @@ export const courses = pgTable(
     credits: integer("credits"),
     description: varchar("description"),
     day: dayEnum("day").notNull(),
-    teacherId: text("teacher_id")
+    teacherId: integer("teacher_id")
       .notNull()
       .references(() => teachers.id),
     scheduleId: integer("schedule_id")
       .notNull()
       .references(() => schedules.id),
-    sessionTimeId: integer("session_time_id")
+    hours: numeric("hours", { precision: 4, scale: 1 }).notNull(),
+    session: integer("session").notNull(),
+    totalHoursLeft: numeric("total_hours_left", {
+      precision: 4,
+      scale: 1,
+    }).notNull(),
+    totalSessionLeft: integer("total_session_left").notNull(),
+    academicYearId: integer("academic_year_id")
       .notNull()
-      .references(() => sessionTimes.id),
-    firstSessionNote: varchar("first_session_note"),
-    secondSessionNote: varchar("second_session_note"),
-    isActive: boolean("is_active").default(true),
-    createdAt: timestamp("created_at").defaultNow(),
-    updatedAt: timestamp("updated_at").defaultNow(),
+      .references(() => academicYears.id),
+    isActive: boolean("is_active").notNull().default(true), // ← notNull added
+    createdAt: timestamp("created_at").defaultNow().notNull(), // ← notNull added
+    updatedAt: timestamp("updated_at").defaultNow().notNull(), // ← notNull added
   },
   (table) => [
     index("idx_course_teacher").on(table.teacherId),
@@ -170,40 +179,30 @@ export const courses = pgTable(
     uniqueIndex("unique_schedule_day_classroom_time").on(
       table.scheduleId,
       table.day,
-      table.sessionTimeId,
     ),
   ],
 );
 
-export const courseOverrides = pgTable("course_overrides", {
-  id: serial("id").primaryKey(),
-  originalCourseId: integer("original_course_id")
-    .notNull()
-    .references(() => courses.id, { onDelete: "cascade" }),
-  replacementTeacherId: text("replacement_teacher_id").references(() => teachers.id),
-  replacementClassroomId: integer("replacement_classroom_id").references(() => classrooms.id),
-  date: date("date").notNull(),
-  isCancelled: boolean("is_cancelled").default(false),
-  note: varchar("note", { length: 500 }),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
-});
-
 export const teachers = pgTable(
   "teachers",
   {
-    id: text("id")
+    id: integer("id").primaryKey(),
+    userId: text("user_id")
       .references(() => user.id, { onDelete: "cascade" })
-      .primaryKey(),
+      .unique()
+      .notNull(),
     name: varchar("name").notNull(),
-    phone: varchar("phone").unique(),
-    email: varchar("email").unique(),
-    gender: gender("gender"),
-    academicLevelId: integer("academic_level_id").references(
-      () => academicLevels.id,
-    ),
-    facultyId: integer("faculty_id").references(() => faculties.id),
+    phone: varchar("phone").unique().notNull(),
+    email: varchar("email").unique().notNull(),
+    gender: gender("gender").notNull(),
+    academicLevelId: integer("academic_level_id")
+      .references(() => academicLevels.id)
+      .notNull(),
+    facultyId: integer("faculty_id")
+      .references(() => faculties.id)
+      .notNull(),
     isActive: boolean("is_active").default(true),
+    image: varchar("image"),
     createdAt: timestamp("created_at").defaultNow(),
     updatedAt: timestamp("updated_at").defaultNow(),
   },
@@ -213,30 +212,31 @@ export const teachers = pgTable(
 export const students = pgTable(
   "students",
   {
-    id: text("id")
+    id: integer("id").primaryKey(),
+    userId: text("user_id")
       .references(() => user.id, { onDelete: "cascade" })
-      .primaryKey(),
+      .unique(),
     name: varchar("name").notNull(),
-    phone: varchar("phone").unique().notNull(),
+    phone: varchar("phone").unique(),
     email: varchar("email").unique().notNull(),
-    facultyId: integer("faculty_id")
-      .references(() => faculties.id)
-      .notNull(),
-    departmentId: integer("department_id")
-      .references(() => departments.id)
-      .notNull(),
-    academicLevelId: integer("academic_level_id")
-      .references(() => academicLevels.id)
-      .notNull(),
-    academicYearId: integer("academic_year_id")
-      .references(() => academicYears.id)
+    facultyId: integer("faculty_id").references(() => faculties.id),
+    departmentId: integer("department_id").references(() => departments.id),
+    academicLevelId: integer("academic_level_id").references(
+      () => academicLevels.id,
+    ),
+    academicYearId: integer("academic_year_id").references(
+      () => academicYears.id,
+    ),
+    skillId: integer("skill_id")
+      .references(() => skills.id)
       .notNull(),
     educationalStatus: educationalStatus("educational_status").notNull(),
-    year: integer("year").notNull(),
     gender: gender("gender").notNull(),
     generation: integer("generation").notNull(),
     semester: integer("semester").notNull(),
     isActive: boolean("is_active").default(true),
+    image: varchar("image"),
+    year: integer("year"),
     createdAt: timestamp("created_at").defaultNow(),
     updatedAt: timestamp("updated_at").defaultNow(),
   },
@@ -246,7 +246,6 @@ export const students = pgTable(
       table.academicLevelId,
       table.generation,
       table.semester,
-      table.year,
     ),
   ],
 );
@@ -255,7 +254,7 @@ export const studentAcademicYears = pgTable(
   "student_academic_years",
   {
     id: serial("id").primaryKey(),
-    studentId: text("student_id")
+    studentId: integer("student_id")
       .notNull()
       .references(() => students.id, { onDelete: "cascade" }),
     academicYearId: integer("academic_year_id")

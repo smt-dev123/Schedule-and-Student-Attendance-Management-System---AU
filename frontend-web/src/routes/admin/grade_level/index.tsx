@@ -33,18 +33,8 @@ function RouteComponent() {
           <Text size="5" className="font-bold">
             តារាងកម្រិតថ្នាក់
           </Text>
-          <Flex gap="2">
-            {/* Export */}
-            <Button variant="outline" style={{ cursor: 'pointer' }}>
-              Export Excel
-            </Button>
 
-            <Button variant="outline" style={{ cursor: 'pointer' }}>
-              បោះពុម្ភ
-            </Button>
-
-            <GradeLevleCreate />
-          </Flex>
+          <GradeLevleCreate />
         </div>
       </Flex>
 

@@ -1,5 +1,8 @@
+import { students } from "@/database/schemas";
 import z from "zod";
+import { createUpdateSchema } from "drizzle-zod";
 
+/* Enum */
 const academicLevelEnum = z.enum(["Associate", "Bachelor", "Master", "PhD"]);
 const genderEnum = z.enum(["male", "female"]);
 const educationalStatusEnum = z.enum([
@@ -18,9 +21,8 @@ const dayEnum = z.enum([
   "Sunday",
 ]);
 const studyShiftEnum = z.enum(["morning", "evening", "night"]);
-/**
- * Faculty Schemas
- */
+
+/* Faculty Schemas */
 export const facultySchema = z.object({
   name: z.string().min(1, "Faculty name is required"),
 });
@@ -29,9 +31,7 @@ export const facultyUpdateSchema = facultySchema.partial();
 export type FacultyInput = z.infer<typeof facultySchema>;
 export type FacultyUpdateInput = z.infer<typeof facultyUpdateSchema>;
 
-/**
- * Academic Level Schemas
- */
+/* Academic Level Schemas */
 export const academicLevelSchema = z.object({
   level: academicLevelEnum,
 });
@@ -42,68 +42,50 @@ export type AcademicLevelUpdateInput = z.infer<
   typeof academicLevelUpdateSchema
 >;
 
-/**
- * Academic Year Schemas
- */
+/* Academic Year Schemas */
 export const academicYearSchema = z.object({
   name: z.string().min(1, "Academic year name is required"),
   startDate: z.coerce.date(),
   endDate: z.coerce.date(),
   isCurrent: z.boolean().default(true),
 });
-
 export const academicYearUpdateSchema = academicYearSchema.partial();
 
 export type AcademicYearInput = z.infer<typeof academicYearSchema>;
 export type AcademicYearUpdateInput = z.infer<typeof academicYearUpdateSchema>;
 
-/**
- * Department Schemas
- */
+/* Department Schemas */
 export const departmentSchema = z.object({
   name: z.string().min(1, "Department name is required"),
-  facultyId: z.number().int().positive(),
+  facultyId: z.coerce.number().positive(),
 });
 export const departmentUpdateSchema = departmentSchema.partial();
 
 export type DepartmentInput = z.infer<typeof departmentSchema>;
 export type DepartmentUpdateInput = z.infer<typeof departmentUpdateSchema>;
 
-/**
- * Major Schemas
- */
-export const majorSchema = z.object({
-  name: z.string().min(1, "Major name is required"),
-  description: z.string().optional(),
-  facultyId: z.number().int().positive(),
-});
-export const majorUpdateSchema = majorSchema.partial();
-
-export type MajorInput = z.infer<typeof majorSchema>;
-export type MajorUpdateInput = z.infer<typeof majorUpdateSchema>;
-
-/**
- * Student Schemas
- */
-export const studentSchema = z.object({
-  id: z.string(),
-  name: z.string().min(1, "Student name is required"),
+/* Student Schemas */
+export const studentCreateSchema = z.object({
+  name: z.string().min(1, "Name is required"),
+  email: z.email("Invalid email address"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
   phone: z.string().min(10).max(15),
-  email: z.email("Invalid email format"),
-  password: z.string().min(1, "Password is required"),
-  facultyId: z.number().int().positive(),
-  departmentId: z.number().int().positive(),
-  academicLevelId: z.number().int().positive(),
-  academicYearId: z.number().int().positive(),
+  facultyId: z.coerce.number().positive(),
+  departmentId: z.coerce.number().positive(),
+  academicLevelId: z.coerce.number().positive(),
   educationalStatus: educationalStatusEnum,
-  year: z.number().int().positive(),
   gender: genderEnum,
-  generation: z.number().int().positive(),
-  semester: z.number().int().positive(),
+  generation: z.coerce.number().positive(),
+  skillId: z.coerce.number().positive(),
+  semester: z.coerce.number().positive(),
   isActive: z.boolean().default(true),
+  academicYearId: z.coerce.number().positive(),
+  year: z.coerce.number().positive(),
 });
-export const studentUpdateSchema = studentSchema.partial();
 
+export const studentUpdateSchema = createUpdateSchema(students).omit({
+  image: true,
+});
 export const studentQuerySchema = z.object({
   name: z.string().optional(),
   facultyId: z.string().optional(),
@@ -113,60 +95,53 @@ export const studentQuerySchema = z.object({
   page: z.coerce.number().int().positive().default(1),
   limit: z.coerce.number().int().positive().default(10),
 });
+export const studentIdParamSchema = z.object({
+  id: z.coerce.number().positive(),
+});
 
-export type StudentInput = z.infer<typeof studentSchema>;
+export const studentPromoteSchema = z.object({
+  studentId: z.coerce.number().positive(),
+  academicYearId: z.coerce.number().positive(),
+  year: z.coerce.number().positive(),
+  semester: z.coerce.number().positive(),
+});
 export type StudentUpdateInput = z.infer<typeof studentUpdateSchema>;
 export type StudentQueryInput = z.infer<typeof studentQuerySchema>;
 
-export const studentPromoteSchema = z.object({
-  studentId: z.string(),
-  academicYearId: z.number().int().positive(),
-  year: z.number().int().positive(),
-  semester: z.number().int().positive(),
-});
-export type StudentPromoteInput = z.infer<typeof studentPromoteSchema>;
-
-/**
- * Teacher Schemas
- */
-export const teacherSchema = z.object({
-  id: z.string(),
+/* Teacher Schemas */
+export const teacherCreateSchema = z.object({
   name: z.string().min(1, "Teacher name is required"),
   phone: z.string().min(10).max(15),
   email: z.email("Invalid email format"),
-  password: z.string().min(1, "Password is required"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
   gender: genderEnum,
-  academicLevelId: z.number().int().positive(),
-  facultyId: z.number().int().positive(),
+  academicLevelId: z.coerce.number().positive(),
+  facultyId: z.coerce.number().positive(),
   isActive: z.boolean().default(true),
 });
-export const teacherUpdateSchema = teacherSchema.partial();
+export const teacherUpdateSchema = teacherCreateSchema.partial();
 export const teacherQuerySchema = z.object({
   name: z.string().optional(),
-  academicLevelId: z.coerce.number().int().positive().optional(),
-  facultyId: z.coerce.number().int().positive().optional(),
-  page: z.coerce.number().int().positive().default(1),
-  limit: z.coerce.number().int().positive().default(10),
+  academicLevelId: z.coerce.number().optional(),
+  facultyId: z.coerce.string().optional(),
+  page: z.coerce.number().positive().default(1),
+  limit: z.coerce.number().positive().default(10),
+});
+export const teacherIdParamSchema = z.object({
+  id: z.coerce.number().positive(),
 });
 
-export type TeacherInput = z.infer<typeof teacherSchema>;
-export type TeacherUpdateInput = z.infer<typeof teacherUpdateSchema>;
-export type TeacherQueryInput = z.infer<typeof teacherQuerySchema>;
-
-/**
- * Course Schemas
- */
+/* Course Schemas */
 export const courseSchema = z.object({
   name: z.string().min(1, "Course name is required"),
   code: z.string().min(1, "Course code is required"),
-  credits: z.number().int().positive(),
-  description: z.string().nullable().optional(),
+  credits: z.coerce.number().positive(),
+  description: z.string().optional(),
   day: dayEnum,
-  teacherId: z.string(),
-  scheduleId: z.number().int().positive(),
-  sessionTimeId: z.number().int().positive(),
-  firstSessionNote: z.string().nullable().optional(),
-  secondSessionNote: z.string().nullable().optional(),
+  teacherId: z.coerce.number().positive(),
+  scheduleId: z.coerce.number().positive(),
+  hours: z.string().min(1, "Hours is required"),
+  academicYearId: z.coerce.number().positive(),
   isActive: z.boolean().default(true),
 });
 export const courseUpdateSchema = courseSchema.partial();
@@ -174,9 +149,7 @@ export const courseUpdateSchema = courseSchema.partial();
 export type CourseInput = z.infer<typeof courseSchema>;
 export type CourseUpdateInput = z.infer<typeof courseUpdateSchema>;
 
-/**
- * Session Time Schemas
- */
+/* Session Time Schemas */
 export const sessionTimeSchema = z.object({
   shift: studyShiftEnum,
   firstSessionStartTime: z
@@ -197,9 +170,7 @@ export const sessionTimeUpdateSchema = sessionTimeSchema.partial();
 export type SessionTimeInput = z.infer<typeof sessionTimeSchema>;
 export type SessionTimeUpdateInput = z.infer<typeof sessionTimeUpdateSchema>;
 
-/**
- * Schedule
- */
+/* Schedule Schemas */
 export const scheduleSchema = z.object({
   facultyId: z.coerce.number().positive(),
   year: z.coerce.number().positive(),
@@ -212,6 +183,7 @@ export const scheduleSchema = z.object({
   semesterEnd: z.coerce.date(),
   academicYearId: z.coerce.number().positive(),
   studyShift: studyShiftEnum,
+  sessionTimeId: z.coerce.number().positive(),
 });
 
 export const scheduleUniqueKeySchema = z.object({
@@ -227,19 +199,25 @@ export const scheduleUpdateSchema = scheduleSchema.partial();
 
 export const scheduleWithCoursesSchema = z.object({
   schedule: scheduleSchema,
-  courses: z.array(courseSchema.omit({ scheduleId: true })),
+  courses: z.array(
+    courseSchema.omit({ scheduleId: true, academicYearId: true }),
+  ),
 });
 
-export const scheduleWithCoursesUpdateSchema = z.object({
-  schedule: scheduleUpdateSchema,
+export const scheduleUpdateWithCoursesSchema = z.object({
+  schedule: scheduleSchema.partial(),
   courses: z.array(
-    courseSchema
-      .extend({
-        id: z.coerce.number().positive().optional(),
-        scheduleId: z.coerce.number().positive().optional(),
-      })
-      .omit({ scheduleId: true }),
-  ),
+    z.object({
+      id: z.coerce.number().optional(),
+      name: z.string().min(1, "Course name is required"),
+      code: z.string().min(1, "Course code is required"),
+      credits: z.coerce.number().positive(),
+      day: dayEnum,
+      teacherId: z.coerce.number().positive(),
+      hours: z.string().min(1, "Hours is required"),
+      isActive: z.boolean().default(true),
+    }),
+  ).optional(),
 });
 
 export type ScheduleInput = z.infer<typeof scheduleSchema>;
@@ -248,25 +226,22 @@ export type ScheduleUniqueKeyInput = z.infer<typeof scheduleUniqueKeySchema>;
 export type ScheduleWithCoursesInput = z.infer<
   typeof scheduleWithCoursesSchema
 >;
-export type ScheduleWithCoursesUpdateInput = z.infer<
-  typeof scheduleWithCoursesUpdateSchema
+export type ScheduleUpdateWithCoursesInput = z.infer<
+  typeof scheduleUpdateWithCoursesSchema
 >;
 
-/**
- * Course Overrides
- */
-export const courseOverrideSchema = z.object({
-  originalCourseId: z.coerce.number().positive(),
-  replacementTeacherId: z.string().optional().nullable(),
-  replacementClassroomId: z.coerce.number().positive().optional().nullable(),
-  date: z.coerce.date(),
-  isCancelled: z.boolean().default(false),
-  note: z.string().optional().nullable(),
+/* Skill Schemas */
+export const skillCreateSchema = z.object({
+  name: z.string().min(1, "Skill name is required"),
+  facultyId: z.coerce.number().positive(),
+  description: z.string().optional(),
 });
-
-export const courseOverrideUpdateSchema = courseOverrideSchema.partial();
-
-export type CourseOverrideInput = z.infer<typeof courseOverrideSchema>;
-export type CourseOverrideUpdateInput = z.infer<
-  typeof courseOverrideUpdateSchema
->;
+export const skillUpdateSchema = skillCreateSchema.partial();
+export const skillQuerySchema = z.object({
+  name: z.string().optional(),
+  page: z.coerce.number().positive().default(1),
+  limit: z.coerce.number().positive().default(10),
+});
+export const skillIdParamSchema = z.object({
+  id: z.coerce.number().positive(),
+});

@@ -1,19 +1,15 @@
 import { Hono } from "hono";
 import { zValidator } from "@hono/zod-validator";
 import {
-  courseSchema,
-  scheduleSchema,
-  scheduleUpdateSchema,
+  scheduleUpdateWithCoursesSchema,
   scheduleWithCoursesSchema,
-  scheduleWithCoursesUpdateSchema
 } from "@/validators/academy";
 
 const router = new Hono();
 
 router.get("/", async (c) => {
   const { scheduleService } = c.var.container;
-  const academicYearId = c.req.query("academicYearId");
-  const schedules = await scheduleService.findAll(academicYearId ? parseInt(academicYearId) : undefined);
+  const schedules = await scheduleService.findAll();
   return c.json(schedules);
 });
 
@@ -31,7 +27,10 @@ router.post("/", zValidator("json", scheduleWithCoursesSchema), async (c) => {
   return c.json(result);
 });
 
-router.put("/:id", zValidator("json", scheduleWithCoursesUpdateSchema), async (c) => {
+router.put(
+  "/:id",
+  zValidator("json", scheduleUpdateWithCoursesSchema),
+  async (c) => {
   const { scheduleService } = c.var.container;
   const id = parseInt(c.req.param("id"));
   const data = c.req.valid("json");

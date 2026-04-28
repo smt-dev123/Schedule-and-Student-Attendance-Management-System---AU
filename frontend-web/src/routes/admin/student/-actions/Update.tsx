@@ -20,6 +20,7 @@ import { getFaculties } from '@/api/FacultyAPI'
 import { getDepartments } from '@/api/DepartmentAPI'
 import { getAcademicLevels } from '@/api/AcademicLevelAPI'
 import { getAcademicYear } from '@/api/AcademicYearAPI'
+import { getMajors } from '@/api/MajorAPI'
 
 interface Props {
   data: StudentsType
@@ -34,16 +35,24 @@ const StudentUpdate = ({ data }: Props) => {
     handleSubmit,
     control,
     reset,
+    watch,
+    setValue,
     formState: { errors },
   } = useForm<StudentsType>()
+
+  const facultyId = watch('facultyId')
 
   const { data: faculties = [] } = useQuery({
     queryKey: ['faculties'],
     queryFn: getFaculties,
   })
+  const { data: majors = [] } = useQuery({
+    queryKey: ['majors', facultyId],
+    queryFn: () => getMajors(),
+  })
   const { data: departments = [] } = useQuery({
-    queryKey: ['departments'],
-    queryFn: getDepartments,
+    queryKey: ['departments', facultyId],
+    queryFn: () => getDepartments(),
   })
   const { data: academicLevels = [] } = useQuery({
     queryKey: ['academicLevels'],
@@ -60,6 +69,7 @@ const StudentUpdate = ({ data }: Props) => {
         ...data,
         gender: data.gender || 'male',
         educationalStatus: data.educationalStatus || 'enrolled',
+        skillId: data.skillId,
         facultyId: data.facultyId,
         departmentId: data.departmentId,
         academicLevelId: data.academicLevelId,
@@ -71,8 +81,15 @@ const StudentUpdate = ({ data }: Props) => {
     }
   }, [open, data, reset])
 
+  useEffect(() => {
+    if (facultyId && facultyId !== data.facultyId) {
+      setValue('departmentId', 0)
+      setValue('skillId', 0)
+    }
+  }, [facultyId, data.facultyId, setValue])
+
   const mutation = useMutation({
-    mutationFn: (formData: StudentsType) => updateStudent(data.id!, formData),
+    mutationFn: (formData: any) => updateStudent(data.id!, formData),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['students'] })
       toast.success('កែប្រែនិស្សិតជោគជ័យ')
@@ -82,22 +99,25 @@ const StudentUpdate = ({ data }: Props) => {
   })
 
   const onSubmit = (formData: StudentsType) => {
-    const payload = {
-      ...formData,
-      facultyId: Number(formData.facultyId),
-      departmentId: Number(formData.departmentId),
-      academicLevelId: Number(formData.academicLevelId),
-      year: formData.year ? Number(formData.year) : null,
-      semester: formData.semester ? Number(formData.semester) : null,
-      generation: formData.generation ? Number(formData.generation) : null,
-      academicYearId: Number(formData.academicYearId),
-      educationalStatus: formData.educationalStatus,
-      gender: formData.gender,
-      phone: formData.phone,
-      email: formData.email,
-      name: formData.name,
-      password: formData.password,
-    }
+    const payload = new FormData()
+    payload.append('name', formData.name)
+    payload.append('email', formData.email)
+    payload.append('phone', formData.phone)
+    payload.append('studentCode', formData.studentCode)
+    payload.append('gender', formData.gender)
+    payload.append('educationalStatus', formData.educationalStatus)
+    payload.append('facultyId', String(formData.facultyId))
+    payload.append('departmentId', String(formData.departmentId))
+    payload.append('academicLevelId', String(formData.academicLevelId))
+    payload.append('academicYearId', String(formData.academicYearId))
+    payload.append('skillId', String(formData.skillId))
+
+    if (formData.year) payload.append('year', String(formData.year))
+    if (formData.semester) payload.append('semester', String(formData.semester))
+    if (formData.generation)
+      payload.append('generation', String(formData.generation))
+    if (formData.password) payload.append('password', formData.password)
+
     mutation.mutate(payload)
   }
 
@@ -120,6 +140,23 @@ const StudentUpdate = ({ data }: Props) => {
         <form onSubmit={handleSubmit(onSubmit)}>
           <Flex direction="column" gap="4">
             <Grid columns={{ initial: '1', md: '2' }} gap="4">
+              {/* លេខសម្គាល់ */}
+              <Box>
+                <Text as="div" size="2" mb="1" weight="bold">
+                  លេខសម្គាល់ <span className="text-red-500">*</span>
+                </Text>
+                <TextField.Root
+                  {...register('studentCode', {
+                    required: 'សូមបញ្ចូលលេខសម្គាល់',
+                  })}
+                  placeholder="CS001"
+                />
+                {errors.studentCode && (
+                  <Text size="1" color="red">
+                    {errors.studentCode.message}
+                  </Text>
+                )}
+              </Box>
               {/* ឈ្មោះនិស្សិត */}
               <Box>
                 <Text as="div" size="2" mb="1" weight="bold">
@@ -325,6 +362,36 @@ const StudentUpdate = ({ data }: Props) => {
                 />
               </Box>
 
+              {/* ជំនាញ */}
+              <Box>
+                <Text as="div" size="2" mb="1" weight="bold">
+                  ជំនាញ <span className="text-red-500">*</span>
+                </Text>
+                <Controller
+                  name="skillId"
+                  control={control}
+                  rules={{ required: 'សូមជ្រើសរើសជំនាញ' }}
+                  render={({ field }) => (
+                    <Select.Root
+                      value={field.value?.toString()}
+                      onValueChange={field.onChange}
+                    >
+                      <Select.Trigger
+                        style={{ width: '100%' }}
+                        placeholder="ជ្រើសរើសជំនាញ"
+                      />
+                      <Select.Content>
+                        {majors.map((m: any) => (
+                          <Select.Item key={m.id} value={m.id.toString()}>
+                            {m.name}
+                          </Select.Item>
+                        ))}
+                      </Select.Content>
+                    </Select.Root>
+                  )}
+                />
+              </Box>
+
               {/* ឆ្នាំទី និង ឆមាស */}
               <Grid columns="2" gap="3">
                 <Box>
@@ -368,7 +435,7 @@ const StudentUpdate = ({ data }: Props) => {
             </Grid>
 
             {/* លេខសម្ងាត់ */}
-            <Box>
+            {/* <Box>
               <Text as="div" size="2" mb="1" weight="bold">
                 លេខសម្ងាត់សម្រាប់ចូលប្រើប្រាស់{' '}
                 <span className="text-red-500">*</span>
@@ -389,7 +456,7 @@ const StudentUpdate = ({ data }: Props) => {
                   {errors.password.message}
                 </Text>
               )}
-            </Box>
+            </Box> */}
 
             {/* ប៊ូតុងសកម្មភាព */}
             <Flex gap="3" mt="6" justify="end">

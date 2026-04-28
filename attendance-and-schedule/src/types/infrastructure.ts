@@ -1,16 +1,12 @@
 import { buildings, classrooms } from "@/database/schemas";
 
-/**
- * Building Types
- */
+/* Building */
 export type Building = Pick<
   typeof buildings.$inferSelect,
   "id" | "name" | "isActive"
 >;
 
-/**
- * Classroom Types
- */
+/* Classroom */
 export type Classroom = typeof classrooms.$inferSelect;
 
 export type ClassroomWithBuilding = Pick<
