@@ -4,6 +4,7 @@ import { Button, Flex, Spinner, Text, TextField } from '@radix-ui/themes'
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { useState } from 'react'
 import toast from 'react-hot-toast'
+import Logo from '@/assets/au.webp'
 
 export const Route = createFileRoute('/auth/login')({
   component: Login,
@@ -30,7 +31,7 @@ function Login() {
       const { error } = await signIn.email({
         email,
         password,
-        callbackURL: '/admin/dashboard'
+        callbackURL: '/admin/dashboard',
       })
 
       if (error) {
@@ -57,7 +58,7 @@ function Login() {
     <>
       <Flex direction="column" align="center" justify="center" mb="5" gap="2">
         <img
-          src="https://academics-bucket-sj19asxm-prod.s3.ap-southeast-1.amazonaws.com/884dc87f-2613-47fc-83b3-b138abc386df/884dc87f-2613-47fc-83b3-b138abc386df.png"
+          src={Logo}
           alt="App Logo"
           className="h-[110px] w-auto object-contain"
         />

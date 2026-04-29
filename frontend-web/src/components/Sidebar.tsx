@@ -21,7 +21,7 @@ import { useAcademicYears } from '@/hooks/useAcademicYears'
 import type { AcademicYearsType } from '@/types'
 import { useAcademicStore } from '@/stores/useAcademicStore'
 import LogoDestop from '@/assets/au-logo.webp'
-import LogoMobile from '@/assets/au.png'
+import LogoMobile from '@/assets/au.webp'
 
 interface MenuItem {
   key: string
