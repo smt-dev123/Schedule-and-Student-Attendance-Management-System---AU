@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, type ChangeEvent } from 'react'
 import {
   Button,
   Dialog,
@@ -8,6 +8,7 @@ import {
   TextField,
   Grid,
   Box,
+  Avatar,
 } from '@radix-ui/themes'
 import { useForm, Controller } from 'react-hook-form'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
@@ -22,6 +23,8 @@ import { getMajors } from '@/api/MajorAPI'
 
 const StudentCreate = () => {
   const [open, setOpen] = useState(false)
+  const [imageFile, setImageFile] = useState<File | null>(null)
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null)
   const queryClient = useQueryClient()
 
   const {
@@ -43,50 +46,62 @@ const StudentCreate = () => {
       academicYearId: 1,
     },
   })
+
   const facultyId = watch('facultyId')
 
+  // ទាញយកទិន្នន័យពី API
   const { data: faculties = [] } = useQuery({
     queryKey: ['faculties'],
     queryFn: getFaculties,
   })
-
   const { data: majors = [] } = useQuery({
     queryKey: ['majors', facultyId],
     queryFn: () => getMajors(),
   })
-
   const { data: departments = [] } = useQuery({
     queryKey: ['departments', facultyId],
     queryFn: () => getDepartments(),
   })
-
   const { data: academicLevels = [] } = useQuery({
     queryKey: ['academicLevels'],
     queryFn: getAcademicLevels,
   })
-
   const { data: academicYearsRes } = useQuery({
     queryKey: ['academicYears'],
     queryFn: getAcademicYear,
   })
-
   const academicYears = academicYearsRes || []
 
+  const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      const fileSizeInMB = file.size / (1024 * 1024)
+
+      if (fileSizeInMB > 1) {
+        toast.error('រូបភាពមិនអាចធំជាង 1MB ឡើយ!')
+        e.target.value = ''
+        setImageFile(null)
+        setPreviewUrl(null)
+        return
+      }
+
+      setImageFile(file)
+      setPreviewUrl(URL.createObjectURL(file))
+    }
+  }
+
+  // Reset form និងរូបភាពពេលបើក/បិទ Dialog
   useEffect(() => {
     if (open) {
       reset()
-
-      if (open && academicYears.length > 0) {
-        // ១. រកឆ្នាំសិក្សាដែលជា "បច្ចុប្បន្ន"
+      setImageFile(null)
+      setPreviewUrl(null)
+      if (academicYears.length > 0) {
         const currentYear = academicYears.find((ay: any) => ay.isCurrent)
-
-        // ២. បើគ្មាន 'isCurrent' ទេ យកឆ្នាំដែលបង្កើតក្រោយគេបង្អស់ (ID ធំបំផុត)
         const latestYear =
           currentYear || [...academicYears].sort((a, b) => b.id - a.id)[0]
-
         if (latestYear) {
           setValue('academicYearId', latestYear.id.toString())
-          // អ្នកអាចកំណត់ Year = 1 និង Semester = 1 ជា default សម្រាប់សិស្សថ្មីផងដែរ
           setValue('year', 1)
           setValue('semester', 1)
         }
@@ -98,11 +113,12 @@ const StudentCreate = () => {
     if (facultyId) {
       setValue('departmentId', 0)
       setValue('skillId', 0)
+      setValue('departmentId', 0)
     }
   }, [facultyId, setValue])
 
   const mutation = useMutation({
-    mutationFn: (formData: any) => createStudent(formData),
+    mutationFn: (formData: FormData) => createStudent(formData),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['students'] })
       toast.success('ចុះឈ្មោះនិស្សិតបានជោគជ័យ')
@@ -116,27 +132,17 @@ const StudentCreate = () => {
   const onSubmit = (formData: StudentsType) => {
     const data = new FormData()
 
-    // Required strings
-    data.append('name', formData.name)
-    data.append('email', formData.email)
-    data.append('password', formData.password)
-    data.append('phone', formData.phone)
-    data.append('studentCode', formData.studentCode)
-    data.append('gender', formData.gender)
-    data.append('educationalStatus', formData.educationalStatus)
+    // បន្ថែមរូបភាព (បើមាន)
+    if (imageFile) {
+      data.append('image', imageFile)
+    }
 
-    // Required numbers (coerced by backend)
-    data.append('facultyId', String(formData.facultyId))
-    data.append('departmentId', String(formData.departmentId))
-    data.append('academicLevelId', String(formData.academicLevelId))
-    data.append('academicYearId', String(formData.academicYearId))
-    data.append('skillId', String(formData.skillId))
-
-    // Optional numbers
-    if (formData.year) data.append('year', String(formData.year))
-    if (formData.semester) data.append('semester', String(formData.semester))
-    if (formData.generation)
-      data.append('generation', String(formData.generation))
+    // បន្ថែមទិន្នន័យអត្ថបទ និងលេខទាំងអស់ចូលទៅក្នុង FormData
+    Object.entries(formData).forEach(([key, value]) => {
+      if (value !== undefined && value !== null) {
+        data.append(key, String(value))
+      }
+    })
 
     mutation.mutate(data)
   }
@@ -149,7 +155,7 @@ const StudentCreate = () => {
         </Button>
       </Dialog.Trigger>
 
-      <Dialog.Content maxWidth="700px" size="3">
+      <Dialog.Content maxWidth="750px" size="3">
         <Dialog.Title>ចុះឈ្មោះនិស្សិតថ្មី</Dialog.Title>
         <Dialog.Description size="2" mb="4" color="gray">
           សូមបំពេញព័ត៌មាននិស្សិតឱ្យបានត្រឹមត្រូវតាមទម្រង់ខាងក្រោម។
@@ -157,6 +163,35 @@ const StudentCreate = () => {
 
         <form onSubmit={handleSubmit(onSubmit)}>
           <Flex direction="column" gap="4">
+            {/* ផ្នែក Upload រូបភាព និង Preview */}
+            <Flex
+              align="center"
+              gap="4"
+              p="3"
+              style={{
+                border: '1px dashed var(--gray-6)',
+                borderRadius: '8px',
+              }}
+            >
+              <Avatar
+                size="6"
+                src={previewUrl || ''}
+                fallback={watch('name')?.charAt(0) || 'S'}
+                radius="full"
+              />
+              <Box>
+                <Text as="div" size="2" mb="2" weight="bold">
+                  រូបថតនិស្សិត (Profile Picture)
+                </Text>
+                <input
+                  type="file"
+                  accept="image/png, image/jpeg, image/jpg, image/webp"
+                  onChange={handleImageChange}
+                  className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"
+                />
+              </Box>
+            </Flex>
+
             <Grid columns={{ initial: '1', md: '2' }} gap="4">
               {/* លេខសម្គាល់ */}
               <Box>
@@ -217,11 +252,6 @@ const StudentCreate = () => {
                     </Select.Root>
                   )}
                 />
-                {errors.gender && (
-                  <Text size="1" color="red">
-                    {errors.gender.message}
-                  </Text>
-                )}
               </Box>
 
               {/* អ៊ីម៉ែល */}
@@ -233,11 +263,6 @@ const StudentCreate = () => {
                   {...register('email', { required: 'សូមបញ្ចូលអ៊ីម៉ែល' })}
                   placeholder="student@example.com"
                 />
-                {errors.email && (
-                  <Text size="1" color="red">
-                    {errors.email.message}
-                  </Text>
-                )}
               </Box>
 
               {/* លេខទូរស័ព្ទ */}
@@ -249,14 +274,9 @@ const StudentCreate = () => {
                   {...register('phone', { required: 'សូមបញ្ចូលលេខទូរស័ព្ទ' })}
                   placeholder="012 345 678"
                 />
-                {errors.phone && (
-                  <Text size="1" color="red">
-                    {errors.phone.message}
-                  </Text>
-                )}
               </Box>
 
-              {/* ឆ្នាំសិក្សា (Academic Year) */}
+              {/* ឆ្នាំសិក្សា */}
               <Box>
                 <Text as="div" size="2" mb="1" weight="bold">
                   ឆ្នាំសិក្សា <span className="text-red-500">*</span>
@@ -264,38 +284,31 @@ const StudentCreate = () => {
                 <Controller
                   name="academicYearId"
                   control={control}
-                  rules={{ required: 'សូមជ្រើសរើសឆ្នាំសិក្សា' }}
                   render={({ field }) => (
                     <Select.Root
                       value={field.value?.toString()}
                       onValueChange={field.onChange}
                     >
-                      <Select.Trigger
-                        style={{ width: '100%' }}
-                        placeholder="ជ្រើសរើសឆ្នាំសិក្សា"
-                      />
+                      <Select.Trigger style={{ width: '100%' }} />
                       <Select.Content>
                         {academicYears.map((ay: any) => (
                           <Select.Item key={ay.id} value={ay.id.toString()}>
-                            {ay.name} {ay.isCurrent && ' (បច្ចុប្បន្ន)'}
+                            {ay.name}
                           </Select.Item>
                         ))}
                       </Select.Content>
                     </Select.Root>
                   )}
                 />
-                {errors.academicYearId && (
-                  <Text size="1" color="red">
-                    {errors.academicYearId.message}
-                  </Text>
-                )}
               </Box>
 
               {/* កម្រិតសិក្សា */}
+
               <Box>
                 <Text as="div" size="2" mb="1" weight="bold">
                   កម្រិតសិក្សា <span className="text-red-500">*</span>
                 </Text>
+
                 <Controller
                   name="academicLevelId"
                   control={control}
@@ -309,6 +322,7 @@ const StudentCreate = () => {
                         style={{ width: '100%' }}
                         placeholder="ជ្រើសរើសកម្រិតសិក្សា"
                       />
+
                       <Select.Content>
                         {academicLevels.map((al: any) => (
                           <Select.Item key={al.id} value={al.id.toString()}>
@@ -329,50 +343,16 @@ const StudentCreate = () => {
                 <Controller
                   name="facultyId"
                   control={control}
-                  rules={{ required: 'សូមជ្រើសរើសមហាវិទ្យាល័យ' }}
                   render={({ field }) => (
                     <Select.Root
                       value={field.value?.toString()}
                       onValueChange={field.onChange}
                     >
-                      <Select.Trigger
-                        style={{ width: '100%' }}
-                        placeholder="ជ្រើសរើសមហាវិទ្យាល័យ"
-                      />
+                      <Select.Trigger style={{ width: '100%' }} />
                       <Select.Content>
                         {faculties.map((f: any) => (
                           <Select.Item key={f.id} value={f.id.toString()}>
                             {f.name}
-                          </Select.Item>
-                        ))}
-                      </Select.Content>
-                    </Select.Root>
-                  )}
-                />
-              </Box>
-
-              {/* ដេប៉ាតឺម៉ង់ */}
-              <Box>
-                <Text as="div" size="2" mb="1" weight="bold">
-                  ដេប៉ាតឺម៉ង់ <span className="text-red-500">*</span>
-                </Text>
-                <Controller
-                  name="departmentId"
-                  control={control}
-                  rules={{ required: 'សូមជ្រើសរើសដេប៉ាតឺម៉ង់' }}
-                  render={({ field }) => (
-                    <Select.Root
-                      value={field.value?.toString()}
-                      onValueChange={field.onChange}
-                    >
-                      <Select.Trigger
-                        style={{ width: '100%' }}
-                        placeholder="ជ្រើសរើសដេប៉ាតឺម៉ង់"
-                      />
-                      <Select.Content>
-                        {departments.map((d: any) => (
-                          <Select.Item key={d.id} value={d.id.toString()}>
-                            {d.name}
                           </Select.Item>
                         ))}
                       </Select.Content>
@@ -394,21 +374,81 @@ const StudentCreate = () => {
                     <Select.Root
                       value={field.value?.toString()}
                       onValueChange={field.onChange}
+                      disabled={!facultyId}
                     >
                       <Select.Trigger
                         style={{ width: '100%' }}
-                        placeholder="ជ្រើសរើសជំនាញ"
+                        placeholder={
+                          facultyId
+                            ? 'ជ្រើសរើសជំនាញ'
+                            : 'សូមជ្រើសរើសមហាវិទ្យាល័យជាមុន'
+                        }
                       />
                       <Select.Content>
-                        {majors.map((m: any) => (
-                          <Select.Item key={m.id} value={m.id.toString()}>
-                            {m.name}
-                          </Select.Item>
-                        ))}
+                        {majors
+                          .filter(
+                            (m: any) =>
+                              m.facultyId?.toString() === facultyId?.toString(),
+                          )
+                          .map((m: any) => (
+                            <Select.Item key={m.id} value={m.id.toString()}>
+                              {m.name}
+                            </Select.Item>
+                          ))}
                       </Select.Content>
                     </Select.Root>
                   )}
                 />
+                {errors.skillId && (
+                  <Text size="1" color="red">
+                    {errors.skillId.message}
+                  </Text>
+                )}
+              </Box>
+
+              {/* តេប៉ាតឺម៉ង់ */}
+              <Box>
+                <Text as="div" size="2" mb="1" weight="bold">
+                  តេប៉ាតឺម៉ង់ <span className="text-red-500">*</span>
+                </Text>
+                <Controller
+                  name="departmentId"
+                  control={control}
+                  rules={{ required: 'សូមជ្រើសរើសតេប៉ាតឺម៉ង់' }}
+                  render={({ field }) => (
+                    <Select.Root
+                      value={field.value?.toString()}
+                      onValueChange={field.onChange}
+                      disabled={!facultyId}
+                    >
+                      <Select.Trigger
+                        style={{ width: '100%' }}
+                        placeholder={
+                          facultyId
+                            ? 'ជ្រើសរើសតេប៉ាតឺម៉ង់'
+                            : 'សូមជ្រើសរើសមហាវិទ្យាល័យជាមុន'
+                        }
+                      />
+                      <Select.Content>
+                        {departments
+                          .filter(
+                            (d: any) =>
+                              d.facultyId?.toString() === facultyId?.toString(),
+                          )
+                          .map((d: any) => (
+                            <Select.Item key={d.id} value={d.id.toString()}>
+                              {d.name}
+                            </Select.Item>
+                          ))}
+                      </Select.Content>
+                    </Select.Root>
+                  )}
+                />
+                {errors.departmentId && (
+                  <Text size="1" color="red">
+                    {errors.departmentId.message}
+                  </Text>
+                )}
               </Box>
 
               {/* ឆ្នាំទី និង ឆមាស */}
@@ -419,10 +459,8 @@ const StudentCreate = () => {
                   </Text>
                   <TextField.Root
                     type="number"
-                    min={1}
-                    max={5}
                     {...register('year')}
-                    placeholder="ឧ. 1"
+                    placeholder="1"
                   />
                 </Box>
                 <Box>
@@ -431,19 +469,19 @@ const StudentCreate = () => {
                   </Text>
                   <TextField.Root
                     type="number"
-                    min={1}
-                    max={3}
                     {...register('semester')}
-                    placeholder="ឧ. 1"
+                    placeholder="1"
                   />
                 </Box>
               </Grid>
 
               {/* ជំនាន់ */}
+
               <Box>
                 <Text as="div" size="2" mb="1" weight="bold">
                   ជំនាន់
                 </Text>
+
                 <TextField.Root
                   type="number"
                   min={1}
@@ -451,34 +489,21 @@ const StudentCreate = () => {
                   placeholder="ឧ. 19"
                 />
               </Box>
+
+              {/* លេខសម្ងាត់ */}
+              <Box>
+                <Text as="div" size="2" mb="1" weight="bold">
+                  លេខសម្ងាត់ <span className="text-red-500">*</span>
+                </Text>
+                <TextField.Root
+                  type="password"
+                  {...register('password', { required: true, minLength: 6 })}
+                  placeholder="******"
+                />
+              </Box>
             </Grid>
 
-            {/* លេខសម្ងាត់ */}
-            <Box>
-              <Text as="div" size="2" mb="1" weight="bold">
-                លេខសម្ងាត់សម្រាប់ចូលប្រើប្រាស់{' '}
-                <span className="text-red-500">*</span>
-              </Text>
-              <TextField.Root
-                type="password"
-                {...register('password', {
-                  required: 'សូមបញ្ចូលលេខសម្ងាត់',
-                  minLength: {
-                    value: 6,
-                    message: 'លេខសម្ងាត់ត្រូវមានយ៉ាងតិច 6 ខ្ទង់',
-                  },
-                })}
-                placeholder="******"
-              />
-              {errors.password && (
-                <Text as="div" size="2" color="red">
-                  {errors.password.message}
-                </Text>
-              )}
-            </Box>
-
-            {/* ប៊ូតុងសកម្មភាព */}
-            <Flex gap="3" mt="6" justify="end">
+            <Flex gap="3" mt="4" justify="end">
               <Dialog.Close>
                 <Button
                   variant="soft"

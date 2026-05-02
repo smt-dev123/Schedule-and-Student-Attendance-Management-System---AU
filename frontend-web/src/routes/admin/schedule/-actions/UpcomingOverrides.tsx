@@ -72,14 +72,15 @@ const UpcomingOverrides = ({ scheduleId }: Props) => {
 
   return (
     <Box mb="6">
-      <Flex align="center" gap="2" mb="2">
-        <Text size="2" weight="bold" color="orange">
-          <FaCalendarDay /> ជំនួសកាលវិភាគសប្ដាហ៍នេះ
+      <div className="flex items-center gap-2 mb-4">
+        <FaCalendarDay className="text-red-700" />
+        <Text size="2" weight="bold" color="red">
+          ជំនួសកាលវិភាគសប្ដាហ៍នេះ
         </Text>
-        <Badge variant="surface" color="blue" size="1">
+        <Badge variant="surface" color="red" size="1">
           {upcoming.length}
         </Badge>
-      </Flex>
+      </div>
 
       <ScrollArea scrollbars="horizontal" style={{ width: '100%' }}>
         <Flex gap="3" pb="3">

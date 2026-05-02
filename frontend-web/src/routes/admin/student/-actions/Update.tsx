@@ -141,7 +141,7 @@ const StudentUpdate = ({ data }: Props) => {
           <Flex direction="column" gap="4">
             <Grid columns={{ initial: '1', md: '2' }} gap="4">
               {/* លេខសម្គាល់ */}
-              <Box>
+              {/* <Box>
                 <Text as="div" size="2" mb="1" weight="bold">
                   លេខសម្គាល់ <span className="text-red-500">*</span>
                 </Text>
@@ -156,7 +156,7 @@ const StudentUpdate = ({ data }: Props) => {
                     {errors.studentCode.message}
                   </Text>
                 )}
-              </Box>
+              </Box> */}
               {/* ឈ្មោះនិស្សិត */}
               <Box>
                 <Text as="div" size="2" mb="1" weight="bold">

@@ -44,18 +44,8 @@ function RouteComponent() {
           <Text size="5" className="font-bold">
             តារាងឆ្នាំសិក្សា
           </Text>
-          <Flex gap="2">
-            {/* Export */}
-            <Button variant="outline" style={{ cursor: 'pointer' }}>
-              Export Excel
-            </Button>
 
-            <Button variant="outline" style={{ cursor: 'pointer' }}>
-              បោះពុម្ភ
-            </Button>
-
-            <AcademicYearCreate />
-          </Flex>
+          <AcademicYearCreate />
         </div>
       </Flex>
       <AcademicYearTable data={academic_years} />

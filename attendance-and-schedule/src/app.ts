@@ -22,12 +22,18 @@ import { secureHeaders } from "hono/secure-headers";
 import skillRoutes from "./routes/skill.routes";
 import courseRoutes from "./routes/course.routes";
 import scheduleOverrideRoutes from "./routes/schedule-override.routes";
+import dashboardRoutes from "./routes/dashboard.routes";
 
 const app = new Hono();
 
 app.use("*", logger());
 app.use("/api/*", diMiddleware);
-app.use(secureHeaders());
+app.use(
+  "*",
+  secureHeaders({
+    crossOriginResourcePolicy: "cross-origin",
+  }),
+);
 app.use("*", serveStatic({ root: "./" }));
 app.use(
   "*",
@@ -70,6 +76,7 @@ app.route("/api/academic-years", academicYearRoutes);
 app.route("/api/skills", skillRoutes);
 app.route("/api/courses", courseRoutes);
 app.route("/api/schedule-overrides", scheduleOverrideRoutes);
+app.route("/api/dashboard", dashboardRoutes);
 
 app.onError((e, c) => errorHandler(c, e));
 

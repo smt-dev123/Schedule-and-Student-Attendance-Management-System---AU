@@ -9,16 +9,7 @@ import { useAcademicStore } from '@/stores/useAcademicStore'
 import { getScheduleById } from '@/api/SchedulesAPI'
 import UpcomingOverrides from './-actions/UpcomingOverrides'
 import OverrideCreate from './-actions/OverrideCreate'
-import {
-  Button,
-  Flex,
-  Text,
-  Spinner,
-  Badge,
-  Box,
-  Card,
-  ScrollArea,
-} from '@radix-ui/themes'
+import { Button, Flex, Text, Spinner, Badge, Box, Card } from '@radix-ui/themes'
 import { useQuery } from '@tanstack/react-query'
 import { createFileRoute, useRouter } from '@tanstack/react-router'
 import {
@@ -109,7 +100,6 @@ function RouteComponent() {
           </Box>
         </Flex>
         <Flex gap="2" wrap="wrap">
-          <OverrideCreate scheduleId={Number(scheduleId)} />
           <Button variant="soft" color="gray">
             <FaFileExport />{' '}
             <span className="hidden md:inline">Export Excel</span>
@@ -117,6 +107,8 @@ function RouteComponent() {
           <Button variant="soft" onClick={() => window.print()}>
             <FaPrint /> <span className="hidden md:inline">បោះពុម្ភ</span>
           </Button>
+
+          <OverrideCreate scheduleId={Number(scheduleId)} />
         </Flex>
       </Flex>
 

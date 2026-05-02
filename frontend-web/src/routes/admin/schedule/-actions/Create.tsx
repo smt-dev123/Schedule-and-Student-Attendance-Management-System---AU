@@ -11,7 +11,7 @@ import {
   IconButton,
   Grid,
 } from '@radix-ui/themes'
-import { Controller, useForm, useFieldArray } from 'react-hook-form'
+import { Controller, useForm, useFieldArray, useWatch } from 'react-hook-form'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
 import { FaPlus, FaTrash, FaRegCalendarAlt, FaBook } from 'react-icons/fa'
@@ -216,7 +216,6 @@ const ScheduleCreate = () => {
                   name="schedule.academicLevelId"
                   control={control}
                   options={levels}
-                  labelKey="level"
                   placeholder="កម្រិត"
                 />
 
@@ -342,7 +341,7 @@ const ScheduleCreate = () => {
               <Button
                 variant="soft"
                 color="gray"
-                size="3"
+                size="2"
                 className="cursor-pointer"
               >
                 បោះបង់
@@ -350,7 +349,7 @@ const ScheduleCreate = () => {
             </Dialog.Close>
             <Button
               type="submit"
-              size="3"
+              size="2"
               loading={mutation.isPending}
               className="cursor-pointer px-8"
             >
@@ -383,6 +382,7 @@ const FormSelect = ({
   options,
   placeholder,
   disabled,
+  disabledOptions = [],
   labelKey = 'name',
 }: any) => (
   <Box>
@@ -405,11 +405,21 @@ const FormSelect = ({
             style={{ width: '100%' }}
           />
           <Select.Content>
-            {options.map((opt: any) => (
-              <Select.Item key={opt.id} value={String(opt.id)}>
-                {opt[labelKey]}
-              </Select.Item>
-            ))}
+            {options.map((opt: any) => {
+              const isOptionDisabled =
+                disabledOptions.includes(String(opt.id)) &&
+                String(field.value) !== String(opt.id)
+
+              return (
+                <Select.Item
+                  key={opt.id}
+                  value={String(opt.id)}
+                  disabled={isOptionDisabled}
+                >
+                  {opt[labelKey]}
+                </Select.Item>
+              )
+            })}
           </Select.Content>
         </Select.Root>
       )}
@@ -424,67 +434,88 @@ const CourseItem = ({
   remove,
   teachers,
   isDisableRemove,
-}: any) => (
-  <Box className="p-4 border border-slate-200 rounded-2xl bg-white shadow-sm hover:border-blue-400 transition-all group">
-    <Grid columns={{ initial: '1', md: '5' }} gap="3" align="end">
-      <Box className="md:col-span-1">
-        <FormInput
-          label="មុខវិជ្ជា"
-          name={`courses.${index}.name`}
-          register={register}
-        />
-      </Box>
-      <Box>
-        <FormInput
-          label="កូដ"
-          name={`courses.${index}.code`}
-          register={register}
-        />
-      </Box>
-      <Box>
-        <FormSelect
-          label="ថ្ងៃ"
-          name={`courses.${index}.day`}
-          control={control}
-          options={[
-            { id: 'Monday', name: 'ច័ន្ទ' },
-            { id: 'Tuesday', name: 'អង្គារ' },
-            { id: 'Wednesday', name: 'ពុធ' },
-            { id: 'Thursday', name: 'ព្រហស្បតិ៍' },
-            { id: 'Friday', name: 'សុក្រ' },
-            { id: 'Saturday', name: 'សៅរ៍' },
-          ]}
-        />
-      </Box>
-      <Box>
-        <FormSelect
-          label="គ្រូបង្រៀន"
-          name={`courses.${index}.teacherId`}
-          control={control}
-          options={teachers}
-        />
-      </Box>
-      <Box>
-        <FormInput
-          label="ចំនួនម៉ោង"
-          name={`courses.${index}.hours`}
-          register={register}
-        />
-      </Box>
-      <Box>
-        <IconButton
-          variant="soft"
-          color="red"
-          type="button"
-          onClick={() => remove(index)}
-          disabled={isDisableRemove}
-          className="cursor-pointer mb-[2px]"
-        >
-          <FaTrash />
-        </IconButton>
-      </Box>
-    </Grid>
-  </Box>
-)
+}: any) => {
+  const allCourses = useWatch({
+    control,
+    name: 'courses',
+  })
+
+  const selectedDays = allCourses
+    ?.map((c: any) => c?.day)
+    .filter((day: any) => day !== undefined && day !== null)
+
+  const selectedTeachers = allCourses
+    ?.map((c: any) => String(c?.teacherId))
+    .filter((id: any) => id !== 'undefined' && id !== 'null')
+
+  return (
+    <Box className="p-4 border border-slate-200 rounded-2xl bg-white shadow-sm hover:border-blue-400 transition-all group">
+      <Grid columns={{ initial: '1', md: '5' }} gap="3" align="end">
+        <Box className="md:col-span-1">
+          <FormInput
+            label="មុខវិជ្ជា"
+            name={`courses.${index}.name`}
+            register={register}
+          />
+        </Box>
+
+        <Box>
+          <FormInput
+            label="កូដ"
+            name={`courses.${index}.code`}
+            register={register}
+          />
+        </Box>
+
+        <Box>
+          <FormSelect
+            label="ថ្ងៃ"
+            name={`courses.${index}.day`}
+            control={control}
+            disabledOptions={selectedDays}
+            options={[
+              { id: 'Monday', name: 'ច័ន្ទ' },
+              { id: 'Tuesday', name: 'អង្គារ' },
+              { id: 'Wednesday', name: 'ពុធ' },
+              { id: 'Thursday', name: 'ព្រហស្បតិ៍' },
+              { id: 'Friday', name: 'សុក្រ' },
+              { id: 'Saturday', name: 'សៅរ៍' },
+              { id: 'Sunday', name: 'អាទិត្យ' },
+            ]}
+          />
+        </Box>
+
+        <Box>
+          <FormSelect
+            label="គ្រូបង្រៀន"
+            name={`courses.${index}.teacherId`}
+            control={control}
+            disabledOptions={selectedTeachers}
+            options={teachers}
+          />
+        </Box>
+        <Box>
+          <FormInput
+            label="ចំនួនម៉ោង"
+            name={`courses.${index}.hours`}
+            register={register}
+          />
+        </Box>
+        <Box>
+          <IconButton
+            variant="soft"
+            color="red"
+            type="button"
+            onClick={() => remove(index)}
+            disabled={isDisableRemove}
+            className="cursor-pointer mb-[2px]"
+          >
+            <FaTrash />
+          </IconButton>
+        </Box>
+      </Grid>
+    </Box>
+  )
+}
 
 export default ScheduleCreate

@@ -17,6 +17,7 @@ import CourseUpdate from './-actions/Update'
 import { useState } from 'react'
 import toast from 'react-hot-toast'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import CourseDelete from './-actions/Delete'
 
 export const Route = createFileRoute('/admin/course/')({
   component: CourseListComponent,
@@ -51,7 +52,7 @@ function CourseListComponent() {
   })
 
   return (
-    <div className="p-4 font-kantumruy">
+    <>
       <Flex justify="between" mb="4">
         <Text size="5" className="font-bold">
           គ្រប់គ្រងវគ្គសិក្សា
@@ -89,19 +90,7 @@ function CourseListComponent() {
                       កែប្រែ
                     </Flex>
                   </button>
-                  <button
-                    className="text-red-400 hover:text-red-600 transition-colors"
-                    onClick={(e) => {
-                      e.preventDefault()
-                      if (
-                        window.confirm('តើអ្នកពិតជាចង់លុបមុខវិជ្ជានេះមែនទេ?')
-                      ) {
-                        deleteMutation.mutate(course.id)
-                      }
-                    }}
-                  >
-                    លុប
-                  </button>
+                  <CourseDelete data={course} />
                 </Flex>
               </div>
 
@@ -165,7 +154,7 @@ function CourseListComponent() {
         open={isUpdateOpen}
         onOpenChange={setIsUpdateOpen}
       />
-    </div>
+    </>
   )
 }
 

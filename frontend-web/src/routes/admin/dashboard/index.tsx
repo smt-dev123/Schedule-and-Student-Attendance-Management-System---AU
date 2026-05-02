@@ -6,13 +6,20 @@ import {
   Card,
   Flex,
   Heading,
-  Separator,
   Table,
   Text,
   TextField,
+  Spinner,
 } from '@radix-ui/themes'
 import { createFileRoute } from '@tanstack/react-router'
-import { IoSearch, IoPeople, IoSchool, IoPerson, IoExit, IoTrendingUp } from 'react-icons/io5'
+import {
+  IoSearch,
+  IoPeople,
+  IoSchool,
+  IoPerson,
+  IoExit,
+  IoTrendingUp,
+} from 'react-icons/io5'
 import {
   Cell,
   ResponsiveContainer,
@@ -25,55 +32,38 @@ import {
   AreaChart,
   Area,
 } from 'recharts'
+import { useQuery } from '@tanstack/react-query'
+import api from '@/lib/axios'
 
 export const Route = createFileRoute('/admin/dashboard/')({
   component: RouteComponent,
 })
 
-// --- Data សម្រាប់ប៊ូតុងស្ថិតិខាងលើ ---
-const headerCards = [
-  { title: 'បុគ្គលិក', count: 12, icon: <IoPeople size="22" />, color: 'blue' },
-  { title: 'គ្រូបង្រៀន', count: 45, icon: <IoSchool size="22" />, color: 'green' },
-  { title: 'និស្សិត', count: 1250, icon: <IoPerson size="22" />, color: 'indigo' },
-  { title: 'បោះបង់', count: 5, icon: <IoExit size="22" />, color: 'red' },
-]
-
-// --- Data សម្រាប់ក្រាបសសរ (និស្សិតតាមជំនាញ) ---
-const barData = [
-  { name: 'ព័ត៌មានវិទ្យា', value: 650, color: '#3b82f6' },
-  { name: 'វិទ្យាសាស្រ្ដ', value: 400, color: '#10b981' },
-  { name: 'គ្រប់គ្រង', value: 300, color: '#8b5cf6' },
-  { name: 'ភាសា', value: 200, color: '#f59e0b' },
-]
-
-// --- Data សម្រាប់ក្រាបខ្សែ (និន្នាការវត្តមានប្រចាំសប្តាហ៍) ---
-const trendData = [
-  { day: 'ចន្ទ', count: 950 },
-  { day: 'អង្គារ', count: 1100 },
-  { day: 'ពុធ', count: 1050 },
-  { day: 'ព្រហ', count: 1200 },
-  { day: 'សុក្រ', count: 1150 },
-  { day: 'សៅរ៍', count: 800 },
-]
-
-const topAtts = [
-  { name: 'សិទ្ធ ធារ៉ា', gender: 'ប្រុស', department: 'វិទ្យាសាស្រ្ដកុំព្យូទ័រ' },
-  { name: 'សិទ្ធ ស្រីនិច', gender: 'ស្រី', department: 'វិទ្យាសាស្រ្ដកុំព្យូទ័រ' },
-  { name: 'បាន វណ្ណេង', gender: 'ប្រុស', department: 'ព័ត៌មានវិទ្យា' },
-  { name: 'តុញ ណារី', gender: 'ស្រី', department: 'ឌីជីថលម៉ាឃីតធីង' },
-]
-
 // 1. Component ក្រាបសសរ
-function StudentBarChart() {
+function StudentBarChart({ data }: { data: any[] }) {
   return (
     <ResponsiveContainer width="100%" height={220}>
-      <BarChart data={barData}>
-        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
-        <XAxis dataKey="name" tick={{ fontSize: 10 }} axisLine={false} tickLine={false} />
+      <BarChart data={data}>
+        <CartesianGrid
+          strokeDasharray="3 3"
+          vertical={false}
+          stroke="#f0f0f0"
+        />
+        <XAxis
+          dataKey="name"
+          tick={{ fontSize: 10 }}
+          axisLine={false}
+          tickLine={false}
+        />
         <YAxis hide />
-        <Tooltip cursor={{ fill: '#f9fafb' }} contentStyle={{ borderRadius: '8px', border: 'none' }} />
+        <Tooltip
+          cursor={{ fill: '#f9fafb' }}
+          contentStyle={{ borderRadius: '8px', border: 'none' }}
+        />
         <Bar dataKey="value" radius={[4, 4, 0, 0]} barSize={30}>
-          {barData.map((entry, index) => <Cell key={index} fill={entry.color} />)}
+          {data.map((entry, index) => (
+            <Cell key={index} fill={entry.color || '#3b82f6'} />
+          ))}
         </Bar>
       </BarChart>
     </ResponsiveContainer>
@@ -81,21 +71,37 @@ function StudentBarChart() {
 }
 
 // 2. Component ក្រាបខ្សែ (Area Chart)
-function AttendanceTrendChart() {
+function AttendanceTrendChart({ data }: { data: any[] }) {
   return (
     <ResponsiveContainer width="100%" height={220}>
-      <AreaChart data={trendData}>
+      <AreaChart data={data}>
         <defs>
           <linearGradient id="colorCount" x1="0" y1="0" x2="0" y2="1">
             <stop offset="5%" stopColor="#6366f1" stopOpacity={0.3} />
             <stop offset="95%" stopColor="#6366f1" stopOpacity={0} />
           </linearGradient>
         </defs>
-        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
-        <XAxis dataKey="day" tick={{ fontSize: 10 }} axisLine={false} tickLine={false} />
+        <CartesianGrid
+          strokeDasharray="3 3"
+          vertical={false}
+          stroke="#f0f0f0"
+        />
+        <XAxis
+          dataKey="day"
+          tick={{ fontSize: 10 }}
+          axisLine={false}
+          tickLine={false}
+        />
         <YAxis hide />
         <Tooltip contentStyle={{ borderRadius: '8px', border: 'none' }} />
-        <Area type="monotone" dataKey="count" stroke="#6366f1" strokeWidth={3} fillOpacity={1} fill="url(#colorCount)" />
+        <Area
+          type="monotone"
+          dataKey="count"
+          stroke="#6366f1"
+          strokeWidth={3}
+          fillOpacity={1}
+          fill="url(#colorCount)"
+        />
       </AreaChart>
     </ResponsiveContainer>
   )
@@ -104,6 +110,71 @@ function AttendanceTrendChart() {
 function RouteComponent() {
   useTitle('Dashboard')
 
+  const { data, isLoading, isError } = useQuery({
+    queryKey: ['dashboard-summary'],
+    queryFn: async () => {
+      const res = await api.get('/dashboard/summary')
+      return res.data
+    },
+  })
+
+  if (isLoading) {
+    return (
+      <Flex justify="center" align="center" style={{ minHeight: '60vh' }}>
+        <Spinner size="3" />
+      </Flex>
+    )
+  }
+
+  if (isError) {
+    return (
+      <Flex justify="center" align="center" style={{ minHeight: '60vh' }}>
+        <Text color="red">
+          មានបញ្ហាក្នុងការទាញយកទិន្នន័យ។ សូមព្យាយាមម្តងទៀត។
+        </Text>
+      </Flex>
+    )
+  }
+
+  const summary = data || {
+    headerCards: {
+      staffCount: 0,
+      teacherCount: 0,
+      studentCount: 0,
+      dropoutCount: 0,
+    },
+    barData: [],
+    trendData: [],
+    topAtts: [],
+  }
+
+  const headerCards = [
+    {
+      title: 'បុគ្គលិក',
+      count: summary.headerCards.staffCount || 0,
+      icon: <IoPeople size="22" />,
+      color: 'blue',
+    },
+    {
+      title: 'គ្រូបង្រៀន',
+      count: summary.headerCards.teacherCount || 0,
+      icon: <IoSchool size="22" />,
+      color: 'green',
+    },
+    {
+      title: 'និស្សិត',
+      count: summary.headerCards.studentCount || 0,
+      icon: <IoPerson size="22" />,
+      color: 'indigo',
+    },
+    {
+      title: 'បោះបង់',
+      count: summary.headerCards.dropoutCount || 0,
+      icon: <IoExit size="22" />,
+      color: 'red',
+    },
+  ]
+
   return (
     <Flex direction="column" gap="4">
       {/* Stat Cards */}
@@ -111,12 +182,22 @@ function RouteComponent() {
         {headerCards.map((card, index) => (
           <Card key={index}>
             <Flex align="center" gap="3">
-              <Box className={`p-2 rounded-md`} style={{ backgroundColor: `var(--${card.color}-3)`, color: `var(--${card.color}-9)` }}>
+              <Box
+                className={`p-2 rounded-md`}
+                style={{
+                  backgroundColor: `var(--${card.color}-3)`,
+                  color: `var(--${card.color}-9)`,
+                }}
+              >
                 {card.icon}
               </Box>
               <Flex direction="column">
-                <Text size="1" color="gray">{card.title}</Text>
-                <Text size="5" weight="bold">{card.count}</Text>
+                <Text size="1" color="gray">
+                  {card.title}
+                </Text>
+                <Text size="5" weight="bold">
+                  {card.count}
+                </Text>
               </Flex>
             </Flex>
           </Card>
@@ -126,15 +207,16 @@ function RouteComponent() {
       {/* Charts Row */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <Card>
-          <Heading size="3" mb="3">ស្ថិតិនីស្សិតតាមជំនាញ</Heading>
-          <StudentBarChart />
+          <Heading size="3" mb="3">
+            ស្ថិតិនីស្សិតតាមជំនាញ
+          </Heading>
+          <StudentBarChart data={summary.barData} />
         </Card>
         <Card>
           <Flex align="center" gap="2" mb="3">
             <Heading size="3">និន្នាការវត្តមានប្រចាំសប្តាហ៍</Heading>
-            <Badge color="green" variant="soft"><IoTrendingUp /> +12%</Badge>
           </Flex>
-          <AttendanceTrendChart />
+          <AttendanceTrendChart data={summary.trendData} />
         </Card>
       </div>
 
@@ -144,7 +226,9 @@ function RouteComponent() {
           <Heading size="3">និស្សិតវត្តមានច្រើនជាងគេ</Heading>
           <Box width="200px">
             <TextField.Root size="2" placeholder="ស្វែងរក...">
-              <TextField.Slot><IoSearch /></TextField.Slot>
+              <TextField.Slot>
+                <IoSearch />
+              </TextField.Slot>
             </TextField.Root>
           </Box>
         </Flex>
@@ -154,19 +238,30 @@ function RouteComponent() {
               <Table.ColumnHeaderCell>គោត្តនាម-នាម</Table.ColumnHeaderCell>
               <Table.ColumnHeaderCell>ភេទ</Table.ColumnHeaderCell>
               <Table.ColumnHeaderCell>មុខជំនាញ</Table.ColumnHeaderCell>
-              <Table.ColumnHeaderCell align="right">សកម្មភាព</Table.ColumnHeaderCell>
+              <Table.ColumnHeaderCell align="right">
+                សកម្មភាព
+              </Table.ColumnHeaderCell>
             </Table.Row>
           </Table.Header>
           <Table.Body>
-            {topAtts.map((att, index) => (
+            {summary.topAtts.map((att: any, index: number) => (
               <Table.Row key={index} align="center">
-                <Table.RowHeaderCell><Text weight="bold">{att.name}</Text></Table.RowHeaderCell>
+                <Table.RowHeaderCell>
+                  <Text weight="bold">{att.name}</Text>
+                </Table.RowHeaderCell>
                 <Table.Cell>
-                  <Badge color={att.gender === 'ស្រី' ? 'pink' : 'blue'} variant="soft">{att.gender}</Badge>
+                  <Badge
+                    color={att.gender === 'female' ? 'pink' : 'blue'}
+                    variant="soft"
+                  >
+                    {att.gender === 'female' ? 'ស្រី' : 'ប្រុស'}
+                  </Badge>
                 </Table.Cell>
                 <Table.Cell>{att.department}</Table.Cell>
                 <Table.Cell align="right">
-                  <Button variant="ghost" size="1">បង្ហាញ</Button>
+                  <Button variant="ghost" size="1">
+                    បង្ហាញ
+                  </Button>
                 </Table.Cell>
               </Table.Row>
             ))}

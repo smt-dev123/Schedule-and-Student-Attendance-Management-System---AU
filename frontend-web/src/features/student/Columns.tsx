@@ -2,7 +2,7 @@ import StudentDelete from '@/routes/admin/student/-actions/Delete'
 import StudentPromote from '@/routes/admin/student/-actions/StudentPromote'
 import StudentUpdate from '@/routes/admin/student/-actions/Update'
 import type { StudentsType } from '@/types'
-import { Badge, Flex, IconButton, Text } from '@radix-ui/themes'
+import { Avatar, Badge, Flex, IconButton, Text } from '@radix-ui/themes'
 import type { ColumnDef } from '@tanstack/react-table'
 import { FaRegEye } from 'react-icons/fa'
 
@@ -28,6 +28,10 @@ const getStatusColor = (status: string) => {
   }
 }
 
+const handleViewImage = (imageUrl: string) => {
+  window.open(imageUrl, '_blank')
+}
+
 export const StudentColumns: ColumnDef<StudentsType>[] = [
   {
     accessorKey: 'no',
@@ -36,10 +40,30 @@ export const StudentColumns: ColumnDef<StudentsType>[] = [
       return <span>{row.index + 1}</span>
     },
   },
+  {
+    accessorKey: 'image',
+    header: 'រូបភាព',
+    cell: ({ row }) => {
+      const imageUrl =
+        `${import.meta.env.VITE_API_BASE_URL}${row.original.image}`.replace(
+          '/api',
+          '',
+        )
+      return (
+        <Avatar
+          size="3"
+          src={imageUrl}
+          fallback={row.original.name?.charAt(0) || 'S'}
+          radius="full"
+          onClick={() => handleViewImage(imageUrl)}
+          style={{ cursor: 'pointer' }}
+        />
+      )
+    },
+  },
   { accessorKey: 'name', header: 'ឈ្មោះ' },
   { accessorKey: 'gender', header: 'ភេទ' },
   { accessorKey: 'dob', header: 'ថ្ងៃ ខែ ឆ្នាំកំណើត' },
-  { accessorKey: 'pob', header: 'ទីកន្លែងកំណើត' },
   {
     id: 'grade',
     header: 'ថ្នាក់សិក្សា',

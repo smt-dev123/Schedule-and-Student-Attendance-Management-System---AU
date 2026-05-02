@@ -146,11 +146,11 @@ export interface StudentsType {
   generation: number | null
   semester: number | null
   isActive?: boolean
-
   academicYear?: {
     id?: number
     name?: string
   }
+  image?: string
 }
 
 export interface CoursesType {
