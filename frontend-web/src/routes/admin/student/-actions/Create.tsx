@@ -1,15 +1,5 @@
 import { useState, useEffect, type ChangeEvent } from 'react'
-import {
-  Button,
-  Dialog,
-  Flex,
-  Select,
-  Text,
-  TextField,
-  Grid,
-  Box,
-  Avatar,
-} from '@radix-ui/themes'
+import { Button, Dialog, Flex, Text, Grid, Box, Avatar } from '@radix-ui/themes'
 import { useForm } from 'react-hook-form'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
@@ -139,7 +129,10 @@ const StudentCreate = () => {
 
       let issues: any[] = []
       try {
-        if (data?.error?.name === 'ZodError' && typeof data?.error?.message === 'string') {
+        if (
+          data?.error?.name === 'ZodError' &&
+          typeof data?.error?.message === 'string'
+        ) {
           issues = JSON.parse(data.error.message)
         } else {
           issues = data?.error?.issues || data?.errors || []
