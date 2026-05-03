@@ -57,28 +57,15 @@ export class ClassroomService {
       });
     }
 
-    try {
-      const created = await this.classroomRepository.create(data);
-      this.cache
-        .set(
-          `classrooms:${created.id}`,
-          created,
-          ClassroomService.CACHE_TTL_SECONDS,
-        )
-        .catch(() => {});
-      return created;
-    } catch (error) {
-      console.error("Error creating classroom:", error);
-      if (
-        error instanceof Error &&
-        /unique|duplicate|key.*violat/i.test(error.message)
-      ) {
-        throw new HTTPException(409, {
-          message: `Classroom "${data.name}" already exists in building "${building.name}"`,
-        });
-      }
-      throw new HTTPException(500, { message: "Failed to create classroom" });
-    }
+    const created = await this.classroomRepository.create(data);
+    this.cache
+      .set(
+        `classrooms:${created.id}`,
+        created,
+        ClassroomService.CACHE_TTL_SECONDS,
+      )
+      .catch(() => {});
+    return created;
   }
 
   async update(id: number, data: ClassroomUpdateInput): Promise<Classroom> {

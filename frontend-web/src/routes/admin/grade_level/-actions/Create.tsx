@@ -5,6 +5,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
 import type { GradeLevelType } from '@/types'
 import { createAcademicLevel } from '@/api/AcademicLevelAPI'
+import { FormSelect } from '@/components/ui/Input'
 
 const GradeLevleCreate = () => {
   const {
@@ -51,49 +52,21 @@ const GradeLevleCreate = () => {
 
         <form onSubmit={handleSubmit(onSubmit)}>
           <Flex direction="column" gap="3">
-            {/* Level Field - Now a Select Dropdown */}
-            <label>
-              <Text as="div" size="2" mb="1" weight="bold">
-                កម្រិតសិក្សា
-              </Text>
-              <Controller
-                control={control}
-                name="level"
-                rules={{ required: 'សូមជ្រើសរើសកម្រិតសិក្សា' }}
-                render={({ field }) => (
-                  <Select.Root
-                    onValueChange={field.onChange}
-                    value={field.value}
-                  >
-                    <Select.Trigger
-                      placeholder="ជ្រើសរើសកម្រិត..."
-                      style={{ width: '100%' }}
-                    />
-                    <Select.Content>
-                      <Select.Item value="Associate">Associate</Select.Item>
-                      <Select.Item value="Bachelor">Bachelor</Select.Item>
-                      <Select.Item value="Master">Master</Select.Item>
-                      <Select.Item value="PhD">PhD</Select.Item>
-                    </Select.Content>
-                  </Select.Root>
-                )}
-              />
-              {errors.level && (
-                <Text size="2" color="red">
-                  {errors.level.message}
-                </Text>
-              )}
-            </label>
-
-            {/* <label>
-              <Text as="div" size="2" mb="1" weight="bold">
-                ការពិពណ៌នា
-              </Text>
-              <TextField.Root
-                {...register('description')}
-                placeholder="បញ្ចូលការពិពណ៌នា"
-              />
-            </label> */}
+            <FormSelect
+              name="level"
+              label="កម្រិតសិក្សា"
+              placeholder="សូមជ្រើសរើសកម្រិតសិក្សា"
+              control={control}
+              register={register}
+              options={[
+                { id: 'Associate', name: 'Associate' },
+                { id: 'Bachelor', name: 'Bachelor' },
+                { id: 'Master', name: 'Master' },
+                { id: 'PhD', name: 'PhD' },
+              ]}
+              error={errors.level}
+              isRequired
+            />
           </Flex>
 
           <Flex gap="3" mt="4" justify="end">

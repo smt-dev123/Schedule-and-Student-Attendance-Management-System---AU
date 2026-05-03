@@ -16,7 +16,7 @@ export class DashboardRepository {
       this.db
         .select({ count: sql<number>`count(*)::int` })
         .from(user)
-        .where(eq(user.role, "admin")),
+        .where(eq(user.role, "admin" || "staff")),
       this.db
         .select({ count: sql<number>`count(*)::int` })
         .from(teachers)

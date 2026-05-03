@@ -10,7 +10,7 @@ import {
   Box,
   Avatar,
 } from '@radix-ui/themes'
-import { useForm, Controller } from 'react-hook-form'
+import { useForm } from 'react-hook-form'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
 import type { StudentsType } from '@/types'
@@ -20,6 +20,7 @@ import { getDepartments } from '@/api/DepartmentAPI'
 import { getAcademicLevels } from '@/api/AcademicLevelAPI'
 import { getAcademicYear } from '@/api/AcademicYearAPI'
 import { getMajors } from '@/api/MajorAPI'
+import { FormInput, FormSelect } from '@/components/ui/Input'
 
 const StudentCreate = () => {
   const [open, setOpen] = useState(false)
@@ -33,14 +34,17 @@ const StudentCreate = () => {
     control,
     reset,
     setValue,
+    setError,
     watch,
     formState: { errors },
   } = useForm<StudentsType>({
     defaultValues: {
       name: '',
+      nameEn: '',
       email: '',
       password: '',
       phone: '',
+      address: '',
       gender: 'male',
       educationalStatus: 'enrolled',
       academicYearId: 1,
@@ -49,7 +53,6 @@ const StudentCreate = () => {
 
   const facultyId = watch('facultyId')
 
-  // ទាញយកទិន្នន័យពី API
   const { data: faculties = [] } = useQuery({
     queryKey: ['faculties'],
     queryFn: getFaculties,
@@ -90,7 +93,6 @@ const StudentCreate = () => {
     }
   }
 
-  // Reset form និងរូបភាពពេលបើក/បិទ Dialog
   useEffect(() => {
     if (open) {
       reset()
@@ -125,19 +127,52 @@ const StudentCreate = () => {
       setOpen(false)
     },
     onError: (error: any) => {
-      toast.error(error?.response?.data?.message || 'ការចុះឈ្មោះមិនជោគជ័យ')
+      const data = error?.response?.data
+      if (data?.code === 'USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL') {
+        setError('email', {
+          type: 'manual',
+          message:
+            'អ៊ីម៉ែលនេះមានអ្នកប្រើប្រាស់រួចហើយ សូមប្រើប្រាស់អ៊ីម៉ែលផ្សេង',
+        })
+        return
+      }
+
+      let issues: any[] = []
+      try {
+        if (data?.error?.name === 'ZodError' && typeof data?.error?.message === 'string') {
+          issues = JSON.parse(data.error.message)
+        } else {
+          issues = data?.error?.issues || data?.errors || []
+        }
+      } catch (e) {
+        issues = []
+      }
+
+      if (Array.isArray(issues) && issues.length > 0) {
+        issues.forEach((issue: any) => {
+          const field = issue.path?.[0] || issue.field
+          if (field) {
+            setError(field as any, {
+              type: 'server',
+              message: issue.message,
+            })
+          }
+        })
+        toast.error('សូមពិនិត្យមើលព័ត៌មានដែលបានបញ្ចូលឡើងវិញ')
+        return
+      }
+
+      toast.error(data?.message || 'ការចុះឈ្មោះមិនជោគជ័យ')
     },
   })
 
   const onSubmit = (formData: StudentsType) => {
     const data = new FormData()
 
-    // បន្ថែមរូបភាព (បើមាន)
     if (imageFile) {
       data.append('image', imageFile)
     }
 
-    // បន្ថែមទិន្នន័យអត្ថបទ និងលេខទាំងអស់ចូលទៅក្នុង FormData
     Object.entries(formData).forEach(([key, value]) => {
       if (value !== undefined && value !== null) {
         data.append(key, String(value))
@@ -155,7 +190,11 @@ const StudentCreate = () => {
         </Button>
       </Dialog.Trigger>
 
-      <Dialog.Content maxWidth="750px" size="3">
+      <Dialog.Content
+        maxWidth="750px"
+        size="3"
+        onInteractOutside={(e) => e.preventDefault()}
+      >
         <Dialog.Title>ចុះឈ្មោះនិស្សិតថ្មី</Dialog.Title>
         <Dialog.Description size="2" mb="4" color="gray">
           សូមបំពេញព័ត៌មាននិស្សិតឱ្យបានត្រឹមត្រូវតាមទម្រង់ខាងក្រោម។
@@ -163,7 +202,6 @@ const StudentCreate = () => {
 
         <form onSubmit={handleSubmit(onSubmit)}>
           <Flex direction="column" gap="4">
-            {/* ផ្នែក Upload រូបភាព និង Preview */}
             <Flex
               align="center"
               gap="4"
@@ -193,314 +231,298 @@ const StudentCreate = () => {
             </Flex>
 
             <Grid columns={{ initial: '1', md: '2' }} gap="4">
-              {/* លេខសម្គាល់ */}
-              <Box>
-                <Text as="div" size="2" mb="1" weight="bold">
-                  លេខសម្គាល់ <span className="text-red-500">*</span>
-                </Text>
-                <TextField.Root
-                  {...register('studentCode', {
-                    required: 'សូមបញ្ចូលលេខសម្គាល់',
-                  })}
-                  placeholder="CS001"
-                />
-                {errors.studentCode && (
-                  <Text size="1" color="red">
-                    {errors.studentCode.message}
-                  </Text>
-                )}
-              </Box>
+              <FormInput
+                label="លេខសម្គាល់"
+                name="studentCode"
+                placeholder="សូមបំពេញលេខសម្គាល់"
+                control={control}
+                register={register}
+                error={errors.studentCode}
+                rules={{
+                  required: 'ត្រូវបញ្ចូលលេខសម្គាល់',
+                }}
+                isRequired
+              />
 
-              {/* ឈ្មោះនិស្សិត */}
-              <Box>
-                <Text as="div" size="2" mb="1" weight="bold">
-                  ឈ្មោះនិស្សិត <span className="text-red-500">*</span>
-                </Text>
-                <TextField.Root
-                  {...register('name', { required: 'សូមបញ្ចូលឈ្មោះ' })}
-                  placeholder="ឧ. លុយ សុមាត្រា"
-                />
-                {errors.name && (
-                  <Text size="1" color="red">
-                    {errors.name.message}
-                  </Text>
-                )}
-              </Box>
+              <FormInput
+                label="ឈ្មោះនិស្សិត"
+                name="name"
+                placeholder="ឧ. លុយ សុមាត្រា"
+                control={control}
+                register={register}
+                error={errors.name}
+                rules={{
+                  required: 'ត្រូវបញ្ចូលឈ្មោះនិស្សិត',
+                }}
+                isRequired
+              />
 
-              {/* ភេទ */}
-              <Box>
-                <Text as="div" size="2" mb="1" weight="bold">
-                  ភេទ <span className="text-red-500">*</span>
-                </Text>
-                <Controller
-                  name="gender"
-                  control={control}
-                  rules={{ required: 'សូមជ្រើសរើសភេទ' }}
-                  render={({ field }) => (
-                    <Select.Root
-                      value={field.value || ''}
-                      onValueChange={field.onChange}
-                    >
-                      <Select.Trigger
-                        style={{ width: '100%' }}
-                        placeholder="ជ្រើសរើសភេទ"
-                      />
-                      <Select.Content>
-                        <Select.Item value="male">ប្រុស (Male)</Select.Item>
-                        <Select.Item value="female">ស្រី (Female)</Select.Item>
-                      </Select.Content>
-                    </Select.Root>
-                  )}
-                />
-              </Box>
+              <FormInput
+                label="ឈ្មោះអង់គ្លេស"
+                placeholder="LUY Somatra"
+                name="nameEn"
+                control={control}
+                register={register}
+                error={errors.nameEn}
+                rules={{
+                  required: 'ត្រូវបញ្ចូលឈ្មោះអង់គ្លេស',
+                }}
+                isRequired
+              />
+              <FormSelect
+                label="ភេទ"
+                name="gender"
+                control={control}
+                register={register}
+                error={errors.gender}
+                isRequired
+                rules={{
+                  required: 'ត្រូវជ្រើសរើសភេទ',
+                }}
+                options={[
+                  { id: 'male', name: 'ប្រុស' },
+                  { id: 'female', name: 'ស្រី' },
+                ]}
+              />
 
-              {/* អ៊ីម៉ែល */}
-              <Box>
-                <Text as="div" size="2" mb="1" weight="bold">
-                  អ៊ីម៉ែល <span className="text-red-500">*</span>
-                </Text>
-                <TextField.Root
-                  {...register('email', { required: 'សូមបញ្ចូលអ៊ីម៉ែល' })}
-                  placeholder="student@example.com"
-                />
-              </Box>
+              <FormInput
+                label="អ៊ីម៉ែល"
+                placeholder="student@example.com"
+                name="email"
+                control={control}
+                register={register}
+                error={errors.email}
+                rules={{
+                  required: 'ត្រូវបញ្ចូលអ៊ីម៉ែល',
+                  pattern: {
+                    value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                    message: 'អ៊ីម៉ែលមិនត្រឹមត្រូវ',
+                  },
+                }}
+                isRequired
+              />
 
-              {/* លេខទូរស័ព្ទ */}
-              <Box>
-                <Text as="div" size="2" mb="1" weight="bold">
-                  លេខទូរស័ព្ទ <span className="text-red-500">*</span>
-                </Text>
-                <TextField.Root
-                  {...register('phone', { required: 'សូមបញ្ចូលលេខទូរស័ព្ទ' })}
-                  placeholder="012 345 678"
-                />
-              </Box>
+              <FormInput
+                label="លេខទូរស័ព្ទ"
+                placeholder="012 345 678"
+                name="phone"
+                control={control}
+                register={register}
+                error={errors.phone}
+                type="tel"
+                minLength={8}
+                maxLength={15}
+                rules={{
+                  required: 'ត្រូវបញ្ចូលលេខទូរស័ព្ទ',
+                  pattern: {
+                    value: 15,
+                    message: 'លេខទូរស័ព្ទត្រូវមានយ៉ាងតិច 15 តួអក្សរ',
+                  },
+                }}
+                isRequired
+              />
 
-              {/* ឆ្នាំសិក្សា */}
-              <Box>
-                <Text as="div" size="2" mb="1" weight="bold">
-                  ឆ្នាំសិក្សា <span className="text-red-500">*</span>
-                </Text>
-                <Controller
-                  name="academicYearId"
-                  control={control}
-                  render={({ field }) => (
-                    <Select.Root
-                      value={field.value?.toString()}
-                      onValueChange={field.onChange}
-                    >
-                      <Select.Trigger style={{ width: '100%' }} />
-                      <Select.Content>
-                        {academicYears.map((ay: any) => (
-                          <Select.Item key={ay.id} value={ay.id.toString()}>
-                            {ay.name}
-                          </Select.Item>
-                        ))}
-                      </Select.Content>
-                    </Select.Root>
-                  )}
-                />
-              </Box>
+              <FormInput
+                label="ថ្ងៃខែឆ្នាំកំណើត"
+                placeholder="សូមជ្រើសរើសថ្ងៃខែឆ្នាំកំណើត"
+                name="dob"
+                control={control}
+                register={register}
+                rules={{
+                  required: 'ត្រូវជ្រើសរើសថ្ងៃខែឆ្នាំកំណើត',
+                }}
+                type="date"
+                error={errors.dob}
+                isRequired
+              />
 
-              {/* កម្រិតសិក្សា */}
+              <FormInput
+                label="អាស័យដ្ឋាន"
+                placeholder="សូមជ្រើសរើសអាស័យដ្ឋាន"
+                name="address"
+                control={control}
+                register={register}
+                error={errors.address}
+              />
 
-              <Box>
-                <Text as="div" size="2" mb="1" weight="bold">
-                  កម្រិតសិក្សា <span className="text-red-500">*</span>
-                </Text>
+              <FormSelect
+                label="ឆ្នាំសិក្សា"
+                placeholder="សូមជ្រើសរើសឆ្នាំសិក្សា"
+                name="academicYearId"
+                control={control}
+                register={register}
+                error={errors.academicYearId}
+                isRequired
+                options={academicYears ?? []}
+                rules={{
+                  required: 'ត្រូវជ្រើសរើសឆ្នាំសិក្សា',
+                }}
+                valueAsNumber
+                labelKey="name"
+                valueKey="id"
+              />
 
-                <Controller
-                  name="academicLevelId"
-                  control={control}
-                  rules={{ required: 'សូមជ្រើសរើសកម្រិតសិក្សា' }}
-                  render={({ field }) => (
-                    <Select.Root
-                      value={field.value?.toString()}
-                      onValueChange={field.onChange}
-                    >
-                      <Select.Trigger
-                        style={{ width: '100%' }}
-                        placeholder="ជ្រើសរើសកម្រិតសិក្សា"
-                      />
+              <FormSelect
+                label="កម្រិតសិក្សា"
+                placeholder="សូមជ្រើសរើសកម្រិតសិក្សា"
+                name="academicLevelId"
+                control={control}
+                register={register}
+                error={errors.academicLevelId}
+                isRequired
+                options={academicLevels ?? []}
+                rules={{
+                  required: 'ត្រូវជ្រើសរើសកម្រិតសិក្សា',
+                }}
+                valueAsNumber
+                labelKey="level"
+                valueKey="id"
+              />
 
-                      <Select.Content>
-                        {academicLevels.map((al: any) => (
-                          <Select.Item key={al.id} value={al.id.toString()}>
-                            {al.level}
-                          </Select.Item>
-                        ))}
-                      </Select.Content>
-                    </Select.Root>
-                  )}
-                />
-              </Box>
+              <FormSelect
+                label="មហាវិទ្យាល័យ"
+                placeholder="សូមជ្រើសរើសមហាវិទ្យាល័យ"
+                name="facultyId"
+                control={control}
+                register={register}
+                error={errors.facultyId}
+                isRequired
+                options={faculties ?? []}
+                rules={{
+                  required: 'ត្រូវជ្រើសរើសមហាវិទ្យាល័យ',
+                }}
+                valueAsNumber
+                labelKey="name"
+                valueKey="id"
+              />
 
-              {/* មហាវិទ្យាល័យ */}
-              <Box>
-                <Text as="div" size="2" mb="1" weight="bold">
-                  មហាវិទ្យាល័យ <span className="text-red-500">*</span>
-                </Text>
-                <Controller
-                  name="facultyId"
-                  control={control}
-                  render={({ field }) => (
-                    <Select.Root
-                      value={field.value?.toString()}
-                      onValueChange={field.onChange}
-                    >
-                      <Select.Trigger style={{ width: '100%' }} />
-                      <Select.Content>
-                        {faculties.map((f: any) => (
-                          <Select.Item key={f.id} value={f.id.toString()}>
-                            {f.name}
-                          </Select.Item>
-                        ))}
-                      </Select.Content>
-                    </Select.Root>
-                  )}
-                />
-              </Box>
+              <FormSelect
+                label="ជំនាញ"
+                name="skillId"
+                control={control}
+                register={register}
+                error={errors.skillId}
+                placeholder={
+                  facultyId ? 'ជ្រើសរើសជំនាញ' : 'សូមជ្រើសរើសមហាវិទ្យាល័យជាមុន'
+                }
+                isRequired
+                options={majors
+                  .filter(
+                    (m: any) =>
+                      m.facultyId?.toString() === facultyId?.toString(),
+                  )
+                  .map((m: any) => ({
+                    id: m.id,
+                    name: m.name,
+                  }))}
+                rules={{
+                  required: 'ត្រូវជ្រើសរើសជំនាញ',
+                }}
+                valueAsNumber
+                labelKey="name"
+                valueKey="id"
+              />
 
-              {/* ជំនាញ */}
-              <Box>
-                <Text as="div" size="2" mb="1" weight="bold">
-                  ជំនាញ <span className="text-red-500">*</span>
-                </Text>
-                <Controller
-                  name="skillId"
-                  control={control}
-                  rules={{ required: 'សូមជ្រើសរើសជំនាញ' }}
-                  render={({ field }) => (
-                    <Select.Root
-                      value={field.value?.toString()}
-                      onValueChange={field.onChange}
-                      disabled={!facultyId}
-                    >
-                      <Select.Trigger
-                        style={{ width: '100%' }}
-                        placeholder={
-                          facultyId
-                            ? 'ជ្រើសរើសជំនាញ'
-                            : 'សូមជ្រើសរើសមហាវិទ្យាល័យជាមុន'
-                        }
-                      />
-                      <Select.Content>
-                        {majors
-                          .filter(
-                            (m: any) =>
-                              m.facultyId?.toString() === facultyId?.toString(),
-                          )
-                          .map((m: any) => (
-                            <Select.Item key={m.id} value={m.id.toString()}>
-                              {m.name}
-                            </Select.Item>
-                          ))}
-                      </Select.Content>
-                    </Select.Root>
-                  )}
-                />
-                {errors.skillId && (
-                  <Text size="1" color="red">
-                    {errors.skillId.message}
-                  </Text>
-                )}
-              </Box>
+              <FormSelect
+                label="តេប៉ាតឺម៉ង់"
+                name="departmentId"
+                control={control}
+                register={register}
+                error={errors.departmentId}
+                isRequired
+                placeholder={
+                  facultyId
+                    ? 'ជ្រើសរើសតេប៉ាតឺម៉ង់'
+                    : 'សូមជ្រើសរើសមហាវិទ្យាល័យជាមុន'
+                }
+                options={departments
+                  .filter(
+                    (d: any) =>
+                      d.facultyId?.toString() === facultyId?.toString(),
+                  )
+                  .map((d: any) => ({
+                    id: d.id,
+                    name: d.name,
+                  }))}
+                rules={{
+                  required: 'ត្រូវជ្រើសរើសតេប៉ាតឺម៉ង់',
+                }}
+                valueAsNumber
+                labelKey="name"
+                valueKey="id"
+              />
 
-              {/* តេប៉ាតឺម៉ង់ */}
-              <Box>
-                <Text as="div" size="2" mb="1" weight="bold">
-                  តេប៉ាតឺម៉ង់ <span className="text-red-500">*</span>
-                </Text>
-                <Controller
-                  name="departmentId"
-                  control={control}
-                  rules={{ required: 'សូមជ្រើសរើសតេប៉ាតឺម៉ង់' }}
-                  render={({ field }) => (
-                    <Select.Root
-                      value={field.value?.toString()}
-                      onValueChange={field.onChange}
-                      disabled={!facultyId}
-                    >
-                      <Select.Trigger
-                        style={{ width: '100%' }}
-                        placeholder={
-                          facultyId
-                            ? 'ជ្រើសរើសតេប៉ាតឺម៉ង់'
-                            : 'សូមជ្រើសរើសមហាវិទ្យាល័យជាមុន'
-                        }
-                      />
-                      <Select.Content>
-                        {departments
-                          .filter(
-                            (d: any) =>
-                              d.facultyId?.toString() === facultyId?.toString(),
-                          )
-                          .map((d: any) => (
-                            <Select.Item key={d.id} value={d.id.toString()}>
-                              {d.name}
-                            </Select.Item>
-                          ))}
-                      </Select.Content>
-                    </Select.Root>
-                  )}
-                />
-                {errors.departmentId && (
-                  <Text size="1" color="red">
-                    {errors.departmentId.message}
-                  </Text>
-                )}
-              </Box>
+              <FormInput
+                label="ឆ្នាំទី"
+                name="year"
+                control={control}
+                register={register}
+                type="number"
+                error={errors.year}
+                min={1}
+                max={5}
+                rules={{
+                  pattern: {
+                    value: 5,
+                    message: 'ឆ្នាំទីមិនត្រឹមត្រូវ',
+                  },
+                }}
+                placeholder="សូមជ្រើសរើសឆ្នាំទី"
+                isRequired
+              />
 
-              {/* ឆ្នាំទី និង ឆមាស */}
-              <Grid columns="2" gap="3">
-                <Box>
-                  <Text as="div" size="2" mb="1" weight="bold">
-                    ឆ្នាំទី
-                  </Text>
-                  <TextField.Root
-                    type="number"
-                    {...register('year')}
-                    placeholder="1"
-                  />
-                </Box>
-                <Box>
-                  <Text as="div" size="2" mb="1" weight="bold">
-                    ឆមាស
-                  </Text>
-                  <TextField.Root
-                    type="number"
-                    {...register('semester')}
-                    placeholder="1"
-                  />
-                </Box>
-              </Grid>
+              <FormInput
+                label="ឆមាស"
+                name="semester"
+                control={control}
+                register={register}
+                type="number"
+                error={errors.semester}
+                min={1}
+                max={2}
+                rules={{
+                  pattern: {
+                    value: 2,
+                    message: 'ឆមាសមិនត្រឹមត្រូវ',
+                  },
+                }}
+                placeholder="សូមជ្រើសរើសឆមាស"
+                isRequired
+              />
 
-              {/* ជំនាន់ */}
+              <FormInput
+                label="ជំនាន់"
+                name="generation"
+                control={control}
+                register={register}
+                type="number"
+                error={errors.generation}
+                min={1}
+                placeholder="សូមជ្រើសរើសជំនាន់"
+                rules={{
+                  required: 'ត្រូវជ្រើសរើសជំនាន់',
+                }}
+                isRequired
+              />
 
-              <Box>
-                <Text as="div" size="2" mb="1" weight="bold">
-                  ជំនាន់
-                </Text>
-
-                <TextField.Root
-                  type="number"
-                  min={1}
-                  {...register('generation')}
-                  placeholder="ឧ. 19"
-                />
-              </Box>
-
-              {/* លេខសម្ងាត់ */}
-              <Box>
-                <Text as="div" size="2" mb="1" weight="bold">
-                  លេខសម្ងាត់ <span className="text-red-500">*</span>
-                </Text>
-                <TextField.Root
-                  type="password"
-                  {...register('password', { required: true, minLength: 6 })}
-                  placeholder="******"
-                />
-              </Box>
+              <FormInput
+                label="លេខសម្ងាត់"
+                name="password"
+                control={control}
+                register={register}
+                type="password"
+                error={errors.password}
+                min={8}
+                rules={{
+                  required: 'ត្រូវបញ្ចូលលេខសម្ងាត់',
+                  pattern: {
+                    value: 8,
+                    message: 'លេខសម្ងាត់ត្រូវមានយ៉ាងតិច 8 តួអក្សរ',
+                  },
+                }}
+                placeholder="សូមបំពេញលេខសម្ងាត់"
+                isRequired
+              />
             </Grid>
 
             <Flex gap="3" mt="4" justify="end">

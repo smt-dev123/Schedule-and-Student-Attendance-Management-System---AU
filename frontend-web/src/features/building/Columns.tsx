@@ -8,14 +8,13 @@ import { FaRegEye } from 'react-icons/fa'
 export const BuildingColumns: ColumnDef<BuildingType>[] = [
   { accessorKey: 'id', header: 'ល.រ' },
   { accessorKey: 'name', header: 'អាគារសិក្សា' },
-  { accessorKey: 'description', header: 'ការពិពណ៌នា' },
   {
     id: 'building-actions',
     header: 'សកម្មភាព',
     cell: ({ row }) => (
-      <Badge
-      color={row.original.isActive ? 'blue' : 'red'}
-      >{row.original.isActive ? 'បង្ហាញ' : 'មិនបង្ហាញ'}</Badge>
+      <Badge color={row.original.isActive ? 'blue' : 'red'}>
+        {row.original.isActive ? 'បង្ហាញ' : 'មិនបង្ហាញ'}
+      </Badge>
     ),
   },
   {

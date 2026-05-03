@@ -1,20 +1,13 @@
 import type { FacultiesType, MajorsType } from '@/types'
-import {
-  Button,
-  Dialog,
-  Flex,
-  IconButton,
-  Select,
-  Text,
-  TextField,
-} from '@radix-ui/themes'
+import { Button, Dialog, Flex, IconButton } from '@radix-ui/themes'
 import { FaRegEdit } from 'react-icons/fa'
-import { Controller, useForm } from 'react-hook-form'
+import { useForm } from 'react-hook-form'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
 import { useEffect, useState } from 'react'
 import { updateMajors } from '@/api/MajorAPI'
 import { getFaculties } from '@/api/FacultyAPI'
+import { FormInput, FormSelect } from '@/components/ui/Input'
 
 interface Props {
   data: MajorsType
@@ -88,52 +81,34 @@ const MajorUpdate = ({ data }: Props) => {
 
         <form onSubmit={handleSubmit(onSubmit)}>
           <Flex direction="column" gap="3">
-            <label>
-              <Text as="div" size="2" mb="1" weight="bold">
-                មុខជំនាញ
-              </Text>
-              <TextField.Root
-                {...register('name', { required: 'សូមបំពេញឈ្មោះមុខជំនាញ' })}
+            <Flex direction="column" gap="3">
+              <FormInput
+                label="មុខជំនាញ"
                 placeholder="សូមបំពេញឈ្មោះមុខជំនាញ"
+                error={errors.name}
+                register={register}
+                name="name"
+                rules={{
+                  required: 'សូមបំពេញឈ្មោះមុខជំនាញ',
+                }}
+                isRequired
               />
-              {errors.name && (
-                <Text size="2" color="red">
-                  {errors.name.message}
-                </Text>
-              )}
-            </label>
 
-            <label>
-              <Text as="div" size="2" mb="1" weight="bold">
-                ដេប៉ាតេម៉ង់
-              </Text>
-
-              <Controller
-                name="facultyId"
+              <FormSelect
+                label="មហាវិទ្យាល័យ"
+                placeholder="សូមជ្រើសរើសមហាវិទ្យាល័យ"
+                error={errors.facultyId}
                 control={control}
-                render={({ field }) => (
-                  <Select.Root
-                    defaultValue={field.value?.toString() ?? ''}
-                    onValueChange={(val) => field.onChange(Number(val))}
-                  >
-                    <Select.Trigger
-                      placeholder="ដេប៉ាតេម៉ង់"
-                      style={{ width: '100%' }}
-                    />
-                    <Select.Content>
-                      {faculties?.map((faculty) => (
-                        <Select.Item
-                          value={String(faculty.id)}
-                          key={faculty.id}
-                        >
-                          {faculty.name}
-                        </Select.Item>
-                      ))}
-                    </Select.Content>
-                  </Select.Root>
-                )}
+                name="facultyId"
+                rules={{
+                  required: 'សូមជ្រើសរើសមហាវិទ្យាល័យ',
+                }}
+                isRequired
+                valueAsNumber
+                options={faculties ?? []}
+                labelKey="name"
               />
-            </label>
+            </Flex>
           </Flex>
 
           <Flex gap="3" mt="4" justify="end">

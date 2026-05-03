@@ -1,11 +1,4 @@
-import {
-  Button,
-  Dialog,
-  Flex,
-  IconButton,
-  Text,
-  TextField,
-} from '@radix-ui/themes'
+import { Button, Dialog, Flex, IconButton } from '@radix-ui/themes'
 import { FaRegEdit } from 'react-icons/fa'
 import { useForm } from 'react-hook-form'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
@@ -13,14 +6,17 @@ import toast from 'react-hot-toast'
 import { useEffect, useState } from 'react'
 import type { AcademicYearsType } from '@/types'
 import { updateAcademicYear } from '@/api/AcademicYearAPI'
+import { FormInput } from '@/components/ui/Input'
 
 interface Props {
   data: AcademicYearsType
 }
 
-const formatDateForInput = (dateString: string | undefined) => {
-  if (!dateString) return ''
-  return dateString.split('T')[0]
+const formatDateForInput = (dateValue: string | Date | undefined) => {
+  if (!dateValue) return ''
+  const date = new Date(dateValue)
+  if (isNaN(date.getTime())) return ''
+  return date.toISOString().split('T')[0]
 }
 
 const AcademicYearUpdate = ({ data }: Props) => {
@@ -31,7 +27,7 @@ const AcademicYearUpdate = ({ data }: Props) => {
     formState: { errors },
   } = useForm<AcademicYearsType>({
     defaultValues: {
-      name: data.name,
+      ...data,
       startDate: formatDateForInput(data.startDate),
       endDate: formatDateForInput(data.endDate),
     },
@@ -61,7 +57,7 @@ const AcademicYearUpdate = ({ data }: Props) => {
   useEffect(() => {
     if (open) {
       reset({
-        name: data.name,
+        ...data,
         startDate: formatDateForInput(data.startDate),
         endDate: formatDateForInput(data.endDate),
       })
@@ -86,43 +82,44 @@ const AcademicYearUpdate = ({ data }: Props) => {
 
         <form onSubmit={handleSubmit(onSubmit)}>
           <Flex direction="column" gap="3">
-            {/* Name */}
-            <label>
-              <Text as="div" size="2" mb="1" weight="bold">
-                ឆ្នាំសិក្សា
-              </Text>
-              <TextField.Root
-                {...register('name', {
-                  required: 'ត្រូវបញ្ចូលឈ្មោះឆ្នាំសិក្សា',
-                })}
-                placeholder="បញ្ចូលឈ្មោះឆ្នាំសិក្សា"
-              />
-              {errors.name && (
-                <Text size="2" color="red">
-                  {errors.name.message}
-                </Text>
-              )}
-            </label>
+            <FormInput
+              label="ឆ្នាំសិក្សា"
+              placeholder="សូមបំពេញឈ្មោះឆ្នាំសិក្សា"
+              error={errors.name}
+              register={register}
+              name="name"
+              rules={{
+                required: 'សូមបំពេញឈ្មោះឆ្នាំសិក្សា',
+                minLength: { value: 3, message: 'យ៉ាងហោចណាស់ ៣ខ្ទង់' },
+              }}
+              isRequired
+            />
 
-            <label>
-              <Text as="div" size="2" mb="1" weight="bold">
-                ថ្ងៃចាប់ផ្ដើម
-              </Text>
-              <TextField.Root
-                {...register('startDate')}
-                type="date"
-              />
-            </label>
+            <FormInput
+              label="ថ្ងៃចាប់ផ្ដើម"
+              placeholder="សូមបំពេញថ្ងៃចាប់ផ្ដើម"
+              error={errors.startDate}
+              register={register}
+              name="startDate"
+              type="date"
+              rules={{
+                required: 'សូមបំពេញថ្ងៃចាប់ផ្ដើម',
+              }}
+              isRequired
+            />
 
-            <label>
-              <Text as="div" size="2" mb="1" weight="bold">
-                ថ្ងៃបញ្ចប់
-              </Text>
-              <TextField.Root
-                {...register('endDate')}
-                type="date"
-              />
-            </label>
+            <FormInput
+              label="ថ្ងៃបញ្ចប់"
+              placeholder="សូមបំពេញថ្ងៃបញ្ចប់"
+              error={errors.endDate}
+              register={register}
+              name="endDate"
+              type="date"
+              rules={{
+                required: 'សូមបំពេញថ្ងៃបញ្ចប់',
+              }}
+              isRequired
+            />
           </Flex>
 
           <Flex gap="3" mt="4" justify="end">

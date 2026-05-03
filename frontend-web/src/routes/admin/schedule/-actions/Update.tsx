@@ -3,18 +3,16 @@ import {
   Button,
   Dialog,
   Flex,
-  Select,
   Text,
-  TextField,
   Box,
-  IconButton,
   Grid,
   Spinner,
 } from '@radix-ui/themes'
-import { Controller, useForm, useFieldArray } from 'react-hook-form'
+import { useForm, useFieldArray } from 'react-hook-form'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
-import { FaPlus, FaTrash, FaEdit } from 'react-icons/fa'
+import { FaPlus, FaEdit } from 'react-icons/fa'
+import { CourseItem } from './components/ScheduleFormComponents'
 
 // API Imports
 import { getScheduleById, updateSchedule } from '@/api/SchedulesAPI'
@@ -25,6 +23,7 @@ import { getAcademicYear } from '@/api/AcademicYearAPI'
 import { getRoom } from '@/api/RoomAPI'
 import { getTeachers } from '@/api/TeacherAPI'
 import { getSessionTime } from '@/api/SessionTime'
+import { FormSelect, FormInput } from '@/components/ui/Input'
 
 interface Props {
   scheduleId: number | null
@@ -51,6 +50,7 @@ const ScheduleUpdate = ({ scheduleId, open, onOpenChange }: Props) => {
 
   const { fields, append, remove } = useFieldArray({ control, name: 'courses' })
   const selectedFacultyId = watch('schedule.facultyId')
+  const scheduleErrors = errors.schedule as any
 
   // --- Data Fetching ---
   const { data: faculties = [] } = useQuery({
@@ -216,6 +216,8 @@ const ScheduleUpdate = ({ scheduleId, open, onOpenChange }: Props) => {
                     control={control}
                     options={faculties}
                     placeholder="រើសមហាវិទ្យាល័យ"
+                    error={scheduleErrors?.facultyId}
+                    isRequired
                   />
                   <FormSelect
                     label="ដេប៉ាតឺម៉ង់"
@@ -224,6 +226,8 @@ const ScheduleUpdate = ({ scheduleId, open, onOpenChange }: Props) => {
                     options={departments}
                     disabled={!selectedFacultyId}
                     placeholder="រើសដេប៉ាតឺម៉ង់"
+                    error={scheduleErrors?.departmentId}
+                    isRequired
                   />
                   <FormSelect
                     label="ឆ្នាំសិក្សា"
@@ -231,6 +235,7 @@ const ScheduleUpdate = ({ scheduleId, open, onOpenChange }: Props) => {
                     control={control}
                     options={academicYears}
                     placeholder="រើសឆ្នាំសិក្សា"
+                    error={scheduleErrors?.academicYearId}
                   />
                   <FormSelect
                     label="កម្រិតសិក្សា"
@@ -239,6 +244,8 @@ const ScheduleUpdate = ({ scheduleId, open, onOpenChange }: Props) => {
                     options={levels}
                     labelKey="level"
                     placeholder="កម្រិត"
+                    error={scheduleErrors?.academicLevelId}
+                    isRequired
                   />
 
                   <Grid columns="2" gap="2">
@@ -247,12 +254,18 @@ const ScheduleUpdate = ({ scheduleId, open, onOpenChange }: Props) => {
                       name="schedule.generation"
                       register={register}
                       type="number"
+                      rules={{ required: 'ត្រូវបញ្ចូលជំនាន់' }}
+                      error={scheduleErrors?.generation}
+                      isRequired
                     />
                     <FormInput
                       label="ឆ្នាំទី"
                       name="schedule.year"
                       register={register}
                       type="number"
+                      rules={{ required: 'ត្រូវបញ្ចូលឆ្នាំ' }}
+                      error={scheduleErrors?.year}
+                      isRequired
                     />
                   </Grid>
 
@@ -262,6 +275,9 @@ const ScheduleUpdate = ({ scheduleId, open, onOpenChange }: Props) => {
                       name="schedule.semester"
                       register={register}
                       type="number"
+                      rules={{ required: 'ត្រូវបញ្ចូលឆមាស' }}
+                      error={scheduleErrors?.semester}
+                      isRequired
                     />
                     <FormSelect
                       label="វេនសិក្សា"
@@ -272,6 +288,8 @@ const ScheduleUpdate = ({ scheduleId, open, onOpenChange }: Props) => {
                         { id: 'evening', name: 'ល្ងាច' },
                         { id: 'night', name: 'យប់' },
                       ]}
+                      error={scheduleErrors?.studyShift}
+                      isRequired
                     />
                   </Grid>
 
@@ -283,18 +301,26 @@ const ScheduleUpdate = ({ scheduleId, open, onOpenChange }: Props) => {
                       id: r.id,
                       name: `${r.name} (${r.building?.name})`,
                     }))}
+                    error={scheduleErrors?.classroomId}
+                    isRequired
                   />
                   <FormInput
                     label="ចាប់ផ្ដើមឆមាស"
                     name="schedule.semesterStart"
                     register={register}
                     type="date"
+                    rules={{ required: 'ត្រូវជ្រើសរើសថ្ងៃចាប់ផ្ដើម' }}
+                    error={scheduleErrors?.semesterStart}
+                    isRequired
                   />
                   <FormInput
                     label="បញ្ចប់ឆមាស"
                     name="schedule.semesterEnd"
                     register={register}
                     type="date"
+                    rules={{ required: 'ត្រូវជ្រើសរើសថ្ងៃបញ្ចប់' }}
+                    error={scheduleErrors?.semesterEnd}
+                    isRequired
                   />
                   <FormSelect
                     label="ម៉ោងសិក្សា (Session)"
@@ -304,6 +330,8 @@ const ScheduleUpdate = ({ scheduleId, open, onOpenChange }: Props) => {
                       id: s.id,
                       name: `${s.shift.toUpperCase()}: ${s.firstSessionStartTime} - ${s.secondSessionEndTime}`,
                     }))}
+                    error={scheduleErrors?.sessionTimeId}
+                    isRequired
                   />
                 </Grid>
               </Box>
@@ -352,6 +380,7 @@ const ScheduleUpdate = ({ scheduleId, open, onOpenChange }: Props) => {
                       teachers={teachers}
                       sessions={sessions}
                       isDisableRemove={fields.length === 1}
+                      errors={errors}
                     />
                   ))}
                 </Flex>
@@ -385,131 +414,5 @@ const ScheduleUpdate = ({ scheduleId, open, onOpenChange }: Props) => {
     </Dialog.Root>
   )
 }
-
-// --- Helper Components (Reusable) ---
-
-const FormInput = ({ label, name, register, type = 'text' }: any) => (
-  <Box>
-    <Text as="div" size="1" mb="1" weight="bold" className="text-slate-600">
-      {label}
-    </Text>
-    <TextField.Root
-      type={type}
-      {...register(name, { valueAsNumber: type === 'number' })}
-      className="rounded-lg"
-    />
-  </Box>
-)
-
-const FormSelect = ({
-  label,
-  name,
-  control,
-  options,
-  placeholder,
-  disabled,
-  labelKey = 'name',
-}: any) => (
-  <Box>
-    <Text as="div" size="1" mb="1" weight="bold" className="text-slate-600">
-      {label}
-    </Text>
-    <Controller
-      name={name}
-      control={control}
-      rules={{ required: true }}
-      render={({ field }) => (
-        <Select.Root
-          disabled={disabled}
-          value={field.value ? String(field.value) : undefined}
-          onValueChange={field.onChange}
-        >
-          <Select.Trigger
-            placeholder={placeholder}
-            className="w-full rounded-lg"
-            style={{ width: '100%' }}
-          />
-          <Select.Content>
-            {options.map((opt: any) => (
-              <Select.Item key={opt.id} value={String(opt.id)}>
-                {opt[labelKey]}
-              </Select.Item>
-            ))}
-          </Select.Content>
-        </Select.Root>
-      )}
-    />
-  </Box>
-)
-
-const CourseItem = ({
-  index,
-  register,
-  control,
-  remove,
-  teachers,
-  isDisableRemove,
-}: any) => (
-  <Box className="p-4 border border-slate-200 rounded-2xl bg-white shadow-sm hover:border-blue-400 transition-all group">
-    <Grid columns={{ initial: '1', md: '5' }} gap="3" align="end">
-      <Box className="md:col-span-1">
-        <FormInput
-          label="មុខវិជ្ជា"
-          name={`courses.${index}.name`}
-          register={register}
-        />
-      </Box>
-      <Box>
-        <FormInput
-          label="កូដ"
-          name={`courses.${index}.code`}
-          register={register}
-        />
-      </Box>
-      <Box>
-        <FormSelect
-          label="ថ្ងៃ"
-          name={`courses.${index}.day`}
-          control={control}
-          options={[
-            { id: 'Monday', name: 'ច័ន្ទ' },
-            { id: 'Tuesday', name: 'អង្គារ' },
-            { id: 'Wednesday', name: 'ពុធ' },
-            { id: 'Thursday', name: 'ព្រហស្បតិ៍' },
-            { id: 'Friday', name: 'សុក្រ' },
-            { id: 'Saturday', name: 'សៅរ៍' },
-          ]}
-        />
-      </Box>
-      <Box>
-        <FormSelect
-          label="គ្រូបង្រៀន"
-          name={`courses.${index}.teacherId`}
-          control={control}
-          options={teachers}
-        />
-      </Box>
-      <Box>
-        <FormInput
-          label="ចំនួនម៉ោង"
-          name={`courses.${index}.hours`}
-          register={register}
-        />
-      </Box>
-      <Box>
-        <IconButton
-          variant="soft"
-          color="red"
-          type="button"
-          onClick={() => remove(index)}
-          disabled={isDisableRemove}
-          className="cursor-pointer mb-[2px]"
-        >
-          <FaTrash />
-        </IconButton>
-      </Box>
-    </Grid>
-  </Box>
-)
 
 export default ScheduleUpdate

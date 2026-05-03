@@ -16,16 +16,18 @@ function Login() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
+  const [errorMessage, setErrorMessage] = useState('')
 
   const handleLogin = async (e?: React.FormEvent) => {
     if (e) e.preventDefault()
 
     if (!email || !password) {
-      toast.error('សូមបញ្ចូល Email និង Password!')
+      setErrorMessage('សូមបញ្ចូល Email និង Password!')
       return
     }
 
     setLoading(true)
+    setErrorMessage('')
 
     try {
       const { error } = await signIn.email({
@@ -35,17 +37,17 @@ function Login() {
       })
 
       if (error) {
-        if (error.status === 401 || error.code === 'INVALID_CREDENTIALS') {
-          toast.error('Email ឬ Password មិនត្រឹមត្រូវទេ!')
+        if (error.status === 401 || error.code === 'INVALID_CREDENTIALS' || error.code === 'INVALID_EMAIL_OR_PASSWORD') {
+          setErrorMessage('Email ឬ Password មិនត្រឹមត្រូវទេ!')
         } else {
-          toast.error(error.message || 'មានបញ្ហាក្នុងការចូលប្រើប្រាស់')
+          setErrorMessage(error.message || 'មានបញ្ហាក្នុងការចូលប្រើប្រាស់')
         }
       } else {
         toast.success('ចូលប្រើប្រាស់ជោគជ័យ')
         navigate({ to: '/admin/dashboard' })
       }
     } catch (err) {
-      toast.error('មិនអាចភ្ជាប់ទៅកាន់ Server បានទេ!')
+      setErrorMessage('មិនអាចភ្ជាប់ទៅកាន់ Server បានទេ!')
       console.error(err)
     } finally {
       setLoading(false)
@@ -113,6 +115,12 @@ function Login() {
               Forgot password?
             </Text>
           </Flex>
+
+          {errorMessage && (
+            <Text size="2" color="red" align="center" className="bg-red-50 p-2 rounded-md">
+              {errorMessage}
+            </Text>
+          )}
 
           <Button
             type="submit" // ប្ដូរទៅជា submit

@@ -27,13 +27,13 @@ export const classroomSchema = z.object({
   classroomNumber: z.number().int().positive(),
   name: z.string().min(3).max(99),
   buildingId: z.number().int().positive(),
-  floor: z.number().int().positive(),
+  floor: z.number().int().nonnegative(),
   isAvailable: z.boolean().optional(),
 });
 export const classroomUpdateSchema = classroomSchema.partial();
 export const classroomQuerySchema = z.object({
   name: z.string().optional(),
-  floor: z.coerce.number().int().positive().optional(),
+  floor: z.coerce.number().int().nonnegative().optional(),
   isAvailable: z.coerce.boolean().optional(),
   page: z.coerce.number().int().positive().optional(),
   limit: z.coerce.number().int().positive().optional(),

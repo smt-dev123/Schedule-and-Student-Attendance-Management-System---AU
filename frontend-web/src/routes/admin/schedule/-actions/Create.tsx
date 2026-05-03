@@ -1,22 +1,11 @@
 import { useState, useEffect, useMemo } from 'react'
-import {
-  Button,
-  Dialog,
-  Flex,
-  Select,
-  Text,
-  TextField,
-  Box,
-  Separator,
-  IconButton,
-  Grid,
-} from '@radix-ui/themes'
-import { Controller, useForm, useFieldArray, useWatch } from 'react-hook-form'
+import { Button, Dialog, Flex, Text, Box, Grid } from '@radix-ui/themes'
+import { useForm, useFieldArray } from 'react-hook-form'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
-import { FaPlus, FaTrash, FaRegCalendarAlt, FaBook } from 'react-icons/fa'
-
-// API Imports (រក្សានៅដដែល)
+import { FaPlus, FaRegCalendarAlt } from 'react-icons/fa'
+import { FormInput, FormSelect } from '@/components/ui/Input'
+import { CourseItem } from './components/ScheduleFormComponents'
 import { createSchedule } from '@/api/SchedulesAPI'
 import { getFaculties } from '@/api/FacultyAPI'
 import { getDepartments } from '@/api/DepartmentAPI'
@@ -195,6 +184,8 @@ const ScheduleCreate = () => {
                   options={faculties}
                   placeholder="រើសមហាវិទ្យាល័យ"
                   style={{ width: '100%' }}
+                  error={errors.schedule?.facultyId}
+                  isRequired={true}
                 />
                 <FormSelect
                   label="ដេប៉ាតឺម៉ង់"
@@ -203,6 +194,8 @@ const ScheduleCreate = () => {
                   options={departments}
                   disabled={!selectedFacultyId}
                   placeholder="រើសដេប៉ាតឺម៉ង់"
+                  error={errors.schedule?.departmentId}
+                  isRequired={true}
                 />
                 <FormSelect
                   label="ឆ្នាំសិក្សា"
@@ -210,6 +203,8 @@ const ScheduleCreate = () => {
                   control={control}
                   options={academicYears}
                   placeholder="រើសឆ្នាំសិក្សា"
+                  error={errors.schedule?.academicYearId}
+                  isRequired={true}
                 />
                 <FormSelect
                   label="កម្រិតសិក្សា"
@@ -217,6 +212,8 @@ const ScheduleCreate = () => {
                   control={control}
                   options={levels}
                   placeholder="កម្រិត"
+                  error={errors.schedule?.academicLevelId}
+                  isRequired={true}
                 />
 
                 <Grid columns="2" gap="2">
@@ -225,12 +222,18 @@ const ScheduleCreate = () => {
                     name="schedule.generation"
                     register={register}
                     type="number"
+                    rules={{ required: 'ត្រូវបញ្ចូលជំនាន់' }}
+                    error={errors.schedule?.generation}
+                    isRequired={true}
                   />
                   <FormInput
                     label="ឆ្នាំទី"
                     name="schedule.year"
                     register={register}
                     type="number"
+                    rules={{ required: 'ត្រូវបញ្ចូលឆ្នាំ' }}
+                    error={errors.schedule?.year}
+                    isRequired={true}
                   />
                 </Grid>
 
@@ -240,6 +243,9 @@ const ScheduleCreate = () => {
                     name="schedule.semester"
                     register={register}
                     type="number"
+                    rules={{ required: 'ត្រូវបញ្ចូលឆមាស' }}
+                    error={errors.schedule?.semester}
+                    isRequired={true}
                   />
                   <FormSelect
                     label="វេនសិក្សា"
@@ -250,6 +256,8 @@ const ScheduleCreate = () => {
                       { id: 'evening', name: 'ល្ងាច' },
                       { id: 'night', name: 'យប់' },
                     ]}
+                    error={errors.schedule?.studyShift}
+                    isRequired={true}
                   />
                 </Grid>
 
@@ -261,18 +269,26 @@ const ScheduleCreate = () => {
                     id: r.id,
                     name: `${r.name} (${r.building?.name})`,
                   }))}
+                  error={errors.schedule?.classroomId}
+                  isRequired={true}
                 />
                 <FormInput
                   label="ចាប់ផ្ដើមឆមាស"
                   name="schedule.semesterStart"
                   register={register}
                   type="date"
+                  rules={{ required: 'ត្រូវជ្រើសរើសថ្ងៃចាប់ផ្ដើម' }}
+                  error={errors.schedule?.semesterStart}
+                  isRequired={true}
                 />
                 <FormInput
                   label="បញ្ចប់ឆមាស"
                   name="schedule.semesterEnd"
                   register={register}
                   type="date"
+                  rules={{ required: 'ត្រូវជ្រើសរើសថ្ងៃបញ្ចប់' }}
+                  error={errors.schedule?.semesterEnd}
+                  isRequired={true}
                 />
                 <FormSelect
                   label="ម៉ោងសិក្សា (Session)"
@@ -282,6 +298,8 @@ const ScheduleCreate = () => {
                     id: s.id,
                     name: `${s.shift.toUpperCase()}: ${s.firstSessionStartTime} - ${s.secondSessionEndTime}`,
                   }))}
+                  error={errors.schedule?.sessionTimeId}
+                  isRequired={true}
                 />
               </Grid>
             </Box>
@@ -330,6 +348,8 @@ const ScheduleCreate = () => {
                     teachers={teachers}
                     sessions={sessions}
                     isDisableRemove={fields.length === 1}
+                    errors={errors}
+                    isRequired
                   />
                 ))}
               </Flex>
@@ -359,162 +379,6 @@ const ScheduleCreate = () => {
         </form>
       </Dialog.Content>
     </Dialog.Root>
-  )
-}
-
-const FormInput = ({ label, name, register, type = 'text' }: any) => (
-  <Box>
-    <Text as="div" size="1" mb="1" weight="bold" className="text-slate-600">
-      {label}
-    </Text>
-    <TextField.Root
-      type={type}
-      {...register(name, { valueAsNumber: type === 'number' })}
-      className="rounded-lg"
-    />
-  </Box>
-)
-
-const FormSelect = ({
-  label,
-  name,
-  control,
-  options,
-  placeholder,
-  disabled,
-  disabledOptions = [],
-  labelKey = 'name',
-}: any) => (
-  <Box>
-    <Text as="div" size="1" mb="1" weight="bold" className="text-slate-600">
-      {label}
-    </Text>
-    <Controller
-      name={name}
-      control={control}
-      rules={{ required: true }}
-      render={({ field }) => (
-        <Select.Root
-          disabled={disabled}
-          value={field.value ? String(field.value) : undefined}
-          onValueChange={field.onChange}
-        >
-          <Select.Trigger
-            placeholder={placeholder}
-            className="w-full rounded-lg"
-            style={{ width: '100%' }}
-          />
-          <Select.Content>
-            {options.map((opt: any) => {
-              const isOptionDisabled =
-                disabledOptions.includes(String(opt.id)) &&
-                String(field.value) !== String(opt.id)
-
-              return (
-                <Select.Item
-                  key={opt.id}
-                  value={String(opt.id)}
-                  disabled={isOptionDisabled}
-                >
-                  {opt[labelKey]}
-                </Select.Item>
-              )
-            })}
-          </Select.Content>
-        </Select.Root>
-      )}
-    />
-  </Box>
-)
-
-const CourseItem = ({
-  index,
-  register,
-  control,
-  remove,
-  teachers,
-  isDisableRemove,
-}: any) => {
-  const allCourses = useWatch({
-    control,
-    name: 'courses',
-  })
-
-  const selectedDays = allCourses
-    ?.map((c: any) => c?.day)
-    .filter((day: any) => day !== undefined && day !== null)
-
-  const selectedTeachers = allCourses
-    ?.map((c: any) => String(c?.teacherId))
-    .filter((id: any) => id !== 'undefined' && id !== 'null')
-
-  return (
-    <Box className="p-4 border border-slate-200 rounded-2xl bg-white shadow-sm hover:border-blue-400 transition-all group">
-      <Grid columns={{ initial: '1', md: '5' }} gap="3" align="end">
-        <Box className="md:col-span-1">
-          <FormInput
-            label="មុខវិជ្ជា"
-            name={`courses.${index}.name`}
-            register={register}
-          />
-        </Box>
-
-        <Box>
-          <FormInput
-            label="កូដ"
-            name={`courses.${index}.code`}
-            register={register}
-          />
-        </Box>
-
-        <Box>
-          <FormSelect
-            label="ថ្ងៃ"
-            name={`courses.${index}.day`}
-            control={control}
-            disabledOptions={selectedDays}
-            options={[
-              { id: 'Monday', name: 'ច័ន្ទ' },
-              { id: 'Tuesday', name: 'អង្គារ' },
-              { id: 'Wednesday', name: 'ពុធ' },
-              { id: 'Thursday', name: 'ព្រហស្បតិ៍' },
-              { id: 'Friday', name: 'សុក្រ' },
-              { id: 'Saturday', name: 'សៅរ៍' },
-              { id: 'Sunday', name: 'អាទិត្យ' },
-            ]}
-          />
-        </Box>
-
-        <Box>
-          <FormSelect
-            label="គ្រូបង្រៀន"
-            name={`courses.${index}.teacherId`}
-            control={control}
-            disabledOptions={selectedTeachers}
-            options={teachers}
-          />
-        </Box>
-        <Box>
-          <FormInput
-            label="ចំនួនម៉ោង"
-            name={`courses.${index}.hours`}
-            register={register}
-          />
-        </Box>
-        <Box>
-          <IconButton
-            variant="soft"
-            color="red"
-            type="button"
-            onClick={() => remove(index)}
-            disabled={isDisableRemove}
-            className="cursor-pointer mb-[2px]"
-          >
-            <FaTrash />
-          </IconButton>
-        </Box>
-      </Grid>
-    </Box>
   )
 }
 

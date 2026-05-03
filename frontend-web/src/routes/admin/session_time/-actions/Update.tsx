@@ -4,17 +4,16 @@ import {
   Flex,
   Grid,
   IconButton,
-  Select,
   Text,
-  TextField,
 } from '@radix-ui/themes'
 import { FaRegEdit } from 'react-icons/fa'
-import { Controller, useForm } from 'react-hook-form'
+import { useForm } from 'react-hook-form'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
 import { useEffect, useState } from 'react'
 import type { SessionTimeType } from '@/types'
 import { updateSessionTime } from '@/api/SessionTime'
+import { FormInput, FormSelect } from '@/components/ui/Input'
 
 interface Props {
   data: SessionTimeType
@@ -106,49 +105,48 @@ const SessionTimeUpdate = ({ data }: Props) => {
           <Flex direction="column" gap="4">
 
             {/* 1. Shift Selection (Enum) */}
-            <label>
-              <Text as="div" size="2" mb="1" weight="bold">វេនសិក្សា (Shift)</Text>
-              <Controller
-                control={control}
-                name="shift"
-                rules={{ required: 'សូមជ្រើសរើសវេនសិក្សា' }}
-                render={({ field }) => (
-                  <Select.Root onValueChange={field.onChange} value={field.value}>
-                    <Select.Trigger placeholder="ជ្រើសរើសវេន..." style={{ width: '100%' }} />
-                    <Select.Content>
-                      <Select.Item value="morning">Morning (ព្រឹក)</Select.Item>
-                      <Select.Item value="evening">Evening (រសៀល)</Select.Item>
-                      <Select.Item value="night">Night (យប់)</Select.Item>
-                    </Select.Content>
-                  </Select.Root>
-                )}
-              />
-              {errors.shift && <Text size="1" color="red">{errors.shift.message}</Text>}
-            </label>
+            <FormSelect
+              name="shift"
+              control={control}
+              register={register}
+              label="វេនសិក្សា"
+              placeholder="សូមជ្រើសរើសវេនសិក្សា"
+              options={[
+                { id: 'morning', name: 'Morning (ព្រឹក)' },
+                { id: 'evening', name: 'Evening (រសៀល)' },
+                { id: 'night', name: 'Night (យប់)' },
+              ]}
+              isRequired
+              error={errors.shift}
+            />
 
             {/* 2. Session 1 Times with Validation */}
             <fieldset style={{ border: 'none', padding: 0, margin: 0 }}>
               <Text size="2" weight="bold" mb="2" color="blue">ម៉ោងសិក្សាទី ១</Text>
               <Grid columns="2" gap="3">
-                <label>
-                  <Text as="div" size="1" mb="1">ម៉ោងចាប់ផ្ដើម</Text>
-                  <TextField.Root
-                    type="time"
-                    {...register('firstSessionStartTime', { required: 'តម្រូវឱ្យបញ្ចូល' })}
-                  />
-                  {errors.firstSessionStartTime && <Text size="1" color="red">{errors.firstSessionStartTime.message}</Text>}
-                </label>
-                <label>
-                  <Text as="div" size="1" mb="1">ម៉ោងបញ្ចប់</Text>
-                  <TextField.Root
-                    type="time"
-                    {...register('firstSessionEndTime', {
-                      required: 'តម្រូវឱ្យបញ្ចូល',
-                      validate: (val) => toMinutes(val) > toMinutes(getValues('firstSessionStartTime')) || 'ម៉ោងបញ្ចប់ត្រូវតែធំជាងម៉ោងចាប់ផ្ដើម'
-                    })}
-                  />
-                  {errors.firstSessionEndTime && <Text size="1" color="red">{errors.firstSessionEndTime.message}</Text>}
-                </label>
+                <FormInput
+                  type="time"
+                  name="firstSessionStartTime"
+                  error={errors.firstSessionStartTime}
+                  register={register}
+                  rules={{
+                    required: 'តម្រូវឱ្យបញ្ចូល',
+                  }}
+                  isRequired
+                  label="ម៉ោងចាប់ផ្ដើម"
+                />
+                <FormInput
+                  type="time"
+                  name="firstSessionEndTime"
+                  error={errors.firstSessionEndTime}
+                  register={register}
+                  rules={{
+                    required: 'តម្រូវឱ្យបញ្ចូល',
+                    validate: (val: string) => toMinutes(val) > toMinutes(getValues('firstSessionStartTime')) || 'ម៉ោងបញ្ចប់ត្រូវតែធំជាងម៉ោងចាប់ផ្ដើម'
+                  }}
+                  isRequired
+                  label="ម៉ោងបញ្ចប់"
+                />
               </Grid>
             </fieldset>
 
@@ -156,35 +154,41 @@ const SessionTimeUpdate = ({ data }: Props) => {
             <fieldset style={{ border: 'none', padding: 0, margin: 0 }}>
               <Text size="2" weight="bold" mb="2" color="blue">ម៉ោងសិក្សាទី ២</Text>
               <Grid columns="2" gap="3">
-                <label>
-                  <Text as="div" size="1" mb="1">ម៉ោងចាប់ផ្ដើម</Text>
-                  <TextField.Root
-                    type="time"
-                    {...register('secondSessionStartTime', {
-                      required: 'តម្រូវឱ្យបញ្ចូល',
-                      validate: (val) => toMinutes(val) > toMinutes(getValues('firstSessionEndTime')) || 'ត្រូវចាប់ផ្ដើមក្រោយវេនទី ១ បញ្ចប់'
-                    })}
-                  />
-                  {errors.secondSessionStartTime && <Text size="1" color="red">{errors.secondSessionStartTime.message}</Text>}
-                </label>
-                <label>
-                  <Text as="div" size="1" mb="1">ម៉ោងបញ្ចប់</Text>
-                  <TextField.Root
-                    type="time"
-                    {...register('secondSessionEndTime', {
-                      required: 'តម្រូវឱ្យបញ្ចូល',
-                      validate: (val) => toMinutes(val) > toMinutes(getValues('secondSessionStartTime')) || 'ម៉ោងបញ្ចប់ត្រូវតែធំជាងម៉ោងចាប់ផ្ដើម'
-                    })}
-                  />
-                  {errors.secondSessionEndTime && <Text size="1" color="red">{errors.secondSessionEndTime.message}</Text>}
-                </label>
+                <FormInput
+                  type="time"
+                  name="secondSessionStartTime"
+                  register={register}
+                  rules={{
+                    required: 'តម្រូវឱ្យបញ្ចូល',
+                    validate: (val: string) => toMinutes(val) > toMinutes(getValues('firstSessionEndTime')) || 'ត្រូវចាប់ផ្ដើមក្រោយវេនទី ១ បញ្ចប់'
+                  }}
+                  isRequired
+                  error={errors.secondSessionStartTime}
+                  label="ម៉ោងចាប់ផ្ដើម"
+                />
+                <FormInput
+                  type="time"
+                  name="secondSessionEndTime"
+                  register={register}
+                  rules={{
+                    required: 'តម្រូវឱ្យបញ្ចូល',
+                    validate: (val: string) => toMinutes(val) > toMinutes(getValues('secondSessionStartTime')) || 'ម៉ោងបញ្ចប់ត្រូវតែធំជាងម៉ោងចាប់ផ្ដើម'
+                  }}
+                  isRequired
+                  error={errors.secondSessionEndTime}
+                  label="ម៉ោងបញ្ចប់"
+                />
               </Grid>
             </fieldset>
 
-            <label>
-              <Text as="div" size="2" mb="1" weight="bold">ការពិពណ៌នា</Text>
-              <TextField.Root {...register('description')} placeholder="ផ្សេងៗ..." />
-            </label>
+            <FormInput
+              type="text"
+              name="description"
+              register={register}
+              error={errors.description}
+              label="ការពិពណ៌នា"
+              placeholder="ផ្សេងៗ..."
+            />
           </Flex>
 
           <Flex gap="3" mt="5" justify="end">

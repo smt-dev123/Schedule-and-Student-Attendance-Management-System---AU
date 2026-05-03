@@ -1,10 +1,11 @@
 import { useState } from 'react'
-import { Button, Dialog, Flex, Text, TextField } from '@radix-ui/themes'
+import { Button, Dialog, Flex } from '@radix-ui/themes'
 import { useForm } from 'react-hook-form'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
 import type { FacultiesType } from '@/types'
 import { createFaculties } from '@/api/FacultyAPI'
+import { FormInput } from '@/components/ui/Input'
 
 const FacultyCreate = () => {
   const {
@@ -46,37 +47,17 @@ const FacultyCreate = () => {
 
         <form onSubmit={handleSubmit(onSubmit)}>
           <Flex direction="column" gap="3">
-            <label>
-              <Text as="div" size="2" mb="1" weight="bold">
-                មហាវិទ្យាល័យ
-              </Text>
-              <TextField.Root
-                {...register('name', {
-                  required: 'សូមបញ្ចូលឈ្មោះមហាវិទ្យាល័យ',
-                })}
-                placeholder="សូមបញ្ចូលឈ្មោះមហាវិទ្យាល័យ"
-              />
-              {errors.name && (
-                <Text size="2" color="red">
-                  {errors.name.message}
-                </Text>
-              )}
-            </label>
-
-            <label>
-              <Text as="div" size="2" mb="1" weight="bold">
-                ការពិពណ៌នា
-              </Text>
-              <TextField.Root
-                {...register('description')}
-                placeholder="សូមបញ្ចូលការពិពណ៌នា"
-              />
-              {errors.description && (
-                <Text size="2" color="red">
-                  {errors.description.message}
-                </Text>
-              )}
-            </label>
+            <FormInput
+              label="មហាវិទ្យាល័យ"
+              placeholder="សូមបញ្ចូលឈ្មោះមហាវិទ្យាល័យ"
+              error={errors.name}
+              register={register}
+              name="name"
+              rules={{
+                required: 'សូមបញ្ចូលឈ្មោះមហាវិទ្យាល័យ',
+              }}
+              isRequired
+            />
           </Flex>
 
           <Flex gap="3" mt="4" justify="end">

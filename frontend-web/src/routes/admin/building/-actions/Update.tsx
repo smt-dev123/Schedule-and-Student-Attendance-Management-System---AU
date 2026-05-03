@@ -13,6 +13,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { updateBuilding } from '@/api/BuildingAPI'
 import toast from 'react-hot-toast'
 import { useEffect, useState } from 'react'
+import { FormInput } from '@/components/ui/Input'
 
 interface Props {
   data: BuildingType
@@ -27,7 +28,6 @@ const BuildingUpdate = ({ data }: Props) => {
   } = useForm<BuildingType>({
     defaultValues: {
       name: data.name,
-      description: data?.description,
     },
   })
   const queryClient = useQueryClient()
@@ -56,7 +56,6 @@ const BuildingUpdate = ({ data }: Props) => {
     if (open) {
       reset({
         name: data.name,
-        description: data.description,
       })
     }
   }, [open, data, reset])
@@ -78,38 +77,40 @@ const BuildingUpdate = ({ data }: Props) => {
         <Dialog.Content maxWidth="450px">
           <Dialog.Title>កែប្រែ</Dialog.Title>
 
-          <Flex direction="column" gap="3">
-            <label>
-              <Text as="div" size="2" mb="1" weight="bold">
-                អាគារសិក្សា
-              </Text>
-              <TextField.Root
-                {...register('name', { required: 'សូមបំពេញឈ្មោះអាគារសិក្សា' })}
+          <form onSubmit={handleSubmit(onSubmit)}>
+            <Flex direction="column" gap="3">
+              <FormInput
+                label="អាគារសិក្សា"
                 placeholder="សូមបំពេញឈ្មោះអាគារសិក្សា"
+                error={errors.name}
+                register={register}
+                name="name"
+                rules={{
+                  required: 'ត្រូវជ្រើសរើសអាគារសិក្សា',
+                  minLength: {
+                    value: 3,
+                    message: 'អាគារសិក្សាត្រូវមានយ៉ាងតិច 3 តួអក្សរ',
+                  },
+                }}
+                isRequired
               />
-              {errors.name && <span>{errors.name.message}</span>}
-            </label>
-            <label>
-              <Text as="div" size="2" mb="1" weight="bold">
-                ការពិពណ៌នា
-              </Text>
-              <TextField.Root
-                {...register('description')}
-                placeholder="សូមបំពេញការពិពណ៌នា"
-              />
-            </label>
-          </Flex>
+            </Flex>
 
-          <Flex gap="3" mt="4" justify="end">
-            <Dialog.Close>
-              <Button variant="soft" color="gray">
+            <Flex gap="3" mt="4" justify="end">
+              <Button
+                type="button"
+                variant="soft"
+                color="gray"
+                onClick={() => {
+                  reset()
+                  setOpen(false)
+                }}
+              >
                 ចាកចេញ
               </Button>
-            </Dialog.Close>
-            <Dialog.Close>
-              <Button onClick={handleSubmit(onSubmit)}>រក្សាទុក</Button>
-            </Dialog.Close>
-          </Flex>
+              <Button type="submit">រក្សាទុក</Button>
+            </Flex>
+          </form>
         </Dialog.Content>
       </Dialog.Root>
     </>

@@ -1,11 +1,12 @@
 import { useState } from 'react'
-import { Button, Dialog, Flex, Select, Text, TextField } from '@radix-ui/themes'
-import { Controller, useForm } from 'react-hook-form'
+import { Button, Dialog, Flex } from '@radix-ui/themes'
+import { useForm } from 'react-hook-form'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
 import type { BuildingType, RoomType } from '@/types'
 import { createRoom } from '@/api/RoomAPI'
 import { getBuilding } from '@/api/BuildingAPI'
+import { FormInput, FormSelect } from '@/components/ui/Input'
 
 const RoomCreate = () => {
   const {
@@ -13,6 +14,7 @@ const RoomCreate = () => {
     register,
     handleSubmit,
     reset,
+    setError,
     formState: { errors },
   } = useForm<RoomType>()
   const queryClient = useQueryClient()
@@ -31,8 +33,16 @@ const RoomCreate = () => {
       setOpen(false)
       reset()
     },
-    onError: () => {
-      toast.error('បង្កើតមិនជោគជ័យ')
+    onError: (error: any) => {
+      const message = error.response?.data?.message || 'បង្កើតមិនជោគជ័យ'
+      if (message === 'លេខបន្ទប់ក្នុងអាគារនេះមានរួចហើយ') {
+        setError('classroomNumber', {
+          type: 'manual',
+          message: message,
+        })
+      } else {
+        toast.error(message)
+      }
     },
   })
 
@@ -54,102 +64,85 @@ const RoomCreate = () => {
         <form onSubmit={handleSubmit(onSubmit)}>
           <Flex direction="column" gap="3">
             {/* Room name */}
-            <label>
-              <Text as="div" size="2" mb="1" weight="bold">
-                បន្ទប់សិក្សា
-              </Text>
-              <TextField.Root
-                {...register('name', {
-                  required: 'សូមបញ្ចូលបន្ទប់សិក្សា',
-                  minLength: { value: 3, message: 'យ៉ាងហោចណាស់ ៣ខ្ទង់' },
-                })}
-                placeholder="សូមបញ្ចូលឈ្មោះបន្ទប់"
-              />
-              {errors.name && (
-                <Text size="2" color="red">
-                  {errors.name.message}
-                </Text>
-              )}
-            </label>
+            <FormInput
+              label="បន្ទប់សិក្សា"
+              placeholder="សូមបញ្ចូលឈ្មោះបន្ទប់"
+              error={errors.name}
+              register={register}
+              name="name"
+              rules={{
+                required: 'សូមបញ្ចូលបន្ទប់សិក្សា',
+                minLength: { value: 3, message: 'យ៉ាងហោចណាស់ ៣ខ្ទង់' },
+              }}
+              isRequired
+            />
 
-            <label>
-              <Text as="div" size="2" mb="1" weight="bold">
-                ជាន់បន្ទប់សិក្សា
-              </Text>
-              <TextField.Root
-                {...register('floor', {
-                  valueAsNumber: true,
-                  required: 'សូមបញ្ចូលលេខជាន់',
-                })}
-                placeholder="សូមបញ្ចូលលេខជាន់"
-                type="number"
-              />
-              {errors.floor && (
-                <Text size="2" color="red">
-                  {errors.floor.message}
-                </Text>
-              )}
-            </label>
+            <FormInput
+              label="ជាន់បន្ទប់សិក្សា"
+              placeholder="សូមបញ្ចូលលេខជាន់"
+              error={errors.floor}
+              register={register}
+              name="floor"
+              type="number"
+              rules={{
+                valueAsNumber: true,
+                required: 'សូមបញ្ចូលលេខជាន់',
+                min: { value: 0, message: 'សូមបញ្ចូលលេខជាន់ត្រឹមត្រូវ' },
+                max: { value: 10, message: 'លេខជាន់មិនអាចលើសពី ១០ បានទេ' },
+              }}
+              min={0}
+              max={10}
+              isRequired
+            />
 
-            <label>
-              <Text as="div" size="2" mb="1" weight="bold">
-                លេខបន្ទប់សិក្សា
-              </Text>
-              <TextField.Root
-                {...register('classroomNumber', {
-                  valueAsNumber: true,
-                  required: 'សូមបញ្ចូលលេខបន្ទប់សិក្សា',
-                })}
-                placeholder="សូមបញ្ចូលលេខបន្ទប់សិក្សា"
-                type="number"
-              />
-              {errors.classroomNumber && (
-                <Text size="2" color="red">
-                  {errors.classroomNumber.message}
-                </Text>
-              )}
-            </label>
+            <FormInput
+              label="លេខបន្ទប់សិក្សា"
+              placeholder="សូមបញ្ចូលលេខបន្ទប់សិក្សា"
+              error={errors.classroomNumber}
+              register={register}
+              name="classroomNumber"
+              type="number"
+              rules={{
+                valueAsNumber: true,
+                required: 'សូមបញ្ចូលលេខបន្ទប់សិក្សា',
+              }}
+              isRequired
+            />
 
             {/* Building Select */}
-            <label>
-              <Text as="div" size="2" mb="1" weight="bold">
-                អាគារសិក្សា
-              </Text>
-
-              <Controller
-                name="buildingId"
-                control={control}
-                render={({ field }) => (
-                  <Select.Root
-                    value={field.value?.toString() ?? ''}
-                    onValueChange={(val) => field.onChange(Number(val))}
-                  >
-                    <Select.Trigger
-                      placeholder="ជ្រើសរើសអាគារ"
-                      style={{ width: '100%' }}
-                    />
-                    <Select.Content>
-                      {buildings?.map((building) => (
-                        <Select.Item
-                          value={String(building.id)}
-                          key={building.id}
-                        >
-                          {building.name}
-                        </Select.Item>
-                      ))}
-                    </Select.Content>
-                  </Select.Root>
-                )}
-              />
-            </label>
+            <FormSelect
+              label="អាគារសិក្សា"
+              placeholder="សូមបញ្ចូលអាគារសិក្សា"
+              error={errors.buildingId}
+              register={register}
+              control={control}
+              name="buildingId"
+              rules={{
+                required: 'សូមបញ្ចូលអាគារសិក្សា',
+              }}
+              options={
+                buildings?.map((building) => ({
+                  id: building.id,
+                  name: building.name,
+                })) || []
+              }
+              isRequired
+              valueAsNumber={true}
+            />
           </Flex>
 
           <Flex gap="3" mt="4" justify="end">
-            <Dialog.Close>
-              <Button variant="soft" color="gray">
-                ចាកចេញ
-              </Button>
-            </Dialog.Close>
+            <Button
+              type="button"
+              variant="soft"
+              color="gray"
+              onClick={() => {
+                reset()
+                setOpen(false)
+              }}
+            >
+              ចាកចេញ
+            </Button>
             <Button type="submit">រក្សាទុក</Button>
           </Flex>
         </form>

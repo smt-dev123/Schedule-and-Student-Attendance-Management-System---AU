@@ -61,9 +61,10 @@ export const StudentColumns: ColumnDef<StudentsType>[] = [
       )
     },
   },
+  { accessorKey: 'studentCode', header: 'លេខសម្គាល់' },
   { accessorKey: 'name', header: 'ឈ្មោះ' },
+  { accessorKey: 'nameEn', header: 'ឈ្មោះអង់គ្លេស' },
   { accessorKey: 'gender', header: 'ភេទ' },
-  { accessorKey: 'dob', header: 'ថ្ងៃ ខែ ឆ្នាំកំណើត' },
   {
     id: 'grade',
     header: 'ថ្នាក់សិក្សា',
@@ -73,8 +74,8 @@ export const StudentColumns: ColumnDef<StudentsType>[] = [
       </Text>
     ),
   },
-  { accessorKey: 'email', header: 'អ៊ីម៉ែល' },
   { accessorKey: 'phone', header: 'លេខទូរស័ព្ទ' },
+  { accessorKey: 'address', header: 'អាស័យដ្ឋាន' },
   {
     accessorKey: 'status',
     header: 'ស្ថានភាព',

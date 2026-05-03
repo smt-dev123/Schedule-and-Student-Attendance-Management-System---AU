@@ -8,7 +8,6 @@ import { FaRegEye } from 'react-icons/fa'
 export const FacultiesColumns: ColumnDef<FacultiesType>[] = [
   { accessorKey: 'id', header: 'ល.រ' },
   { accessorKey: 'name', header: 'មហាវិទ្យាល័យ' },
-  // { accessorKey: 'description', header: 'ការពិពណ៌នា' },
   {
     id: 'faculty-actions',
     header: 'សកម្មភាព',

@@ -16,17 +16,17 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
 import { IoArrowUpCircle } from 'react-icons/io5'
 import { getAcademicYear } from '@/api/AcademicYearAPI'
-import { promoteStudent } from '@/api/StudentAPI' // ប្រើ Promote API វិញ
+import { promoteStudent } from '@/api/StudentAPI'
 
 interface PromoteProps {
-  student: any // ទិន្នន័យនិស្សិតពី Table Row
+  student: any
 }
 
 const StudentPromote = ({ student }: PromoteProps) => {
   const [open, setOpen] = useState(false)
   const queryClient = useQueryClient()
 
-  const { register, handleSubmit, control, reset, setValue } = useForm({
+  const { register, handleSubmit, control, setValue } = useForm({
     defaultValues: {
       studentId: '',
       academicYearId: '',
@@ -65,7 +65,7 @@ const StudentPromote = ({ student }: PromoteProps) => {
   }, [open, student, academicYears, setValue])
 
   const mutation = useMutation({
-    mutationFn: (payload: any) => promoteStudent(payload), // ហៅ API Promote
+    mutationFn: (payload: any) => promoteStudent(payload),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['students'] })
       toast.success(
@@ -80,12 +80,10 @@ const StudentPromote = ({ student }: PromoteProps) => {
 
   const onSubmit = (formData: any) => {
     const payload = {
-      studentId: student.id, // ID សិស្សដដែល (UUID)
-      academicYearId: Number(formData.academicYearId), // ឆ្នាំសិក្សាថ្មី (ឧ. 2025-2026)
-      year: Number(formData.year), // ឆ្នាំទីថ្មី (ឧ. ឆ្នាំទី ២)
-      semester: Number(formData.semester), // ឆមាសថ្មី (ឧ. ឆមាសទី ១)
-
-      // បញ្ជូនព័ត៌មានគោលផ្សេងៗដែលសិស្សកំពុងរៀន (ទាញពី props student)
+      studentId: student.id,
+      academicYearId: Number(formData.academicYearId),
+      year: Number(formData.year),
+      semester: Number(formData.semester),
       facultyId: student.facultyId,
       departmentId: student.departmentId,
       academicLevelId: student.academicLevelId,

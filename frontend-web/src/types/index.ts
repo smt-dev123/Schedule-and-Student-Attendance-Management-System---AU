@@ -1,7 +1,6 @@
 export interface BuildingType {
   id?: number
   name: string
-  description?: string
   isActive?: boolean
 }
 
@@ -10,12 +9,8 @@ export interface RoomType {
   name: string
   classroomNumber: number
   floor: number
-  buildingId: string
-  building: {
-    id: number
-    name: string
-    description: string
-  }
+  buildingId?: number
+  building?: BuildingType
 }
 
 export interface GradeLevelType {
@@ -63,7 +58,6 @@ export interface FacultiesType {
     id?: number
     name: string
   }
-  description: string
 }
 
 export interface DepartmentsType {
@@ -115,6 +109,7 @@ export interface SubjectsType {
 
 export interface TeachersType {
   id?: string
+  teacherCode: string
   name: string
   gender: GenderEnum
   academicLevelId: number
@@ -124,7 +119,7 @@ export interface TeachersType {
   password: string
   education_level?: string
   address?: string
-  profile?: string
+  image?: string
   departmentId?: number
 }
 
@@ -132,6 +127,7 @@ export interface StudentsType {
   id?: string
   studentCode: string
   name: string
+  nameEn: string
   phone: string
   email: string
   password: string
@@ -145,6 +141,8 @@ export interface StudentsType {
   gender: GenderEnum
   generation: number | null
   semester: number | null
+  dob?: string | Date
+  address?: string
   isActive?: boolean
   academicYear?: {
     id?: number

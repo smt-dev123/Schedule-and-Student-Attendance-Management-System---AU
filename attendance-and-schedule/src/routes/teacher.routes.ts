@@ -49,15 +49,17 @@ router.post(
         },
       });
       const teacher = await teacherService.create({
-        name: user.name,
-        email: user.email,
+        name: data.name,
+        email: data.email,
         phone: data.phone,
         gender: data.gender,
         academicLevelId: data.academicLevelId,
         facultyId: data.facultyId,
         isActive: data.isActive,
-        userId: user.id,
+        userId: (user as any).id,
         image: image?.url,
+        teacherCode: data.teacherCode,
+        address: data.address,
       });
       return c.json(teacher);
     } catch (error) {

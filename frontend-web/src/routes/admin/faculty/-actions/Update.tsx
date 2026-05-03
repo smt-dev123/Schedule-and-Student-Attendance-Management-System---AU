@@ -1,11 +1,4 @@
-import {
-  Button,
-  Dialog,
-  Flex,
-  IconButton,
-  Text,
-  TextField,
-} from '@radix-ui/themes'
+import { Button, Dialog, Flex, IconButton } from '@radix-ui/themes'
 import { FaRegEdit } from 'react-icons/fa'
 import { useForm } from 'react-hook-form'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
@@ -13,6 +6,7 @@ import toast from 'react-hot-toast'
 import { useEffect, useState } from 'react'
 import type { FacultiesType } from '@/types'
 import { updateFaculties } from '@/api/FacultyAPI'
+import { FormInput } from '@/components/ui/Input'
 
 interface Props {
   data: FacultiesType
@@ -27,7 +21,6 @@ const FacultyUpdate = ({ data }: Props) => {
   } = useForm<FacultiesType>({
     defaultValues: {
       name: data.name,
-      description: data?.description,
     },
   })
   const queryClient = useQueryClient()
@@ -56,7 +49,6 @@ const FacultyUpdate = ({ data }: Props) => {
     if (open) {
       reset({
         name: data.name,
-        description: data.description,
       })
     }
   }, [open, data, reset])
@@ -80,37 +72,17 @@ const FacultyUpdate = ({ data }: Props) => {
 
           <form onSubmit={handleSubmit(onSubmit)}>
             <Flex direction="column" gap="3">
-              <label>
-                <Text as="div" size="2" mb="1" weight="bold">
-                  មហាវិទ្យាល័យ
-                </Text>
-                <TextField.Root
-                  {...register('name', {
-                    required: 'សូមបញ្ចូលឈ្មោះមហាវិទ្យាល័យ',
-                  })}
-                  placeholder="សូមបញ្ចូលឈ្មោះមហាវិទ្យាល័យ"
-                />
-                {errors.name && (
-                  <Text size="2" color="red">
-                    {errors.name.message}
-                  </Text>
-                )}
-              </label>
-
-              <label>
-                <Text as="div" size="2" mb="1" weight="bold">
-                  ការពិពណ៌នា
-                </Text>
-                <TextField.Root
-                  {...register('description')}
-                  placeholder="សូមបញ្ចូលការពិពណ៌នា"
-                />
-                {errors.description && (
-                  <Text size="2" color="red">
-                    {errors.description.message}
-                  </Text>
-                )}
-              </label>
+              <FormInput
+                label="មហាវិទ្យាល័យ"
+                placeholder="សូមបញ្ចូលឈ្មោះមហាវិទ្យាល័យ"
+                error={errors.name}
+                register={register}
+                name="name"
+                rules={{
+                  required: 'សូមបញ្ចូលឈ្មោះមហាវិទ្យាល័យ',
+                }}
+                isRequired
+              />
             </Flex>
 
             <Flex gap="3" mt="4" justify="end">

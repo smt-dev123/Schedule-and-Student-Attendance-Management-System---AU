@@ -1,10 +1,11 @@
 import { useState } from 'react'
-import { Button, Dialog, Flex, Text, TextField } from '@radix-ui/themes'
+import { Button, Dialog, Flex } from '@radix-ui/themes'
 import { useForm } from 'react-hook-form'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
 import type { AcademicYearsType } from '@/types'
 import { createAcademicYear } from '@/api/AcademicYearAPI'
+import { FormInput } from '@/components/ui/Input'
 
 const AcademicYearCreate = () => {
   const {
@@ -37,51 +38,53 @@ const AcademicYearCreate = () => {
     <Dialog.Root open={open} onOpenChange={setOpen}>
       <Dialog.Trigger>
         <Button variant="solid" style={{ cursor: 'pointer' }}>
-          បន្ថែមបន្ទប់សិក្សា
+          បន្ថែមឆ្នាំសិក្សា
         </Button>
       </Dialog.Trigger>
 
       <Dialog.Content maxWidth="450px">
-        <Dialog.Title>បន្ថែមបន្ទប់សិក្សា</Dialog.Title>
+        <Dialog.Title>បន្ថែមឆ្នាំសិក្សា</Dialog.Title>
 
         <form onSubmit={handleSubmit(onSubmit)}>
           <Flex direction="column" gap="3">
-            <label>
-              <Text as="div" size="2" mb="1" weight="bold">
-                ឆ្នាំសិក្សា
-              </Text>
-              <TextField.Root
-                {...register('name', { required: 'Name is required' })}
-                placeholder="Enter name"
-              />
-              {errors.name && (
-                <Text size="2" color="red">
-                  {errors.name.message}
-                </Text>
-              )}
-            </label>
+            <FormInput
+              label="ឆ្នាំសិក្សា"
+              placeholder="សូមបំពេញឈ្មោះឆ្នាំសិក្សា"
+              error={errors.name}
+              register={register}
+              name="name"
+              rules={{
+                required: 'សូមបំពេញឈ្មោះឆ្នាំសិក្សា',
+                minLength: { value: 3, message: 'យ៉ាងហោចណាស់ ៣ខ្ទង់' },
+              }}
+              isRequired
+            />
 
-            <label>
-              <Text as="div" size="2" mb="1" weight="bold">
-                ថ្ងៃចាប់ផ្ដើម
-              </Text>
-              <TextField.Root
-                {...register('startDate')}
-                placeholder="Enter startDate"
-                type='date'
-              />
-            </label>
+            <FormInput
+              label="ថ្ងៃចាប់ផ្ដើម"
+              placeholder="សូមបំពេញថ្ងៃចាប់ផ្ដើម"
+              error={errors.startDate}
+              register={register}
+              name="startDate"
+              type="date"
+              rules={{
+                required: 'សូមបំពេញថ្ងៃចាប់ផ្ដើម',
+              }}
+              isRequired
+            />
 
-            <label>
-              <Text as="div" size="2" mb="1" weight="bold" typeof='date'>
-                ថ្ងៃបញ្ចប់
-              </Text>
-              <TextField.Root
-                {...register('endDate')}
-                placeholder="Enter endDate"
-                type='date'
-              />
-            </label>
+            <FormInput
+              label="ថ្ងៃបញ្ចប់"
+              placeholder="សូមបំពេញថ្ងៃបញ្ចប់"
+              error={errors.endDate}
+              register={register}
+              name="endDate"
+              type="date"
+              rules={{
+                required: 'សូមបំពេញថ្ងៃបញ្ចប់',
+              }}
+              isRequired
+            />
           </Flex>
 
           <Flex gap="3" mt="4" justify="end">

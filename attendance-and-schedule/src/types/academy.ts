@@ -58,6 +58,8 @@ export type CreateTeacher = {
   isActive: boolean;
   userId: string;
   image?: string | null;
+  teacherCode: string;
+  address?: string | null;
 };
 export type UpdateTeacher = {
   name?: string;
@@ -68,6 +70,8 @@ export type UpdateTeacher = {
   facultyId?: number;
   isActive?: boolean;
   image?: string | null;
+  teacherCode?: string;
+  address?: string | null;
 };
 export type TeacherQueryInput = {
   page: number;

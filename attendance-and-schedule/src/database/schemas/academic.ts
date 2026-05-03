@@ -188,6 +188,7 @@ export const teachers = pgTable(
   "teachers",
   {
     id: integer("id").primaryKey(),
+    teacherCode: varchar("teacher_code").unique().notNull(),
     userId: text("user_id")
       .references(() => user.id, { onDelete: "cascade" })
       .unique()
@@ -196,6 +197,7 @@ export const teachers = pgTable(
     phone: varchar("phone").unique().notNull(),
     email: varchar("email").unique().notNull(),
     gender: gender("gender").notNull(),
+    address: varchar("address"),
     academicLevelId: integer("academic_level_id")
       .references(() => academicLevels.id)
       .notNull(),
@@ -237,6 +239,10 @@ export const students = pgTable(
     semester: integer("semester").notNull(),
     isActive: boolean("is_active").default(true),
     image: varchar("image"),
+    studentCode: varchar("student_code").unique().notNull(),
+    nameEn: varchar("name_en").notNull(),
+    dob: timestamp("dob"),
+    address: varchar("address"),
     year: integer("year"),
     createdAt: timestamp("created_at").defaultNow(),
     updatedAt: timestamp("updated_at").defaultNow(),
@@ -280,10 +286,14 @@ export const scheduleOverrides = pgTable(
       .notNull()
       .references(() => courses.id, { onDelete: "cascade" }),
     date: date("date").notNull(),
-    replacementTeacherId: integer("replacement_teacher_id")
-      .references(() => teachers.id, { onDelete: "set null" }),
-    replacementClassroomId: integer("replacement_classroom_id")
-      .references(() => classrooms.id, { onDelete: "set null" }),
+    replacementTeacherId: integer("replacement_teacher_id").references(
+      () => teachers.id,
+      { onDelete: "set null" },
+    ),
+    replacementClassroomId: integer("replacement_classroom_id").references(
+      () => classrooms.id,
+      { onDelete: "set null" },
+    ),
     isCancelled: boolean("is_cancelled").default(false),
     note: varchar("note"),
     createdAt: timestamp("created_at").defaultNow(),
