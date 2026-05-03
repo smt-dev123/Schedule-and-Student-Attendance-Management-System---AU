@@ -14,6 +14,7 @@ import teacherRoutes from "./routes/teacher.routes";
 import translationRoutes from "./routes/translation.routes";
 import notificationRoutes from "./routes/notification.routes";
 import academicYearRoutes from "./routes/academic-year.routes";
+import uploadRoutes from "./routes/upload.routes";
 import { auth } from "./lib/auth";
 import { errorHandler } from "./middlewares/error";
 import { cors } from "hono/cors";
@@ -77,6 +78,7 @@ app.route("/api/skills", skillRoutes);
 app.route("/api/courses", courseRoutes);
 app.route("/api/schedule-overrides", scheduleOverrideRoutes);
 app.route("/api/dashboard", dashboardRoutes);
+app.route("/api/upload", uploadRoutes);
 
 app.onError((e, c) => errorHandler(c, e));
 

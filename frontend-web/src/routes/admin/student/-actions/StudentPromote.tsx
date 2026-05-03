@@ -11,12 +11,13 @@ import {
   Badge,
   IconButton,
 } from '@radix-ui/themes'
-import { useForm, Controller } from 'react-hook-form'
+import { useForm } from 'react-hook-form'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
 import { IoArrowUpCircle } from 'react-icons/io5'
 import { getAcademicYear } from '@/api/AcademicYearAPI'
 import { promoteStudent } from '@/api/StudentAPI'
+import { FormSelect } from '@/components/ui/Input'
 
 interface PromoteProps {
   student: any
@@ -26,7 +27,13 @@ const StudentPromote = ({ student }: PromoteProps) => {
   const [open, setOpen] = useState(false)
   const queryClient = useQueryClient()
 
-  const { register, handleSubmit, control, setValue } = useForm({
+  const {
+    register,
+    handleSubmit,
+    control,
+    setValue,
+    formState: { errors },
+  } = useForm({
     defaultValues: {
       studentId: '',
       academicYearId: '',
@@ -122,57 +129,68 @@ const StudentPromote = ({ student }: PromoteProps) => {
               <Text as="div" size="2" mb="1" weight="bold">
                 ព័ត៌មានបច្ចុប្បន្ន
               </Text>
-              <Badge color="gray" variant="soft">
+              <Badge color="blue" variant="soft">
                 ឆ្នាំទី {student.year} ឆមាស {student.semester} (
                 {student.department?.name})
               </Badge>
             </Box>
 
             <Grid columns="2" gap="3">
-              <Box>
-                <Text as="div" size="2" mb="1" weight="bold">
-                  ទៅឆ្នាំសិក្សា *
-                </Text>
-                <Controller
-                  name="academicYearId"
-                  control={control}
-                  render={({ field }) => (
-                    <Select.Root
-                      value={field.value}
-                      onValueChange={field.onChange}
-                    >
-                      <Select.Trigger className="w-full" />
-                      <Select.Content>
-                        {academicYears.map((ay: any) => (
-                          <Select.Item key={ay.id} value={ay.id.toString()}>
-                            {ay.name} {ay.isCurrent && '(បច្ចុប្បន្ន)'}
-                          </Select.Item>
-                        ))}
-                      </Select.Content>
-                    </Select.Root>
-                  )}
-                />
-              </Box>
-              <Box>
-                <Text as="div" size="2" mb="1" weight="bold">
-                  ឆ្នាំទី *
-                </Text>
-                <TextField.Root
-                  type="number"
-                  {...register('year', { required: true })}
-                />
-              </Box>
-            </Grid>
-
-            <Box>
-              <Text as="div" size="2" mb="1" weight="bold">
-                ឆមាស *
-              </Text>
-              <TextField.Root
-                type="number"
-                {...register('semester', { required: true })}
+              <FormSelect
+                label="ឆ្នាំសិក្សាថ្មី"
+                name="academicYearId"
+                error={errors.academicYearId}
+                control={control}
+                options={
+                  academicYears.map((ay: any) => ({
+                    ...ay,
+                    label: `${ay.name} ${ay.isCurrent && '(បច្ចុប្បន្ន)'}`,
+                  })) ?? []
+                }
+                register={register}
+                isRequired
+                rules={{
+                  required: 'សូមជ្រើសរើសឆ្នាំសិក្សា',
+                }}
+                placeholder="សូមបញ្ចូលឆ្នាំសិក្សា"
               />
-            </Box>
+              <FormSelect
+                label="ឆ្នាំទី"
+                name="year"
+                error={errors.year}
+                control={control}
+                options={[
+                  { id: '1', name: 'ឆ្នាំទី ១' },
+                  { id: '2', name: 'ឆ្នាំទី ២' },
+                  { id: '3', name: 'ឆ្នាំទី ៣' },
+                  { id: '4', name: 'ឆ្នាំទី ៤' },
+                  { id: '5', name: 'ឆ្នាំទី ៥' },
+                ]}
+                register={register}
+                isRequired
+                rules={{
+                  required: 'សូមជ្រើសរើសឆ្នាំទី',
+                }}
+                placeholder="សូមបញ្ចូលឆ្នាំទី"
+              />
+
+              <FormSelect
+                label="ឆមាស *"
+                name="semester"
+                error={errors.semester}
+                control={control}
+                options={[
+                  { id: '1', name: 'ឆមាសទី ១' },
+                  { id: '2', name: 'ឆមាសទី ២' },
+                ]}
+                register={register}
+                isRequired
+                rules={{
+                  required: 'សូមជ្រើសរើសឆមាស',
+                }}
+                placeholder="សូមបញ្ចូលឆមាស"
+              />
+            </Grid>
 
             <Flex gap="3" mt="4" justify="end">
               <Dialog.Close>
