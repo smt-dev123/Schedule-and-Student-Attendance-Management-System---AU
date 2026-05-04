@@ -198,7 +198,7 @@ function RouteComponent() {
                         រូបភាពកម្រងព័ត៌មាន
                       </Text>
                       <Text as="div" size="2" color="gray">
-                        JPG, PNG ទំហំអតិបរមា 2MB
+                        JPG, PNG, WEBP ទំហំអតិបរមា 2MB
                       </Text>
                     </Box>
                   </Flex>

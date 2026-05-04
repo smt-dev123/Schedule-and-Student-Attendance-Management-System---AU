@@ -87,8 +87,8 @@ export const studentCreateSchema = z.object({
   year: z.coerce.number().positive(),
 });
 
-export const studentUpdateSchema = createUpdateSchema(students).omit({
-  image: true,
+export const studentUpdateSchema = studentCreateSchema.partial().omit({
+  password: true,
 });
 export const studentQuerySchema = z.object({
   name: z.string().optional(),

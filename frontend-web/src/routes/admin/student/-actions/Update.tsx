@@ -1,5 +1,14 @@
-import { useState, useEffect } from 'react'
-import { Button, Dialog, Flex, Grid, IconButton } from '@radix-ui/themes'
+import { useState, useEffect, type ChangeEvent } from 'react'
+import {
+  Avatar,
+  Box,
+  Button,
+  Dialog,
+  Flex,
+  Grid,
+  IconButton,
+  Text,
+} from '@radix-ui/themes'
 import { FaRegEdit } from 'react-icons/fa'
 import { useForm } from 'react-hook-form'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
@@ -20,6 +29,8 @@ interface Props {
 const StudentUpdate = ({ data }: Props) => {
   const [open, setOpen] = useState(false)
   const queryClient = useQueryClient()
+  const [imageFile, setImageFile] = useState<File | null>(null)
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null)
 
   const {
     register,
@@ -28,6 +39,7 @@ const StudentUpdate = ({ data }: Props) => {
     reset,
     watch,
     setValue,
+    setError,
     formState: { errors },
   } = useForm<StudentsType>()
 
@@ -54,6 +66,24 @@ const StudentUpdate = ({ data }: Props) => {
     queryFn: getAcademicYear,
   })
 
+  const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      const fileSizeInMB = file.size / (1024 * 1024)
+
+      if (fileSizeInMB > 1) {
+        toast.error('រូបភាពមិនអាចធំជាង 1MB ឡើយ!')
+        e.target.value = ''
+        setImageFile(null)
+        setPreviewUrl(null)
+        return
+      }
+
+      setImageFile(file)
+      setPreviewUrl(URL.createObjectURL(file))
+    }
+  }
+
   useEffect(() => {
     if (open && data) {
       reset({
@@ -70,6 +100,16 @@ const StudentUpdate = ({ data }: Props) => {
         semester: data.semester,
         generation: data.generation,
       })
+      if (data.image || (data as any).image) {
+        setPreviewUrl(
+          data.image
+            ? `http://localhost:3000/api/uploads/${data.image}`
+            : `http://localhost:3000/api/uploads/${(data as any).image}`,
+        )
+      } else {
+        setPreviewUrl(null)
+      }
+      setImageFile(null)
     }
   }, [open, data, reset])
 
@@ -87,7 +127,47 @@ const StudentUpdate = ({ data }: Props) => {
       toast.success('កែប្រែនិស្សិតជោគជ័យ')
       setOpen(false)
     },
-    onError: () => toast.error('កែប្រែមិនជោគជ័យ'),
+    onError: (error: any) => {
+      const data = error?.response?.data
+      if (data?.code === 'USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL') {
+        setError('email', {
+          type: 'manual',
+          message:
+            'អ៊ីម៉ែលនេះមានអ្នកប្រើប្រាស់រួចហើយ សូមប្រើប្រាស់អ៊ីម៉ែលផ្សេង',
+        })
+        return
+      }
+
+      let issues: any[] = []
+      try {
+        if (
+          data?.error?.name === 'ZodError' &&
+          typeof data?.error?.message === 'string'
+        ) {
+          issues = JSON.parse(data.error.message)
+        } else {
+          issues = data?.error?.issues || data?.errors || []
+        }
+      } catch (e) {
+        issues = []
+      }
+
+      if (Array.isArray(issues) && issues.length > 0) {
+        issues.forEach((issue: any) => {
+          const field = issue.path?.[0] || issue.field
+          if (field) {
+            setError(field as any, {
+              type: 'server',
+              message: issue.message,
+            })
+          }
+        })
+        toast.error('សូមពិនិត្យមើលព័ត៌មានដែលបានបញ្ចូលឡើងវិញ')
+        return
+      }
+
+      toast.error(data?.message || 'កែប្រែមិនជោគជ័យ')
+    },
   })
 
   const onSubmit = (formData: StudentsType) => {
@@ -103,7 +183,6 @@ const StudentUpdate = ({ data }: Props) => {
     payload.append('academicLevelId', String(formData.academicLevelId))
     payload.append('academicYearId', String(formData.academicYearId))
     payload.append('skillId', String(formData.skillId))
-
     if (formData.nameEn) payload.append('nameEn', formData.nameEn)
     if (formData.dob) {
       const dobDate =
@@ -119,7 +198,7 @@ const StudentUpdate = ({ data }: Props) => {
     if (formData.generation)
       payload.append('generation', String(formData.generation))
     if (formData.password) payload.append('password', formData.password)
-
+    if (imageFile) payload.append('image', imageFile)
     mutation.mutate(payload)
   }
 
@@ -136,11 +215,39 @@ const StudentUpdate = ({ data }: Props) => {
         </IconButton>
       </Dialog.Trigger>
 
-      <Dialog.Content maxWidth="650px">
+      <Dialog.Content maxWidth="650px" onInteractOutside={(e) => e.preventDefault()}>
         <Dialog.Title>កែប្រែព័ត៌មាននិស្សិត</Dialog.Title>
 
         <form onSubmit={handleSubmit(onSubmit)}>
           <Flex direction="column" gap="4">
+            <Flex
+              align="center"
+              gap="4"
+              p="3"
+              style={{
+                border: '1px dashed var(--gray-6)',
+                borderRadius: '8px',
+              }}
+            >
+              <Avatar
+                size="6"
+                src={previewUrl || ''}
+                fallback={watch('name')?.charAt(0) || 'S'}
+                radius="full"
+              />
+              <Box>
+                <Text as="div" size="2" mb="2" weight="bold">
+                  រូបថតនិស្សិត (Profile Picture)
+                </Text>
+                <input
+                  type="file"
+                  accept="image/png, image/jpeg, image/jpg, image/webp"
+                  onChange={handleImageChange}
+                  className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"
+                />
+              </Box>
+            </Flex>
+
             <Grid columns={{ initial: '1', md: '2' }} gap="4">
               <FormInput
                 label="លេខសម្គាល់"
@@ -416,7 +523,7 @@ const StudentUpdate = ({ data }: Props) => {
                 isRequired
               />
 
-              <FormInput
+              {/* <FormInput
                 label="លេខសម្ងាត់"
                 name="password"
                 control={control}
@@ -433,7 +540,7 @@ const StudentUpdate = ({ data }: Props) => {
                 }}
                 placeholder="សូមបំពេញលេខសម្ងាត់"
                 isRequired
-              />
+              /> */}
             </Grid>
 
             {/* ប៊ូតុងសកម្មភាព */}
