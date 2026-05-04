@@ -1,17 +1,13 @@
-import { useRouter } from '@tanstack/react-router'
-import { createFileRoute } from '@tanstack/react-router'
-import { useEffect } from 'react'
+import { authClient } from '@/lib/auth-client'
+import { createFileRoute, redirect } from '@tanstack/react-router'
 
 export const Route = createFileRoute('/')({
-  component: AdminRedirect,
+  beforeLoad: async () => {
+    const session = await authClient.getSession()
+    if (session?.data) {
+      throw redirect({ to: '/admin/dashboard' })
+    } else {
+      throw redirect({ to: '/auth/login' })
+    }
+  },
 })
-
-function AdminRedirect() {
-  const router = useRouter()
-
-  useEffect(() => {
-    router.navigate({ to: '/auth/login' })
-  }, [router])
-
-  return null
-}

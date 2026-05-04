@@ -18,8 +18,8 @@ const router = new Hono<{ Variables: Variables }>();
 
 router.get(
   "/",
-  // authentication,
-  // requirePermission("student", "read"),
+  authentication,
+  requirePermission("student", "read"),
   zValidator("query", studentQuerySchema),
   async (c) => {
     const query = c.req.valid("query");
@@ -48,6 +48,8 @@ router.get("/:id", async (c) => {
 
 router.post(
   "/",
+  authentication,
+  requirePermission("student", "create"),
   upload("image"),
   zValidator("form", studentCreateSchema),
   async (c) => {
@@ -66,7 +68,7 @@ router.post(
       const { studentService } = c.var.container;
       const student = await studentService.create({
         ...data,
-        userId: user.id,
+        userId: (user as any).id,
         image: image?.url,
       });
       return c.json(student);
@@ -81,6 +83,8 @@ router.post(
 
 router.put(
   "/:id",
+  authentication,
+  requirePermission("student", "update"),
   upload("image"),
   zValidator("form", studentUpdateSchema),
   async (c) => {
@@ -105,21 +109,31 @@ router.put(
   },
 );
 
-router.delete("/:id", async (c) => {
-  const id = c.req.param("id") as unknown as number;
-  const { studentService } = c.var.container;
-  const student = await studentService.delete(id);
-  return c.json(student);
-});
+router.delete(
+  "/:id",
+  authentication,
+  requirePermission("student", "delete"),
+  async (c) => {
+    const id = c.req.param("id") as unknown as number;
+    const { studentService } = c.var.container;
+    const student = await studentService.delete(id);
+    return c.json(student);
+  },
+);
 
-router.get("/attendance/report", authentication, async (c) => {
-  const user = c.get("user");
-  const { studentService } = c.var.container;
-  const records = await studentService.generateAttendanceReportForStudent(
-    user.id,
-  );
-  return c.json(records);
-});
+router.get(
+  "/attendance/report",
+  authentication,
+  requirePermission("attendance", "read"),
+  async (c) => {
+    const user = c.get("user");
+    const { studentService } = c.var.container;
+    const records = await studentService.generateAttendanceReportForStudent(
+      (user as any).id,
+    );
+    return c.json(records);
+  },
+);
 
 router.get(
   "/schedule/current-academic-year",

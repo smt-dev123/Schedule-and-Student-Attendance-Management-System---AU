@@ -16,7 +16,8 @@ router.use("/*", authentication);
 
 router.post(
   "/",
-  // requirePermission("skill", "create"),
+  authentication,
+  requirePermission("skill", "create"),
   zValidator("json", skillCreateSchema),
   async (c) => {
     const { skillService } = c.get("container");
@@ -28,6 +29,7 @@ router.post(
 
 router.put(
   "/:id",
+  authentication,
   requirePermission("skill", "update"),
   zValidator("param", skillIdParamSchema),
   zValidator("json", skillUpdateSchema),
@@ -42,6 +44,7 @@ router.put(
 
 router.delete(
   "/:id",
+  authentication,
   requirePermission("skill", "delete"),
   zValidator("param", skillIdParamSchema),
   async (c) => {
@@ -54,7 +57,8 @@ router.delete(
 
 router.get(
   "/:id",
-  // requirePermission("skill", "read"),
+  authentication,
+  requirePermission("skill", "read"),
   zValidator("param", skillIdParamSchema),
   async (c) => {
     const { skillService } = c.get("container");
@@ -66,7 +70,8 @@ router.get(
 
 router.get(
   "/",
-  // requirePermission("skill", "read"),
+  authentication,
+  requirePermission("skill", "read"),
   zValidator("query", skillQuerySchema),
   async (c) => {
     const { skillService } = c.get("container");

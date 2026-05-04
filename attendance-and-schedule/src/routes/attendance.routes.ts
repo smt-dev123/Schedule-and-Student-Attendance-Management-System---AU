@@ -7,19 +7,20 @@ import {
 import { roleMiddleware } from "@/middlewares/roles";
 import authentication from "@/middlewares/auth";
 import type { Variables } from "@/types/middleware";
+import requirePermission from "@/middlewares/permission";
 
 const router = new Hono<{ Variables: Variables }>();
 
 router.post(
   "/bulk",
   authentication,
-  roleMiddleware("admin", "staff", "teacher"),
+  requirePermission("attendance", "create"),
   zValidator("json", bulkAttendanceSchema),
   async (c) => {
     const user = c.get("user");
     const data = c.req.valid("json");
     const { attendanceService } = c.get("container");
-    const result = await attendanceService.markBulkAttendance(data, user.id);
+    const result = await attendanceService.markBulkAttendance(data, (user as any).id);
     return c.json(result);
   },
 );
@@ -27,7 +28,7 @@ router.post(
 router.get(
   "/student/:id",
   authentication,
-  roleMiddleware("admin", "staff", "teacher"),
+  requirePermission("attendance", "read"),
   async (c) => {
     const id = c.req.param("id");
     const { attendanceService } = c.get("container");
@@ -41,7 +42,7 @@ router.get(
 router.get(
   "/report",
   authentication,
-  roleMiddleware("admin", "staff", "teacher"),
+  requirePermission("attendance", "read"),
   zValidator("query", attendanceReportQuerySchema),
   async (c) => {
     const query = c.req.valid("query");

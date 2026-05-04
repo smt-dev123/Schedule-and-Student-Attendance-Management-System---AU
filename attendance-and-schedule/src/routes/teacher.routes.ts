@@ -17,12 +17,18 @@ const router = new Hono<{ Variables: Variables }>();
 
 router.use(authentication);
 
-router.get("/", zValidator("query", teacherQuerySchema), async (c) => {
-  const query = c.req.valid("query");
-  const { teacherService } = c.var.container;
-  const teachers = await teacherService.findAll(query);
-  return c.json(teachers);
-});
+router.get(
+  "/",
+  authentication,
+  requirePermission("teacher", "read"),
+  zValidator("query", teacherQuerySchema),
+  async (c) => {
+    const query = c.req.valid("query");
+    const { teacherService } = c.var.container;
+    const teachers = await teacherService.findAll(query);
+    return c.json(teachers);
+  },
+);
 
 router.get("/profile/me", async (c) => {
   const { teacherService } = c.var.container;
@@ -32,7 +38,8 @@ router.get("/profile/me", async (c) => {
 
 router.post(
   "/",
-  // requirePermission("teacher", "create"),
+  authentication,
+  requirePermission("teacher", "create"),
   upload("image"),
   zValidator("form", teacherCreateSchema),
   async (c) => {
@@ -73,6 +80,7 @@ router.post(
 
 router.put(
   "/:id",
+  authentication,
   requirePermission("teacher", "update"),
   upload("image"),
   zValidator("param", teacherIdParamSchema),
@@ -101,6 +109,7 @@ router.put(
 
 router.delete(
   "/:id",
+  authentication,
   requirePermission("teacher", "delete"),
   zValidator("param", teacherIdParamSchema),
   async (c) => {

@@ -1,6 +1,7 @@
 import { createAccessControl } from "better-auth/plugins/access";
 
 const statement = {
+  dashboard: ["read"],
   building: ["create", "read", "update", "delete"],
   classroom: ["create", "read", "update", "delete"],
   faculty: ["create", "read", "update", "delete"],
@@ -30,6 +31,7 @@ type PermissionStatement = typeof statement;
 const ac = createAccessControl(statement);
 
 const staff = ac.newRole({
+  dashboard: ["read"],
   classroom: ["create", "read", "update", "delete"],
   faculty: ["create", "read", "update", "delete"],
   department: ["create", "read", "update", "delete"],
@@ -46,6 +48,8 @@ const staff = ac.newRole({
 });
 
 const manager = ac.newRole({
+  dashboard: ["read"],
+  building: ["create", "read", "update", "delete"],
   classroom: ["create", "read", "update", "delete"],
   faculty: ["create", "read", "update", "delete"],
   department: ["create", "read", "update", "delete"],
@@ -60,15 +64,36 @@ const manager = ac.newRole({
 });
 
 const teacher = ac.newRole({
-  attendance: ["create", "read"],
+  dashboard: ["read"],
+  academicYear: ["read"],
+  faculty: ["read"],
+  department: ["read"],
+  academicLevel: ["read"],
+  skill: ["read"],
   schedule: ["read"],
+  attendance: ["read"],
+  course: ["read"],
+  sessionTime: ["read"],
+  student: ["read"],
+  notification: ["read", "create"],
 });
 
 const student = ac.newRole({
-  attendance: ["read"],
-  schedule: ["read-own"],
+  dashboard: ["read"],
+  academicYear: ["read"],
+  classroom: ["read"],
+  building: ["read"],
+  teacher: ["read"],
+  course: ["read"],
+  faculty: ["read"],
+  department: ["read"],
+  sessionTime: ["read"],
+  academicLevel: ["read"],
+  skill: ["read"],
   student: ["read-own", "update-own"],
-  notification: ["read-own"],
+  schedule: ["read-own", "read"],
+  attendance: ["read"],
+  notification: ["read-own", "create"],
 });
 
 export { staff, teacher, student, ac, manager, type PermissionStatement };

@@ -5,6 +5,9 @@ import type { StudentsType } from '@/types'
 import { Avatar, Badge, Flex, IconButton, Text } from '@radix-ui/themes'
 import type { ColumnDef } from '@tanstack/react-table'
 import { FaRegEye } from 'react-icons/fa'
+import { useSession } from '@/lib/auth-client'
+
+
 
 export const STUDENT_STATUS = {
   ACTIVE: 'សកម្ម',
@@ -92,21 +95,34 @@ export const StudentColumns: ColumnDef<StudentsType>[] = [
     id: 'student-actions',
     header: 'សកម្មភាព',
     enableSorting: false,
-    cell: ({ row }) => (
-      <Flex gap="2">
-        <StudentPromote student={row.original} />
-        <IconButton
-          size="1"
-          color="cyan"
-          variant="surface"
-          style={{ cursor: 'pointer' }}
-          onClick={() => console.log('Edit student:', row.original.id)}
-        >
-          <FaRegEye />
-        </IconButton>
-        <StudentUpdate data={row.original} />
-        <StudentDelete data={row.original} />
-      </Flex>
-    ),
+    cell: ({ row }) => <StudentActions row={row} />,
   },
 ]
+
+function StudentActions({ row }: { row: any }) {
+  const { data: session } = useSession()
+  const role = (session?.user as any)?.role
+
+  return (
+    <Flex gap="2">
+      {['manager', 'staff'].includes(role) && (
+        <StudentPromote student={row.original} />
+      )}
+      <IconButton
+        size="1"
+        color="cyan"
+        variant="surface"
+        style={{ cursor: 'pointer' }}
+        onClick={() => console.log('Edit student:', row.original.id)}
+      >
+        <FaRegEye />
+      </IconButton>
+      {['manager', 'staff'].includes(role) && (
+        <StudentUpdate data={row.original} />
+      )}
+      {['manager', 'staff'].includes(role) && (
+        <StudentDelete data={row.original} />
+      )}
+    </Flex>
+  )
+}

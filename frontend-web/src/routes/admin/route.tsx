@@ -1,10 +1,17 @@
 import Footer from '@/components/Footer'
 import Navbar from '@/components/Navbar'
 import Sidebar from '@/components/Sidebar'
-import { createFileRoute, Outlet } from '@tanstack/react-router'
+import { authClient } from '@/lib/auth-client'
+import { createFileRoute, Outlet, redirect } from '@tanstack/react-router'
 import { Toaster } from 'react-hot-toast'
 
 export const Route = createFileRoute('/admin')({
+  beforeLoad: async () => {
+    const session = await authClient.getSession()
+    if (!session?.data) {
+      throw redirect({ to: '/auth/login' })
+    }
+  },
   component: RouteComponent,
 })
 

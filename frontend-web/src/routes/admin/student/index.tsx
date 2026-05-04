@@ -14,6 +14,7 @@ import StudentCreate from './-actions/Create'
 import { useAcademicStore } from '@/stores/useAcademicStore'
 import PDFDownload from '@/components/ui/PDFDownload'
 import StudentReport from './-exports/ExportPDF'
+import { useSession } from '@/lib/auth-client'
 
 type StudentSearch = {
   name?: string
@@ -42,6 +43,8 @@ export const Route = createFileRoute('/admin/student/')({
 
 function RouteComponent() {
   useTitle('គ្រប់គ្រងនិស្សិត')
+  const { data: session } = useSession()
+  const role = (session?.user as any)?.role
 
   const { selectedYearId } = useAcademicStore()
 
@@ -164,7 +167,7 @@ function RouteComponent() {
           <Button variant="outline" style={{ cursor: 'pointer' }}>
             Export Excel
           </Button>
-          <StudentCreate />
+          {['manager', 'staff'].includes(role) && <StudentCreate />}
         </Flex>
       </Flex>
 

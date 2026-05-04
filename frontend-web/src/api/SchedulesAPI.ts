@@ -32,3 +32,10 @@ export const getScheduleById = async (id: number) => {
   const res = await api.get(`${ENDPOINT}/${id}`)
   return res.data
 }
+
+export const getMySchedule = async (semester: number = 1) => {
+  const res = await api.get('/students/schedule/current-academic-year', {
+    params: { semester },
+  })
+  return res.data
+}

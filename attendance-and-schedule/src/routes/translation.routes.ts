@@ -4,10 +4,11 @@ import {
   translationSchema,
   updateTranslationSchema,
 } from "@/validators/translation";
+import authentication from "@/middlewares/auth";
 
 const router = new Hono();
 
-router.get("/translate", async (c) => {
+router.get("/translate", authentication, async (c) => {
   const { translationService } = c.var.container;
   const language = c.req.query("language") || "en";
   const namespace = c.req.query("namespace") || "common";

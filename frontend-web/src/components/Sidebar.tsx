@@ -16,12 +16,14 @@ import { LiaChalkboardTeacherSolid } from 'react-icons/lia'
 import { AiOutlineSchedule } from 'react-icons/ai'
 import { PiStudent } from 'react-icons/pi'
 import { Link } from '@tanstack/react-router'
+import { useSession } from '@/lib/auth-client'
 import { useSidebarStore } from '@/stores/sidebarStore'
 import { useAcademicYears } from '@/hooks/useAcademicYears'
 import type { AcademicYearsType } from '@/types'
 import { useAcademicStore } from '@/stores/useAcademicStore'
 import LogoDestop from '@/assets/au-logo.webp'
 import LogoMobile from '@/assets/au.webp'
+import menuPermissions from '@/lib/permission'
 
 interface MenuItem {
   key: string
@@ -42,6 +44,9 @@ export default function Sidebar({
 }: SidebarProps) {
   const { isDesktopOpen, isMobileOpen, setMobileSidebar } = useSidebarStore()
   const { t } = useTranslation()
+  const { data: session } = useSession()
+  const user = session?.user
+  const role = (user as any)?.role || ''
 
   const { selectedYearId, selectedYearName, setAcademicYear } =
     useAcademicStore() as any as {
@@ -55,10 +60,8 @@ export default function Sidebar({
   }
 
   useEffect(() => {
-    // ប្រសិនបើ Store មិនទាន់មានឆ្នាំសិក្សា ហើយ API ទាញទិន្នន័យរួចរាល់
     if (academicYears.length > 0 && !selectedYearId) {
       const currentYear = academicYears.find((y) => y.isCurrent)
-      alert(currentYear)
       if (currentYear) {
         setAcademicYear(currentYear.id!, currentYear.name!)
       }
@@ -163,6 +166,30 @@ export default function Sidebar({
     },
   ]
 
+  const filterMenu = (items: MenuItem[]): MenuItem[] => {
+    return items
+      .filter((item) => {
+        const allowedRoles = menuPermissions[item.key]
+        if (!allowedRoles) return true // Default visible if no permission defined
+        return allowedRoles.includes(role)
+      })
+      .map((item) => {
+        if (item.children) {
+          return { ...item, children: filterMenu(item.children) }
+        }
+        return item
+      })
+      .filter((item) => {
+        // Hide parent if it has children but all children are filtered out
+        if (item.children && item.children.length === 0) {
+          return false
+        }
+        return true
+      })
+  }
+
+  const filteredMenuItems = filterMenu(menuItems)
+
   return (
     <div className="flex">
       {/* === Desktop Sidebar === */}
@@ -247,9 +274,8 @@ export default function Sidebar({
           </DropdownMenu.Root>
         </div>
 
-        {/* Menu Items */}
         <nav className="flex-1 p-3 flex flex-col gap-1 overflow-y-auto custom-scrollbar">
-          {menuItems.map((menu) =>
+          {filteredMenuItems.map((menu) =>
             menu.children ? (
               isDesktopOpen ? (
                 <Collapsible.Root key={menu.key} className="group">
@@ -393,7 +419,7 @@ export default function Sidebar({
               </div>
 
               <nav className="flex-1 p-4 overflow-y-auto flex flex-col gap-2">
-                {menuItems.map((menu) =>
+                {filteredMenuItems.map((menu) =>
                   menu.children ? (
                     <Collapsible.Root key={menu.key} className="group">
                       <Collapsible.Trigger asChild>

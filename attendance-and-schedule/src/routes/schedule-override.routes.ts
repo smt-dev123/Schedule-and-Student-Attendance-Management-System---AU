@@ -8,11 +8,15 @@ import {
 } from "@/validators/academy";
 import { z } from "zod";
 import type { ScheduleOverrideService } from "@/services/schedule-override.service";
+import authentication from "@/middlewares/auth";
+import requirePermission from "@/middlewares/permission";
 
 const scheduleOverrideRoutes = new Hono();
 
 scheduleOverrideRoutes.post(
   "/",
+  authentication,
+  requirePermission("schedule", "create"),
   zValidator("json", scheduleOverrideSchema),
   async (c) => {
     const data = c.req.valid("json");
@@ -24,6 +28,8 @@ scheduleOverrideRoutes.post(
 
 scheduleOverrideRoutes.get(
   "/",
+  authentication,
+  requirePermission("schedule", "read"),
   zValidator("query", scheduleOverrideQuerySchema),
   async (c) => {
     const query = c.req.valid("query");
@@ -35,6 +41,8 @@ scheduleOverrideRoutes.get(
 
 scheduleOverrideRoutes.get(
   "/daily",
+  authentication,
+  requirePermission("schedule", "read"),
   zValidator(
     "query",
     z.object({
@@ -44,7 +52,9 @@ scheduleOverrideRoutes.get(
   ),
   async (c) => {
     const date = c.req.query("date");
-    const facultyId = c.req.query("facultyId") ? Number(c.req.query("facultyId")) : undefined;
+    const facultyId = c.req.query("facultyId")
+      ? Number(c.req.query("facultyId"))
+      : undefined;
     if (!date) return c.json({ message: "Date is required" }, 400);
 
     const { scheduleOverrideService: service } = c.get("container");
@@ -55,6 +65,8 @@ scheduleOverrideRoutes.get(
 
 scheduleOverrideRoutes.put(
   "/:id",
+  authentication,
+  requirePermission("schedule", "update"),
   zValidator("param", scheduleOverrideIdParamSchema),
   zValidator("json", scheduleOverrideUpdateSchema),
   async (c) => {
@@ -68,6 +80,8 @@ scheduleOverrideRoutes.put(
 
 scheduleOverrideRoutes.delete(
   "/:id",
+  authentication,
+  requirePermission("schedule", "delete"),
   zValidator("param", scheduleOverrideIdParamSchema),
   async (c) => {
     const { id } = c.req.valid("param");

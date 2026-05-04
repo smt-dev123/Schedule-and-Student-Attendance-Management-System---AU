@@ -1,13 +1,14 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { Box, Flex, Text } from '@radix-ui/themes'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { getSchedules, deleteSchedule } from '@/api/SchedulesAPI'
+import { getSchedules, deleteSchedule, getMySchedule } from '@/api/SchedulesAPI'
 import { useAcademicStore } from '@/stores/useAcademicStore'
 import FetchData from '@/components/FetchData'
 import { ScheduleTable } from '@/features/schedule/ScheduleTable'
 import toast from 'react-hot-toast'
 import ScheduleCreate from './-actions/Create'
 import ScheduleUpdate from './-actions/Update'
+import { useSession } from '@/lib/auth-client'
 import { useState } from 'react'
 
 export const Route = createFileRoute('/admin/schedule/')({
@@ -15,6 +16,8 @@ export const Route = createFileRoute('/admin/schedule/')({
 })
 
 function ScheduleListComponent() {
+  const { data: session } = useSession()
+  const role = (session?.user as any)?.role
   const { selectedYearId } = useAcademicStore()
   const queryClient = useQueryClient()
   const [editingScheduleId, setEditingScheduleId] = useState<number | null>(
@@ -27,9 +30,14 @@ function ScheduleListComponent() {
     isLoading,
     error,
   } = useQuery({
-    queryKey: ['schedules', selectedYearId],
-    queryFn: () => getSchedules({ academicYearId: selectedYearId! }),
-    enabled: !!selectedYearId,
+    queryKey: ['schedules', selectedYearId, role],
+    queryFn: () => {
+      if (role === 'student') {
+        return getMySchedule()
+      }
+      return getSchedules({ academicYearId: selectedYearId! })
+    },
+    enabled: role === 'student' ? true : !!selectedYearId,
   })
 
   const schedules = schedulesResponse || []
@@ -56,10 +64,10 @@ function ScheduleListComponent() {
     <Box p="4">
       <Flex justify="between" align="center" mb="4">
         <Text size="5" weight="bold">
-          គ្រប់គ្រងកាលវិភាគសិក្សា
+          {role === 'student' ? 'កាលវិភាគសិក្សារបស់ខ្ញុំ' : 'គ្រប់គ្រងកាលវិភាគសិក្សា'}
         </Text>
         <Flex gap="3">
-          <ScheduleCreate />
+          {['manager', 'staff'].includes(role) && <ScheduleCreate />}
         </Flex>
       </Flex>
 

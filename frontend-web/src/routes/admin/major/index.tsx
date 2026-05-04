@@ -6,12 +6,15 @@ import { useQuery } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
 import MajorCreate from './-actions/Create'
 import FetchData from '@/components/FetchData'
+import { useSession } from '@/lib/auth-client'
 
 export const Route = createFileRoute('/admin/major/')({
   component: RouteComponent,
 })
 
 function RouteComponent() {
+  const { data: session } = useSession()
+  const role = (session?.user as any)?.role
   useTitle('Major Management')
 
   const { data, isLoading, error } = useQuery({
@@ -43,7 +46,7 @@ function RouteComponent() {
               បោះពុម្ភ
             </Button>
 
-            <MajorCreate />
+            {['manager', 'staff'].includes(role) && <MajorCreate />}
           </Flex>
         </div>
       </Flex>

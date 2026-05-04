@@ -6,6 +6,7 @@ import { createFileRoute } from '@tanstack/react-router'
 import RoomCreate from './-actions/Create'
 import { useTitle } from '@/hooks/useTitle'
 import FetchData from '@/components/FetchData'
+import { useSession } from '@/lib/auth-client'
 
 import { useNavigate } from '@tanstack/react-router'
 
@@ -25,6 +26,8 @@ export const Route = createFileRoute('/admin/room/')({
 })
 
 function RouteComponent() {
+  const { data: session } = useSession()
+  const role = (session?.user as any)?.role
   useTitle('Room Management')
 
   const { page, limit } = Route.useSearch()
@@ -69,7 +72,7 @@ function RouteComponent() {
               តារាងបន្ទប់សិក្សា
             </Text>
           </Flex>
-          <RoomCreate />
+          {['manager', 'staff'].includes(role) && <RoomCreate />}
         </div>
       </Flex>
 

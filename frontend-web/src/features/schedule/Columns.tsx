@@ -3,6 +3,7 @@ import { Badge, Flex, IconButton } from '@radix-ui/themes'
 import type { ColumnDef } from '@tanstack/react-table'
 import { FaRegEdit, FaRegEye, FaRegTrashAlt } from 'react-icons/fa'
 import { Link } from '@tanstack/react-router'
+import { useSession } from '@/lib/auth-client'
 
 export const ScheduleColumns: ColumnDef<ScheduleType>[] = [
   { accessorKey: 'id', header: 'ល.រ' },
@@ -46,6 +47,8 @@ export const ScheduleColumns: ColumnDef<ScheduleType>[] = [
     enableSorting: false,
     cell: ({ row }) => {
       const s = row.original as any
+      const { data: session } = useSession()
+      const role = (session?.user as any)?.role
       return (
         <Flex gap="2">
           <IconButton
@@ -63,29 +66,33 @@ export const ScheduleColumns: ColumnDef<ScheduleType>[] = [
             </Link>
           </IconButton>
 
-          <IconButton
-            size="1"
-            color="orange"
-            variant="surface"
-            style={{ cursor: 'pointer' }}
-            onClick={() => s.onEdit?.(s.id)}
-          >
-            <FaRegEdit />
-          </IconButton>
+          {['manager', 'staff'].includes(role) && (
+            <IconButton
+              size="1"
+              color="orange"
+              variant="surface"
+              style={{ cursor: 'pointer' }}
+              onClick={() => s.onEdit?.(s.id)}
+            >
+              <FaRegEdit />
+            </IconButton>
+          )}
 
-          <IconButton
-            size="1"
-            color="red"
-            variant="surface"
-            style={{ cursor: 'pointer' }}
-            onClick={() => {
-              if (window.confirm('តើអ្នកពិតជាចង់លុបកាលវិភាគនេះមែនទេ?')) {
-                s.onDelete?.(s.id)
-              }
-            }}
-          >
-            <FaRegTrashAlt />
-          </IconButton>
+          {['manager', 'staff'].includes(role) && (
+            <IconButton
+              size="1"
+              color="red"
+              variant="surface"
+              style={{ cursor: 'pointer' }}
+              onClick={() => {
+                if (window.confirm('តើអ្នកពិតជាចង់លុបកាលវិភាគនេះមែនទេ?')) {
+                  s.onDelete?.(s.id)
+                }
+              }}
+            >
+              <FaRegTrashAlt />
+            </IconButton>
+          )}
         </Flex>
       )
     },

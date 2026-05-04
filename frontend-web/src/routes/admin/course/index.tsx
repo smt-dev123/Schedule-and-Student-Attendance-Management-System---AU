@@ -10,13 +10,13 @@ import {
 import { useQuery } from '@tanstack/react-query'
 import { useAcademicStore } from '@/stores/useAcademicStore'
 import FetchData from '@/components/FetchData'
-import { getCourses, deleteCourse } from '@/api/CourseAPI'
+import { getCourses } from '@/api/CourseAPI'
 import { Flex, Text } from '@radix-ui/themes'
 import CourseCreate from './-actions/Create'
 import CourseUpdate from './-actions/Update'
 import { useState } from 'react'
-import toast from 'react-hot-toast'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+
+import { useSession } from '@/lib/auth-client'
 import CourseDelete from './-actions/Delete'
 import { ManualPagination } from '@/components/ui/ManualPagination'
 
@@ -38,13 +38,13 @@ export const Route = createFileRoute('/admin/course/')({
 })
 
 function CourseListComponent() {
+  const { data: session } = useSession()
+  const role = (session?.user as any)?.role
   const { selectedYearId } = useAcademicStore()
   const { page, limit } = Route.useSearch()
   const navigate = useNavigate({ from: Route.fullPath })
   const [editingCourse, setEditingCourse] = useState<any>(null)
   const [isUpdateOpen, setIsUpdateOpen] = useState(false)
-
-  const queryClient = useQueryClient()
 
   const {
     data: apiResponse,
@@ -74,15 +74,6 @@ function CourseListComponent() {
     })
   }
 
-  const deleteMutation = useMutation({
-    mutationFn: (id: number) => deleteCourse(id),
-    onSuccess: () => {
-      toast.success('លុបមុខវិជ្ជាជោគជ័យ')
-      queryClient.invalidateQueries({ queryKey: ['courses'] })
-    },
-    onError: () => toast.error('មិនអាចលុបបានទេ'),
-  })
-
   return (
     <>
       <Flex justify="between" mb="4">
@@ -90,7 +81,7 @@ function CourseListComponent() {
           គ្រប់គ្រងវគ្គសិក្សា
         </Text>
         <Flex gap="2">
-          <CourseCreate />
+          {['manager', 'staff'].includes(role) && <CourseCreate />}
         </Flex>
       </Flex>
       {/* Header */}
@@ -109,20 +100,24 @@ function CourseListComponent() {
                 </div>
                 <Flex align="center" gap="3">
                   <BadgeCode code={course.code} />
-                  <button
-                    className="text-orange-400 hover:text-orange-600 transition-colors"
-                    onClick={(e) => {
-                      e.preventDefault()
-                      setEditingCourse(course)
-                      setIsUpdateOpen(true)
-                    }}
-                  >
-                    <Flex align="center" gap="1">
-                      <Pencil size={14} />
-                      កែប្រែ
-                    </Flex>
-                  </button>
-                  <CourseDelete data={course} />
+                  {['manager', 'staff'].includes(role) && (
+                    <>
+                      <button
+                        className="text-orange-400 hover:text-orange-600 transition-colors"
+                        onClick={(e) => {
+                          e.preventDefault()
+                          setEditingCourse(course)
+                          setIsUpdateOpen(true)
+                        }}
+                      >
+                        <Flex align="center" gap="1">
+                          <Pencil size={14} />
+                          កែប្រែ
+                        </Flex>
+                      </button>
+                      <CourseDelete data={course} />
+                    </>
+                  )}
                 </Flex>
               </div>
 

@@ -10,6 +10,7 @@ import { TeacherTable } from '@/features/teacher/GenerationTable'
 import TeacherCreate from './-actions/Create'
 import { useState, useEffect } from 'react'
 import FetchData from '@/components/FetchData'
+import { useSession } from '@/lib/auth-client'
 
 type TeacherSearch = {
   search?: string
@@ -35,6 +36,8 @@ export const Route = createFileRoute('/admin/teacher/')({
 })
 function RouteComponent() {
   useTitle('Teacher Management')
+  const { data: session } = useSession()
+  const role = (session?.user as any)?.role
 
   const { search, degree, faculty, major, page, limit } = Route.useSearch()
   const navigate = useNavigate({ from: Route.fullPath })
@@ -127,7 +130,7 @@ function RouteComponent() {
           <Text size="5" weight="bold">គ្រូបង្រៀន</Text>
           <Flex gap="2">
             <Button variant="outline" className="cursor-pointer">Export Excel</Button>
-            <TeacherCreate />
+            {['manager', 'staff'].includes(role) && <TeacherCreate />}
           </Flex>
         </Flex>
 

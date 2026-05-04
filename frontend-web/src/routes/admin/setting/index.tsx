@@ -25,7 +25,7 @@ export const Route = createFileRoute('/admin/setting/')({
 })
 
 function RouteComponent() {
-  useTitle('Settings')
+  useTitle('ការកំណត់ (Settings)')
   const { user } = useAuth()
 
   // Profile Form
@@ -176,7 +176,9 @@ function RouteComponent() {
         <Tabs.List size="2">
           <Tabs.Trigger value="account">គណនី (Account)</Tabs.Trigger>
           <Tabs.Trigger value="security">សុវត្ថិភាព (Security)</Tabs.Trigger>
-          <Tabs.Trigger value="backup">ការចម្លងទុក (Backup)</Tabs.Trigger>
+          {(user as any)?.role === 'manager' && (
+            <Tabs.Trigger value="backup">ការចម្លងទុក (Backup)</Tabs.Trigger>
+          )}
         </Tabs.List>
 
         <Box pt="4">
@@ -358,88 +360,90 @@ function RouteComponent() {
           </Tabs.Content>
 
           {/* --- TAB: BACKUP --- */}
-          <Tabs.Content value="backup">
-            <Flex direction="column" gap="5">
-              <Box>
-                <Text size="4" weight="bold">
-                  ការចម្លងទុកទិន្នន័យ (Backup & Restore)
-                </Text>
-                <Text size="2" color="gray">
-                  គ្រប់គ្រងសុវត្ថិភាពទិន្នន័យប្រព័ន្ធរបស់អ្នក
-                </Text>
-              </Box>
-
-              <Card variant="surface">
-                <Flex justify="between" align="center">
-                  <Box>
-                    <Text as="div" size="3" weight="bold">
-                      Auto Backup
-                    </Text>
-                    <Text as="div" size="2" color="gray">
-                      ដំណើរការការចម្លងទុកដោយស្វ័យប្រវត្តិទៅកាន់ Cloud Storage
-                    </Text>
-                  </Box>
-                  <Switch defaultChecked size="3" color="green" />
-                </Flex>
-              </Card>
-
-              <Flex gap="4" direction={{ initial: 'column', sm: 'row' }}>
-                <Box className="grow">
-                  <Text as="div" size="2" mb="1" weight="bold">
-                    ភាពញឹកញាប់ (Frequency)
+          {(user as any)?.role === 'manager' && (
+            <Tabs.Content value="backup">
+              <Flex direction="column" gap="5">
+                <Box>
+                  <Text size="4" weight="bold">
+                    ការចម្លងទុកទិន្នន័យ (Backup & Restore)
                   </Text>
-                  <Select.Root defaultValue="daily">
-                    <Select.Trigger className="w-full" />
-                    <Select.Content>
-                      <Select.Item value="hourly">រាល់ម៉ោង</Select.Item>
-                      <Select.Item value="daily">រៀងរាល់ថ្ងៃ</Select.Item>
-                      <Select.Item value="weekly">រៀងរាល់សប្តាហ៍</Select.Item>
-                    </Select.Content>
-                  </Select.Root>
+                  <Text size="2" color="gray">
+                    គ្រប់គ្រងសុវត្ថិភាពទិន្នន័យប្រព័ន្ធរបស់អ្នក
+                  </Text>
                 </Box>
 
-                <Box className="grow">
-                  <Text as="div" size="2" mb="1" weight="bold">
-                    រក្សាទុកក្នុងរយៈពេល (Retention)
+                <Card variant="surface">
+                  <Flex justify="between" align="center">
+                    <Box>
+                      <Text as="div" size="3" weight="bold">
+                        Auto Backup
+                      </Text>
+                      <Text as="div" size="2" color="gray">
+                        ដំណើរការការចម្លងទុកដោយស្វ័យប្រវត្តិទៅកាន់ Cloud Storage
+                      </Text>
+                    </Box>
+                    <Switch defaultChecked size="3" color="green" />
+                  </Flex>
+                </Card>
+
+                <Flex gap="4" direction={{ initial: 'column', sm: 'row' }}>
+                  <Box className="grow">
+                    <Text as="div" size="2" mb="1" weight="bold">
+                      ភាពញឹកញាប់ (Frequency)
+                    </Text>
+                    <Select.Root defaultValue="daily">
+                      <Select.Trigger className="w-full" />
+                      <Select.Content>
+                        <Select.Item value="hourly">រាល់ម៉ោង</Select.Item>
+                        <Select.Item value="daily">រៀងរាល់ថ្ងៃ</Select.Item>
+                        <Select.Item value="weekly">រៀងរាល់សប្តាហ៍</Select.Item>
+                      </Select.Content>
+                    </Select.Root>
+                  </Box>
+
+                  <Box className="grow">
+                    <Text as="div" size="2" mb="1" weight="bold">
+                      រក្សាទុកក្នុងរយៈពេល (Retention)
+                    </Text>
+                    <Select.Root defaultValue="30">
+                      <Select.Trigger className="w-full" />
+                      <Select.Content>
+                        <Select.Item value="7">៧ ថ្ងៃ</Select.Item>
+                        <Select.Item value="30">៣០ ថ្ងៃ</Select.Item>
+                        <Select.Item value="always">
+                          រហូតដល់លុបដោយផ្ទាល់
+                        </Select.Item>
+                      </Select.Content>
+                    </Select.Root>
+                  </Box>
+                </Flex>
+
+                <Separator size="4" />
+
+                <Box>
+                  <Text size="3" weight="bold" mb="2" as="div">
+                    សកម្មភាពបន្ទាប់បន្សំ
                   </Text>
-                  <Select.Root defaultValue="30">
-                    <Select.Trigger className="w-full" />
-                    <Select.Content>
-                      <Select.Item value="7">៧ ថ្ងៃ</Select.Item>
-                      <Select.Item value="30">៣០ ថ្ងៃ</Select.Item>
-                      <Select.Item value="always">
-                        រហូតដល់លុបដោយផ្ទាល់
-                      </Select.Item>
-                    </Select.Content>
-                  </Select.Root>
+                  <Flex gap="3">
+                    <Button
+                      variant="soft"
+                      color="gray"
+                      onClick={() => toast('មុខងារនេះនឹងមាននៅពេលក្រោយ')}
+                    >
+                      ទាញយក Database ឥឡូវនេះ (.sql)
+                    </Button>
+                    <Button
+                      variant="soft"
+                      color="orange"
+                      onClick={() => toast('មុខងារនេះនឹងមាននៅពេលក្រោយ')}
+                    >
+                      ផ្ទេរទិន្នន័យទៅ Google Drive
+                    </Button>
+                  </Flex>
                 </Box>
               </Flex>
-
-              <Separator size="4" />
-
-              <Box>
-                <Text size="3" weight="bold" mb="2" as="div">
-                  សកម្មភាពបន្ទាប់បន្សំ
-                </Text>
-                <Flex gap="3">
-                  <Button
-                    variant="soft"
-                    color="gray"
-                    onClick={() => toast('មុខងារនេះនឹងមាននៅពេលក្រោយ')}
-                  >
-                    ទាញយក Database ឥឡូវនេះ (.sql)
-                  </Button>
-                  <Button
-                    variant="soft"
-                    color="orange"
-                    onClick={() => toast('មុខងារនេះនឹងមាននៅពេលក្រោយ')}
-                  >
-                    ផ្ទេរទិន្នន័យទៅ Google Drive
-                  </Button>
-                </Flex>
-              </Box>
-            </Flex>
-          </Tabs.Content>
+            </Tabs.Content>
+          )}
         </Box>
       </Tabs.Root>
     </Card>

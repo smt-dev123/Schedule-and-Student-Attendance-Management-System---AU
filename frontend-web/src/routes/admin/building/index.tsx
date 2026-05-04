@@ -11,6 +11,7 @@ import FetchData from '@/components/FetchData'
 import PDFDownload from '@/components/ui/PDFDownload'
 
 import { useNavigate } from '@tanstack/react-router'
+import { useSession } from '@/lib/auth-client'
 
 type BuildingSearch = {
   page?: number
@@ -28,6 +29,8 @@ export const Route = createFileRoute('/admin/building/')({
 })
 
 function RouteComponent() {
+  const { data: session } = useSession()
+  const role = (session?.user as any)?.role
   useTitle('Building Management')
   const { page, limit } = Route.useSearch()
   const navigate = useNavigate({ from: Route.fullPath })
@@ -74,7 +77,7 @@ function RouteComponent() {
               fileName="building-report.pdf"
             />
             <ExportExcel data={data?.data || []} />
-            <BuildingCreate />
+            {['manager', 'staff'].includes(role) && <BuildingCreate />}
           </Flex>
         </div>
       </Flex>
