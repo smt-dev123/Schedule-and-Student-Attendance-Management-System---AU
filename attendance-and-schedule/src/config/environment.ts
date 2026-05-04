@@ -9,6 +9,9 @@ const envSchema = z.object({
   BETTER_AUTH_SECRET: z.string(),
   WS_PORT: z.coerce.number().default(8080),
   BETTER_AUTH_URL: z.string(),
+  ADMIN_EMAIL: z.email(),
+  ADMIN_PASSWORD: z.string().min(8),
+  ADMIN_NAME: z.string().min(1),
 });
 
 const parsed = envSchema.safeParse(process.env);
