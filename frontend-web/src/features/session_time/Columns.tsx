@@ -1,9 +1,8 @@
 import SessionTimeDelete from '@/routes/admin/session_time/-actions/Delete'
 import SessionTimeUpdate from '@/routes/admin/session_time/-actions/Update'
 import type { SessionTimeType } from '@/types'
-import { Badge, Flex, IconButton } from '@radix-ui/themes'
+import { Badge, Flex } from '@radix-ui/themes'
 import type { ColumnDef } from '@tanstack/react-table'
-import { FaRegEye } from 'react-icons/fa'
 
 export const SessionTimeColumns: ColumnDef<SessionTimeType>[] = [
   { accessorKey: 'id', header: 'ល.រ' },
@@ -31,15 +30,6 @@ export const SessionTimeColumns: ColumnDef<SessionTimeType>[] = [
     enableSorting: false,
     cell: ({ row }) => (
       <Flex gap="2">
-        <IconButton
-          size="1"
-          color="blue"
-          variant="surface"
-          style={{ cursor: 'pointer' }}
-        >
-          <FaRegEye />
-        </IconButton>
-
         <SessionTimeUpdate data={row.original} />
         <SessionTimeDelete data={row.original} />
       </Flex>

@@ -1,14 +1,18 @@
 import RoomDelete from '@/routes/admin/room/-actions/Delete'
 import RoomUpdate from '@/routes/admin/room/-actions/Update'
 import type { RoomType } from '@/types'
-import { Flex, IconButton } from '@radix-ui/themes'
+import { Flex } from '@radix-ui/themes'
 import type { ColumnDef } from '@tanstack/react-table'
-import { FaRegEye } from 'react-icons/fa'
 
 export const RoomColumns: ColumnDef<RoomType>[] = [
   { accessorKey: 'id', header: 'ល.រ' },
   { accessorKey: 'name', header: 'បន្ទប់សិក្សា' },
-  { accessorKey: 'floor', header: 'ជាន់ទី' },
+  {
+    accessorKey: 'floor',
+    header: 'ជាន់ទី',
+    cell: ({ row }) =>
+      row.original.floor === 0 ? 'ផ្ទាល់ដី' : `${row.original.floor}`,
+  },
   { accessorKey: 'classroomNumber', header: 'លេខបន្ទប់' },
   { accessorKey: 'building.name', header: 'អាគារសិក្សា' },
   {
@@ -17,15 +21,6 @@ export const RoomColumns: ColumnDef<RoomType>[] = [
     enableSorting: false,
     cell: ({ row }) => (
       <Flex gap="2">
-        <IconButton
-          size="1"
-          color="blue"
-          variant="surface"
-          style={{ cursor: 'pointer' }}
-        >
-          <FaRegEye />
-        </IconButton>
-
         <RoomUpdate data={row.original} />
         <RoomDelete data={row.original} />
       </Flex>

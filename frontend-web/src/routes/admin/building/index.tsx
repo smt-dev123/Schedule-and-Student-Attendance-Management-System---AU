@@ -7,7 +7,6 @@ import { createFileRoute } from '@tanstack/react-router'
 import BuildingCreate from './-actions/Create'
 import ExportExcel from './-exports/ExportExcel'
 import { BuildingReport } from './-exports/ExportPDF'
-import { useState } from 'react'
 import FetchData from '@/components/FetchData'
 import PDFDownload from '@/components/ui/PDFDownload'
 
@@ -17,12 +16,9 @@ export const Route = createFileRoute('/admin/building/')({
 
 function RouteComponent() {
   useTitle('Building Management')
-
-  const [name, setName] = useState('all')
-  const [search, setSearch] = useState('')
   const { data, isLoading, error } = useQuery({
-    queryKey: ['buildings', name, search],
-    queryFn: () => getBuilding(name, search),
+    queryKey: ['buildings', 'all', ''],
+    queryFn: () => getBuilding('all', ''),
     staleTime: 1000 * 60 * 5,
     gcTime: 1000 * 60 * 60 * 24,
     refetchOnWindowFocus: false,

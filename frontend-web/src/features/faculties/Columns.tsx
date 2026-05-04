@@ -14,15 +14,6 @@ export const FacultiesColumns: ColumnDef<FacultiesType>[] = [
     enableSorting: false,
     cell: ({ row }) => (
       <Flex gap="2">
-        <IconButton
-          size="1"
-          color="blue"
-          variant="surface"
-          style={{ cursor: 'pointer' }}
-        >
-          <FaRegEye />
-        </IconButton>
-
         <FacultyUpdate data={row.original} />
         <FacultyDelete data={row.original} />
       </Flex>

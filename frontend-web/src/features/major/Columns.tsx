@@ -1,9 +1,8 @@
 import MajorDelete from '@/routes/admin/major/-actions/Delete'
 import MajorUpdate from '@/routes/admin/major/-actions/Update'
 import type { MajorsType } from '@/types'
-import { Flex, IconButton } from '@radix-ui/themes'
+import { Flex } from '@radix-ui/themes'
 import type { ColumnDef } from '@tanstack/react-table'
-import { FaRegEye } from 'react-icons/fa'
 
 export const MajorColumns: ColumnDef<MajorsType>[] = [
   { accessorKey: 'id', header: 'ល.រ' },
@@ -15,15 +14,6 @@ export const MajorColumns: ColumnDef<MajorsType>[] = [
     enableSorting: false,
     cell: ({ row }) => (
       <Flex gap="2">
-        <IconButton
-          size="1"
-          color="blue"
-          variant="surface"
-          style={{ cursor: 'pointer' }}
-        >
-          <FaRegEye />
-        </IconButton>
-
         <MajorUpdate data={row.original} />
         <MajorDelete data={row.original} />
       </Flex>
