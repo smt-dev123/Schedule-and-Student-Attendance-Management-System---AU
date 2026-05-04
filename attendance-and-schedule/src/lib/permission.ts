@@ -52,6 +52,7 @@ const manager = ac.newRole({
   building: ["create", "read", "update", "delete"],
   classroom: ["create", "read", "update", "delete"],
   faculty: ["create", "read", "update", "delete"],
+  skill: ["create", "read", "update", "delete"],
   department: ["create", "read", "update", "delete"],
   academicLevel: ["create", "read", "update", "delete"],
   academicYear: ["create", "read", "update", "delete"],
