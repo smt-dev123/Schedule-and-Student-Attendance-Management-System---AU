@@ -38,10 +38,12 @@ const RoomUpdate = ({ data }: Props) => {
     },
   })
 
-  const { data: buildings } = useQuery<BuildingType[]>({
+  const { data: buildingsResponse } = useQuery({
     queryKey: ['buildings', 'all'],
     queryFn: () => getBuilding('all'),
   })
+
+  const buildings = ((buildingsResponse as any)?.data as BuildingType[]) || []
 
   const mutation = useMutation({
     mutationFn: (formData: RoomType) => updateRoom(Number(data.id), formData),
@@ -154,7 +156,7 @@ const RoomUpdate = ({ data }: Props) => {
                 required: 'សូមបញ្ចូលអាគារសិក្សា',
               }}
               options={
-                buildings?.map((building) => ({
+                buildings?.map((building: BuildingType) => ({
                   id: building.id,
                   name: building.name,
                 })) || []

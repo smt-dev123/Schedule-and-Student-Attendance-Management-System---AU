@@ -8,7 +8,7 @@ import { getFaculties } from '@/api/FacultyAPI' // នាំចូល API
 import { getAcademicLevels } from '@/api/AcademicLevelAPI' // នាំចូល API
 import { TeacherTable } from '@/features/teacher/GenerationTable'
 import TeacherCreate from './-actions/Create'
-import { useState, useMemo, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import FetchData from '@/components/FetchData'
 
 type TeacherSearch = {
@@ -16,6 +16,8 @@ type TeacherSearch = {
   degree?: string
   faculty?: string
   major?: string
+  page?: number
+  limit?: number
 }
 
 export const Route = createFileRoute('/admin/teacher/')({
@@ -25,15 +27,16 @@ export const Route = createFileRoute('/admin/teacher/')({
       degree: (search.degree as string) || 'all',
       faculty: (search.faculty as string) || 'all',
       major: (search.major as string) || 'all',
+      page: Number(search.page) || 1,
+      limit: Number(search.limit) || 10,
     }
   },
   component: RouteComponent,
 })
-
 function RouteComponent() {
   useTitle('Teacher Management')
 
-  const { search, degree, faculty, major } = Route.useSearch()
+  const { search, degree, faculty, major, page, limit } = Route.useSearch()
   const navigate = useNavigate({ from: Route.fullPath })
 
   const [searchDraft, setSearchDraft] = useState(search)
@@ -43,8 +46,15 @@ function RouteComponent() {
 
   // --- ១. ទាញយកទិន្នន័យពី API សម្រាប់ Dropdowns ---
   const { data: teachersData, isLoading, error } = useQuery({
-    queryKey: ['teachers'],
-    queryFn: getTeachers,
+    queryKey: ['teachers', search, degree, faculty, page, limit],
+    queryFn: () =>
+      getTeachers(
+        search,
+        faculty === 'all' ? '' : faculty,
+        degree === 'all' ? '' : degree,
+        page,
+        limit,
+      ),
   })
 
   const { data: faculties = [] } = useQuery({
@@ -72,6 +82,7 @@ function RouteComponent() {
         degree: degreeDraft,
         faculty: facultyDraft,
         major: majorDraft,
+        page: 1,
       }),
     })
   }
@@ -81,29 +92,33 @@ function RouteComponent() {
     setDegreeDraft('all')
     setFacultyDraft('all')
     setMajorDraft('all')
-    navigate({ 
-        search: { search: '', degree: 'all', faculty: 'all', major: 'all' } 
+    navigate({
+      search: {
+        search: '',
+        degree: 'all',
+        faculty: 'all',
+        major: 'all',
+        page: 1,
+      },
     })
   }
 
-  const filteredData = useMemo(() => {
-    if (!teachersData) return [];
-    
-    // ចាប់យក Array តាមរយៈ res.data?.data ដែលអ្នកបានកំណត់ក្នុង getTeachers
-    const rawList = Array.isArray(teachersData) ? teachersData : (teachersData as any)?.data || [];
+  const total = (teachersData as any)?.total || 0
+  const pageCount = Math.ceil(total / (limit ?? 10))
 
-    return rawList.filter((teacher: any) => {
-      const matchesSearch = !search ||
-        teacher.name?.toLowerCase().includes(search.toLowerCase()) ||
-        teacher.id?.toString().includes(search);
-
-      // បើប្រើ ID ពី API ត្រូវធៀបជា String ឬ Number ឱ្យត្រូវគ្នា
-      const matchesDegree = degree === 'all' || String(teacher.academicLevelId) === degree;
-      const matchesFaculty = faculty === 'all' || String(teacher.facultyId) === faculty;
-      
-      return matchesSearch && matchesDegree && matchesFaculty;
-    });
-  }, [teachersData, search, degree, faculty]);
+  const onPaginationChange = (updater: any) => {
+    const newState =
+      typeof updater === 'function'
+        ? updater({ pageIndex: (page ?? 1) - 1, pageSize: limit ?? 10 })
+        : updater
+    navigate({
+      search: (prev) => ({
+        ...prev,
+        page: newState.pageIndex + 1,
+        limit: newState.pageSize,
+      }),
+    })
+  }
 
   return (
     <div>
@@ -165,7 +180,15 @@ function RouteComponent() {
         </Flex>
 
         <FetchData isLoading={isLoading} error={error} data={teachersData}>
-            <TeacherTable data={filteredData} />
+          <TeacherTable
+            data={teachersData?.data || []}
+            pageCount={pageCount}
+            paginationState={{
+              pageIndex: (page ?? 1) - 1,
+              pageSize: limit ?? 10,
+            }}
+            onPaginationChange={onPaginationChange}
+          />
         </FetchData>
       </Flex>
     </div>

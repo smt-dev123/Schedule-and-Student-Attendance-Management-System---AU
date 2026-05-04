@@ -20,10 +20,12 @@ const RoomCreate = () => {
   const queryClient = useQueryClient()
   const [open, setOpen] = useState(false)
 
-  const { data: buildings } = useQuery<BuildingType[]>({
+  const { data: buildingsResponse } = useQuery({
     queryKey: ['buildings'],
     queryFn: () => getBuilding('all'),
   })
+
+  const buildings = ((buildingsResponse as any)?.data as BuildingType[]) || []
 
   const mutation = useMutation({
     mutationFn: (formData: RoomType) => createRoom(formData),
@@ -121,7 +123,7 @@ const RoomCreate = () => {
                 required: 'សូមបញ្ចូលអាគារសិក្សា',
               }}
               options={
-                buildings?.map((building) => ({
+                buildings?.map((building: BuildingType) => ({
                   id: building.id,
                   name: building.name,
                 })) || []

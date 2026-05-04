@@ -152,9 +152,15 @@ export const courseSchema = z.object({
   isActive: z.boolean().default(true),
 });
 export const courseUpdateSchema = courseSchema.partial();
+export const courseQuerySchema = z.object({
+  academicYearId: z.coerce.number().optional(),
+  page: z.coerce.number().int().positive().default(1),
+  limit: z.coerce.number().int().positive().default(10),
+});
 
 export type CourseInput = z.infer<typeof courseSchema>;
 export type CourseUpdateInput = z.infer<typeof courseUpdateSchema>;
+export type CourseQueryInput = z.infer<typeof courseQuerySchema>;
 
 /* Session Time Schemas */
 export const sessionTimeSchema = z.object({

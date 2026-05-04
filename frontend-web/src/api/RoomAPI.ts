@@ -3,7 +3,7 @@ import type { RoomType } from '@/types'
 
 export const getRoom = async (name?: string, page?: number, limit?: number) => {
   const res = await api.get('/classrooms', { params: { name, page, limit } })
-  return res.data?.data
+  return res.data
 }
 
 export const createRoom = async (newRoom: RoomType) => {

@@ -2,7 +2,7 @@
 import { type DrizzleDb, type Transaction } from "@/database";
 import { courses, students } from "@/database/schemas";
 import type { Course } from "@/types/academy";
-import type { CourseInput, CourseUpdateInput } from "@/validators/academy";
+import type { CourseInput, CourseUpdateInput, CourseQueryInput } from "@/validators/academy";
 import { and, eq, sql } from "drizzle-orm";
 
 const SESSION_DURATION = 1.5; // hours per session
@@ -29,8 +29,21 @@ export class CourseRepository {
     });
   }
 
-  async findAll(): Promise<Course[]> {
-    return this.db.query.courses.findMany({
+  async findAll(query: CourseQueryInput): Promise<{
+    data: Course[]
+    total: number
+    page: number
+    limit: number
+  }> {
+    const { academicYearId, page = 1, limit = 10 } = query
+    const offset = (page - 1) * limit
+
+    const where = academicYearId ? eq(courses.academicYearId, academicYearId) : undefined
+
+    const data = await this.db.query.courses.findMany({
+      where,
+      limit,
+      offset,
       with: {
         schedule: {
           with: {
@@ -43,7 +56,21 @@ export class CourseRepository {
         },
         teacher: true,
       },
-    });
+    })
+
+    const totalResult = await this.db
+      .select({ total: sql<number>`count(*)` })
+      .from(courses)
+      .where(where)
+
+    const total = totalResult[0]?.total ?? 0
+
+    return {
+      data,
+      total: Number(total),
+      page,
+      limit,
+    }
   }
 
   async create(data: CourseInput): Promise<Course | undefined> {

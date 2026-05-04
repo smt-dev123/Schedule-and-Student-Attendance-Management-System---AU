@@ -1,6 +1,10 @@
 import type { CourseRepository } from "@/repositories/course.repository";
 import type { Course } from "@/types/academy";
-import type { CourseInput, CourseUpdateInput } from "@/validators/academy";
+import type {
+  CourseInput,
+  CourseUpdateInput,
+  CourseQueryInput,
+} from "@/validators/academy";
 import { HTTPException } from "hono/http-exception";
 
 export class CourseService {
@@ -14,8 +18,13 @@ export class CourseService {
     return course;
   }
 
-  async findAll(): Promise<Course[]> {
-    return this.courseRepo.findAll();
+  async findAll(query: CourseQueryInput): Promise<{
+    data: Course[];
+    total: number;
+    page: number;
+    limit: number;
+  }> {
+    return this.courseRepo.findAll(query);
   }
 
   async findById(id: number): Promise<Course> {

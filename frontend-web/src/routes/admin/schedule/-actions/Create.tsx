@@ -71,14 +71,17 @@ const ScheduleCreate = () => {
     queryKey: ['academicYears'],
     queryFn: getAcademicYear,
   })
-  const { data: rooms = [] } = useQuery({
+  const { data: roomsResponse } = useQuery({
     queryKey: ['rooms'],
     queryFn: () => getRoom('all'),
   })
-  const { data: teachers = [] } = useQuery({
+  const rooms = (roomsResponse as any)?.data || []
+
+  const { data: teachersResponse } = useQuery({
     queryKey: ['teachers'],
-    queryFn: getTeachers,
+    queryFn: () => getTeachers('all'),
   })
+  const teachers = (teachersResponse as any)?.data || []
   const { data: sessions = [] } = useQuery({
     queryKey: ['sessionTimes'],
     queryFn: getSessionTime,

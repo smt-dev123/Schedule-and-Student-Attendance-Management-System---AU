@@ -18,13 +18,29 @@ import { useState } from 'react'
 import toast from 'react-hot-toast'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import CourseDelete from './-actions/Delete'
+import { ManualPagination } from '@/components/ui/ManualPagination'
+
+import { useNavigate } from '@tanstack/react-router'
+
+type CourseSearch = {
+  page?: number
+  limit?: number
+}
 
 export const Route = createFileRoute('/admin/course/')({
+  validateSearch: (search: Record<string, unknown>): CourseSearch => {
+    return {
+      page: Number(search.page) || 1,
+      limit: Number(search.limit) || 10,
+    }
+  },
   component: CourseListComponent,
 })
 
 function CourseListComponent() {
   const { selectedYearId } = useAcademicStore()
+  const { page, limit } = Route.useSearch()
+  const navigate = useNavigate({ from: Route.fullPath })
   const [editingCourse, setEditingCourse] = useState<any>(null)
   const [isUpdateOpen, setIsUpdateOpen] = useState(false)
 
@@ -35,12 +51,28 @@ function CourseListComponent() {
     isLoading,
     error,
   } = useQuery({
-    queryKey: ['courses', selectedYearId],
-    queryFn: () => getCourses(selectedYearId!),
+    queryKey: ['courses', selectedYearId, page, limit],
+    queryFn: () => getCourses(selectedYearId!, page, limit),
     enabled: !!selectedYearId,
   })
 
-  const courses = apiResponse ?? []
+  const courses = apiResponse?.data ?? []
+  const total = apiResponse?.total ?? 0
+  const pageCount = Math.ceil(total / (limit ?? 10))
+
+  const onPaginationChange = (updater: any) => {
+    const newState =
+      typeof updater === 'function'
+        ? updater({ pageIndex: (page ?? 1) - 1, pageSize: limit ?? 10 })
+        : updater
+    navigate({
+      search: (prev) => ({
+        ...prev,
+        page: newState.pageIndex + 1,
+        limit: newState.pageSize,
+      }),
+    })
+  }
 
   const deleteMutation = useMutation({
     mutationFn: (id: number) => deleteCourse(id),
@@ -147,6 +179,13 @@ function CourseListComponent() {
             </div>
           ))}
         </div>
+
+        <ManualPagination
+          pageIndex={(page ?? 1) - 1}
+          pageSize={limit ?? 10}
+          pageCount={pageCount}
+          onPaginationChange={onPaginationChange}
+        />
       </FetchData>
 
       <CourseUpdate

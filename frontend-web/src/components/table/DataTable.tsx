@@ -7,6 +7,8 @@ import {
   getSortedRowModel,
   useReactTable,
   type ColumnDef,
+  type PaginationState,
+  type OnChangeFn,
 } from '@tanstack/react-table'
 import { HiArrowDown, HiArrowsUpDown, HiArrowUp } from 'react-icons/hi2'
 import { DataTablePagination } from './DataTablePagination'
@@ -14,15 +16,31 @@ import { DataTablePagination } from './DataTablePagination'
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[]
   data: TData[]
+  pageCount?: number
+  manualPagination?: boolean
+  onPaginationChange?: OnChangeFn<PaginationState>
+  paginationState?: PaginationState
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data,
+  pageCount,
+  manualPagination,
+  onPaginationChange,
+  paginationState,
 }: DataTableProps<TData, TValue>) {
   const table = useReactTable({
     data: data ?? [],
     columns,
+    ...(manualPagination && { pageCount }),
+    manualPagination: manualPagination ?? false,
+    ...(onPaginationChange && { onPaginationChange }),
+    ...(paginationState && {
+      state: {
+        pagination: paginationState,
+      },
+    }),
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),

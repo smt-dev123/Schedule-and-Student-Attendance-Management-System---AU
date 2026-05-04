@@ -22,6 +22,7 @@ type StudentSearch = {
   academicLevelId?: string
   academicYearId?: string
   page?: number
+  limit?: number
 }
 
 export const Route = createFileRoute('/admin/student/')({
@@ -33,6 +34,7 @@ export const Route = createFileRoute('/admin/student/')({
       academicLevelId: (search.academicLevelId as string) || 'all',
       academicYearId: (search.academicYearId as string) || undefined,
       page: Number(search.page) || 1,
+      limit: Number(search.limit) || 10,
     }
   },
   component: RouteComponent,
@@ -43,11 +45,10 @@ function RouteComponent() {
 
   const { selectedYearId } = useAcademicStore()
 
-  const { name, facultyId, departmentId, academicLevelId, page } =
+  const { name, facultyId, departmentId, academicLevelId, page, limit } =
     Route.useSearch()
   const navigate = useNavigate({ from: Route.fullPath })
 
-  // Draft state សម្រាប់ Filter UI
   const [draft, setDraft] = useState<StudentSearch>({
     name,
     facultyId,
@@ -90,9 +91,8 @@ function RouteComponent() {
         academicLevelId === 'all' ? '' : academicLevelId,
         selectedYearId,
         page,
-        10,
+        limit,
       ),
-    // ដំណើរការ Query លុះត្រាតែមាន selectedYearId ពី Store
     enabled: !!selectedYearId,
   })
 
@@ -120,10 +120,25 @@ function RouteComponent() {
 
   const students = useMemo(() => {
     if (!data) return []
-    return Array.isArray(data)
-      ? data
-      : (data as any)?.data || (data as any)?.students || []
+    return (data as any)?.data || []
   }, [data])
+
+  const total = (data as any)?.total || 0
+  const pageCount = Math.ceil(total / (limit ?? 10))
+
+  const onPaginationChange = (updater: any) => {
+    const newState =
+      typeof updater === 'function'
+        ? updater({ pageIndex: (page ?? 1) - 1, pageSize: limit ?? 10 })
+        : updater
+    navigate({
+      search: (prev) => ({
+        ...prev,
+        page: newState.pageIndex + 1,
+        limit: newState.pageSize,
+      }),
+    })
+  }
 
   const filteredDepartments = useMemo(() => {
     if (draft.facultyId === 'all') return []
@@ -201,7 +216,6 @@ function RouteComponent() {
             <Select.Root
               value={draft.facultyId}
               onValueChange={(val) => {
-                // នៅពេលដូរ Faculty ត្រូវ Reset Department ទៅ "all"
                 setDraft({ ...draft, facultyId: val, departmentId: 'all' })
               }}
             >
@@ -224,7 +238,6 @@ function RouteComponent() {
             <Select.Root
               value={draft.departmentId}
               onValueChange={(val) => setDraft({ ...draft, departmentId: val })}
-              // បិទមិនឱ្យរើស បើមិនទាន់រើស Faculty (Optional)
               disabled={draft.facultyId === 'all'}
             >
               <Select.Trigger style={{ minWidth: '150px' }} />
@@ -259,7 +272,15 @@ function RouteComponent() {
 
       {/* --- Table Section --- */}
       <FetchData isLoading={isLoading} error={error} data={data}>
-        <StudentTable data={students} />
+        <StudentTable
+          data={students}
+          pageCount={pageCount}
+          paginationState={{
+            pageIndex: (page ?? 1) - 1,
+            pageSize: limit ?? 10,
+          }}
+          onPaginationChange={onPaginationChange}
+        />
       </FetchData>
     </Flex>
   )

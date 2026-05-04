@@ -1,9 +1,22 @@
 import api from '@/lib/axios'
-import type { TeachersType } from '@/types'
 
-export const getTeachers = async () => {
-  const res = await api.get('/teachers')
-  return res.data?.data ?? []
+export const getTeachers = async (
+  name?: string,
+  facultyId?: string,
+  academicLevelId?: string,
+  page: number = 1,
+  limit: number = 10,
+) => {
+  const res = await api.get('/teachers', {
+    params: {
+      name: name || undefined,
+      facultyId: facultyId || undefined,
+      academicLevelId: academicLevelId || undefined,
+      page,
+      limit,
+    },
+  })
+  return res.data
 }
 
 export const createTeachers = async (data: any) => {

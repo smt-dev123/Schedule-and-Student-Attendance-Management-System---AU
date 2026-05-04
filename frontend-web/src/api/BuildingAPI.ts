@@ -1,9 +1,16 @@
 import api from '@/lib/axios'
 import type { BuildingType } from '@/types'
 
-export const getBuilding = async (name?: string, search?: string, page?: number, limit?: number) => {
-  const res = await api.get('/buildings', { params: { name, search, page, limit } })
-  return res.data?.data ?? []
+export const getBuilding = async (
+  name?: string,
+  search?: string,
+  page?: number,
+  limit?: number,
+) => {
+  const res = await api.get('/buildings', {
+    params: { name, search, page, limit },
+  })
+  return res.data
 }
 
 export const createBuilding = async (newBuilding: BuildingType) => {

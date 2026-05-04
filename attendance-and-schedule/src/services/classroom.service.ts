@@ -24,12 +24,6 @@ export class ClassroomService {
     page: number;
     limit: number;
   }> {
-    const { name, floor, isAvailable, page = 1, limit = 10 } = query;
-
-    if (!name && !floor && isAvailable === undefined) {
-      return { data: [], total: 0, page, limit };
-    }
-
     return await this.classroomRepository.findAll(query);
   }
 
