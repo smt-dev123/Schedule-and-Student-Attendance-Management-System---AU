@@ -14,6 +14,7 @@ const AcademicYearCreate = () => {
     handleSubmit,
     reset,
     control,
+    getValues,
     formState: { errors },
   } = useForm<AcademicYearsType>({
     defaultValues: {
@@ -88,6 +89,9 @@ const AcademicYearCreate = () => {
               type="date"
               rules={{
                 required: 'សូមបំពេញថ្ងៃបញ្ចប់',
+                validate: (val: string) =>
+                  new Date(val) > new Date(getValues('startDate')) ||
+                  'ថ្ងៃបញ្ចប់ត្រូវតែធំជាងថ្ងៃចាប់ផ្ដើម',
               }}
               isRequired
             />

@@ -85,8 +85,8 @@ export interface MajorsType {
 export interface AcademicYearsType {
   id?: number
   name: string
-  startDate: string
-  endDate: string
+  startDate: string | Date
+  endDate: string | Date
   isCurrent: boolean
 }
 

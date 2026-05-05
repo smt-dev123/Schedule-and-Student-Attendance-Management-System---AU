@@ -3,12 +3,21 @@ import AcademicYearUpdate from '@/routes/admin/academic_year/-actions/Update'
 import type { AcademicYearsType } from '@/types'
 import { Flex } from '@radix-ui/themes'
 import type { ColumnDef } from '@tanstack/react-table'
+import { formatDate } from '@/hooks/useDate'
 
 export const AcademicYearColumns: ColumnDef<AcademicYearsType>[] = [
   { accessorKey: 'id', header: 'ល.រ' },
   { accessorKey: 'name', header: 'ឆ្នាំសិក្សា' },
-  { accessorKey: 'startDate', header: 'ថ្ងៃចាប់ផ្ដើម' },
-  { accessorKey: 'endDate', header: 'ថ្ងៃបញ្ចប់' },
+  {
+    accessorKey: 'startDate',
+    header: 'ថ្ងៃចាប់ផ្ដើម',
+    cell: ({ getValue }) => formatDate(getValue<string>()).display(),
+  },
+  {
+    accessorKey: 'endDate',
+    header: 'ថ្ងៃបញ្ចប់',
+    cell: ({ getValue }) => formatDate(getValue<string>()).display(),
+  },
   {
     accessorKey: 'isCurrent',
     header: 'ស្ថានភាព',

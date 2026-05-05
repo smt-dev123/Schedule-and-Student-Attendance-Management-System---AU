@@ -6,8 +6,6 @@ import { useQuery } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
 import AcademicYearCreate from './-actions/Create'
 import FetchData from '@/components/FetchData'
-import { formatDate } from '@/hooks/useDate'
-import type { AcademicYearsType } from '@/types'
 
 export const Route = createFileRoute('/admin/academic_year/')({
   component: RouteComponent,
@@ -24,13 +22,7 @@ function RouteComponent() {
     refetchOnWindowFocus: false,
   })
 
-  const academic_years = data?.map((academic_year: AcademicYearsType) => {
-    return {
-      ...academic_year,
-      startDate: formatDate(academic_year.startDate).display(),
-      endDate: formatDate(academic_year.endDate).display(),
-    }
-  })
+  const academic_years = data
 
   if (isLoading || error) {
     return <FetchData isLoading={isLoading} error={error} data={data} />

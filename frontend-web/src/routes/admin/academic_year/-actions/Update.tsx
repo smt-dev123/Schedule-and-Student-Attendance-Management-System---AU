@@ -17,7 +17,12 @@ const formatDateForInput = (dateValue: string | Date | undefined) => {
   if (!dateValue) return ''
   const date = new Date(dateValue)
   if (isNaN(date.getTime())) return ''
-  return date.toISOString().split('T')[0]
+
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+
+  return `${year}-${month}-${day}`
 }
 
 const AcademicYearUpdate = ({ data }: Props) => {
@@ -26,6 +31,7 @@ const AcademicYearUpdate = ({ data }: Props) => {
     handleSubmit,
     reset,
     control,
+    getValues,
     formState: { errors },
   } = useForm<AcademicYearsType>({
     defaultValues: {
@@ -59,9 +65,10 @@ const AcademicYearUpdate = ({ data }: Props) => {
 
   useEffect(() => {
     if (open) {
+      const formattedStart = formatDateForInput(data.startDate)
       reset({
         ...data,
-        startDate: formatDateForInput(data.startDate),
+        startDate: formattedStart,
         endDate: formatDateForInput(data.endDate),
         isCurrent: data.isCurrent || false,
       })
@@ -114,13 +121,15 @@ const AcademicYearUpdate = ({ data }: Props) => {
 
             <FormInput
               label="ថ្ងៃបញ្ចប់"
-              placeholder="សូមបំពេញថ្ងៃបញ្ចប់"
               error={errors.endDate}
               register={register}
               name="endDate"
               type="date"
               rules={{
                 required: 'សូមបំពេញថ្ងៃបញ្ចប់',
+                validate: (val: string) =>
+                  new Date(val) > new Date(getValues('startDate')) ||
+                  'ថ្ងៃបញ្ចប់ត្រូវតែធំជាងថ្ងៃចាប់ផ្ដើម',
               }}
               isRequired
             />
