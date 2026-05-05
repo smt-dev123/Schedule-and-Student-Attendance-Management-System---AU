@@ -143,7 +143,7 @@ const notificationService = new NotificationService(
   studentRepository,
   wsManager,
 );
-const academicYearService = new AcademicYearService(academicYearRepository);
+const academicYearService = new AcademicYearService(db, academicYearRepository);
 const courseService = new CourseService(courseRepository);
 const skillService = new SkillService(skillRepository);
 const scheduleOverrideService = new ScheduleOverrideService(scheduleOverrideRepository, db);

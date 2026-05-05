@@ -4,13 +4,13 @@ import { IoSearch, IoFilter } from 'react-icons/io5'
 import { useTitle } from '@/hooks/useTitle'
 import { useQuery } from '@tanstack/react-query'
 import { getTeachers } from '@/api/TeacherAPI'
-import { getFaculties } from '@/api/FacultyAPI' // នាំចូល API 
+import { getFaculties } from '@/api/FacultyAPI' // នាំចូល API
 import { getAcademicLevels } from '@/api/AcademicLevelAPI' // នាំចូល API
 import { TeacherTable } from '@/features/teacher/GenerationTable'
 import TeacherCreate from './-actions/Create'
 import { useState, useEffect } from 'react'
 import FetchData from '@/components/FetchData'
-import { useSession } from '@/lib/auth-client'
+import { useSessionContext } from '@/providers/AuthProvider'
 
 type TeacherSearch = {
   search?: string
@@ -36,7 +36,7 @@ export const Route = createFileRoute('/admin/teacher/')({
 })
 function RouteComponent() {
   useTitle('Teacher Management')
-  const { data: session } = useSession()
+  const { data: session } = useSessionContext()
   const role = (session?.user as any)?.role
 
   const { search, degree, faculty, major, page, limit } = Route.useSearch()
@@ -47,8 +47,11 @@ function RouteComponent() {
   const [facultyDraft, setFacultyDraft] = useState(faculty)
   const [majorDraft, setMajorDraft] = useState(major)
 
-  // --- ១. ទាញយកទិន្នន័យពី API សម្រាប់ Dropdowns ---
-  const { data: teachersData, isLoading, error } = useQuery({
+  const {
+    data: teachersData,
+    isLoading,
+    error,
+  } = useQuery({
     queryKey: ['teachers', search, degree, faculty, page, limit],
     queryFn: () =>
       getTeachers(
@@ -79,7 +82,7 @@ function RouteComponent() {
 
   const handleApplyFilter = () => {
     navigate({
-      search: (prev) => ({
+      search: (prev: Record<string, any>) => ({
         ...prev,
         search: searchDraft || undefined,
         degree: degreeDraft,
@@ -115,7 +118,7 @@ function RouteComponent() {
         ? updater({ pageIndex: (page ?? 1) - 1, pageSize: limit ?? 10 })
         : updater
     navigate({
-      search: (prev) => ({
+      search: (prev: Record<string, any>) => ({
         ...prev,
         page: newState.pageIndex + 1,
         limit: newState.pageSize,
@@ -127,10 +130,14 @@ function RouteComponent() {
     <div>
       <Flex direction="column" gap="4">
         <Flex justify="between" align="center" mb="2">
-          <Text size="5" weight="bold">គ្រូបង្រៀន</Text>
+          <Text size="5" weight="bold">
+            គ្រូបង្រៀន
+          </Text>
           <Flex gap="2">
-            <Button variant="outline" className="cursor-pointer">Export Excel</Button>
-            {['manager', 'staff'].includes(role) && <TeacherCreate />}
+            <Button variant="outline" className="cursor-pointer">
+              Export Excel
+            </Button>
+            {['admin', 'manager', 'staff'].includes(role) && <TeacherCreate />}
           </Flex>
         </Flex>
 
@@ -142,7 +149,9 @@ function RouteComponent() {
               onChange={(e) => setSearchDraft(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleApplyFilter()}
             >
-              <TextField.Slot><IoSearch /></TextField.Slot>
+              <TextField.Slot>
+                <IoSearch />
+              </TextField.Slot>
             </TextField.Root>
           </Box>
 
@@ -173,10 +182,19 @@ function RouteComponent() {
               </Select.Content>
             </Select.Root>
 
-            <Button onClick={handleApplyFilter} color="indigo" className="cursor-pointer">
+            <Button
+              onClick={handleApplyFilter}
+              color="indigo"
+              className="cursor-pointer"
+            >
               <IoFilter /> ស្វែងរក
             </Button>
-            <Button variant="soft" color="gray" onClick={handleClearFilter} className="cursor-pointer">
+            <Button
+              variant="soft"
+              color="gray"
+              onClick={handleClearFilter}
+              className="cursor-pointer"
+            >
               សម្អាត
             </Button>
           </Flex>

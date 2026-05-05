@@ -7,6 +7,7 @@ import { useEffect, useState } from 'react'
 import type { AcademicYearsType } from '@/types'
 import { updateAcademicYear } from '@/api/AcademicYearAPI'
 import { FormInput } from '@/components/ui/forms/Input'
+import { FormCheckbox } from '@/components/ui/forms/Checkbox'
 
 interface Props {
   data: AcademicYearsType
@@ -24,12 +25,14 @@ const AcademicYearUpdate = ({ data }: Props) => {
     register,
     handleSubmit,
     reset,
+    control,
     formState: { errors },
   } = useForm<AcademicYearsType>({
     defaultValues: {
       ...data,
       startDate: formatDateForInput(data.startDate),
       endDate: formatDateForInput(data.endDate),
+      isCurrent: data.isCurrent || false,
     },
   })
 
@@ -60,6 +63,7 @@ const AcademicYearUpdate = ({ data }: Props) => {
         ...data,
         startDate: formatDateForInput(data.startDate),
         endDate: formatDateForInput(data.endDate),
+        isCurrent: data.isCurrent || false,
       })
     }
   }, [open, data, reset])
@@ -119,6 +123,13 @@ const AcademicYearUpdate = ({ data }: Props) => {
                 required: 'សូមបំពេញថ្ងៃបញ្ចប់',
               }}
               isRequired
+            />
+
+            <FormCheckbox
+              label="កំណត់ជាឆ្នាំសិក្សាបច្ចុប្បន្ន"
+              name="isCurrent"
+              control={control}
+              placeholder="ឆ្នាំសិក្សាបច្ចុប្បន្ន"
             />
           </Flex>
 

@@ -6,14 +6,14 @@ import { useQuery } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
 import DepartmentCreate from './-actions/Create'
 import FetchData from '@/components/FetchData'
-import { useSession } from '@/lib/auth-client'
+import { useSessionContext } from '@/providers/AuthProvider'
 
 export const Route = createFileRoute('/admin/department/')({
   component: RouteComponent,
 })
 
 function RouteComponent() {
-  const { data: session } = useSession()
+  const { data: session } = useSessionContext()
   const role = (session?.user as any)?.role
   useTitle('Department Management')
 
@@ -36,7 +36,7 @@ function RouteComponent() {
           <Text size="5" className="font-bold">
             តារាងតេប៉ាតឺម៉ង់
           </Text>
-          {['manager', 'staff'].includes(role) && <DepartmentCreate />}
+          {['admin', 'manager', 'staff'].includes(role) && <DepartmentCreate />}
         </div>
       </Flex>
       <DepartmentTable data={data} />

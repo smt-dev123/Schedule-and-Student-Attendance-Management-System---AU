@@ -1,4 +1,4 @@
-import type { DrizzleDb } from "@/database";
+import type { DrizzleDb, Transaction } from "@/database";
 import { academicYears, schedules } from "@/database/schemas";
 import type { AcademicYear } from "@/types/academy";
 import type {
@@ -20,8 +20,12 @@ export class AcademicYearRepository {
     });
   }
 
-  async create(data: AcademicYearInput): Promise<AcademicYear> {
-    const [academicYear] = await this.db
+  async create(
+    data: AcademicYearInput,
+    tx?: Transaction,
+  ): Promise<AcademicYear> {
+    const db = tx || this.db;
+    const [academicYear] = await db
       .insert(academicYears)
       .values(data)
       .returning();
@@ -31,13 +35,20 @@ export class AcademicYearRepository {
   async update(
     id: number,
     data: AcademicYearUpdateInput,
+    tx?: Transaction,
   ): Promise<AcademicYear> {
-    const [updated] = await this.db
+    const db = tx || this.db;
+    const [updated] = await db
       .update(academicYears)
       .set(data)
       .where(eq(academicYears.id, id))
       .returning();
     return updated!;
+  }
+
+  async clearCurrent(tx?: Transaction): Promise<void> {
+    const db = tx || this.db;
+    await db.update(academicYears).set({ isCurrent: false });
   }
 
   async delete(id: number): Promise<AcademicYear> {

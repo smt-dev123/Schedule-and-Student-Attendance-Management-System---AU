@@ -16,7 +16,7 @@ import CourseCreate from './-actions/Create'
 import CourseUpdate from './-actions/Update'
 import { useState } from 'react'
 
-import { useSession } from '@/lib/auth-client'
+import { useSessionContext } from '@/providers/AuthProvider'
 import CourseDelete from './-actions/Delete'
 import { ManualPagination } from '@/components/ui/ManualPagination'
 
@@ -38,7 +38,7 @@ export const Route = createFileRoute('/admin/course/')({
 })
 
 function CourseListComponent() {
-  const { data: session } = useSession()
+  const { data: session } = useSessionContext()
   const role = (session?.user as any)?.role
   const { selectedYearId } = useAcademicStore()
   const { page, limit } = Route.useSearch()
@@ -81,7 +81,7 @@ function CourseListComponent() {
           គ្រប់គ្រងវគ្គសិក្សា
         </Text>
         <Flex gap="2">
-          {['manager', 'staff'].includes(role) && <CourseCreate />}
+          {['admin', 'manager', 'staff'].includes(role) && <CourseCreate />}
         </Flex>
       </Flex>
       {/* Header */}
@@ -100,7 +100,7 @@ function CourseListComponent() {
                 </div>
                 <Flex align="center" gap="3">
                   <BadgeCode code={course.code} />
-                  {['manager', 'staff'].includes(role) && (
+                  {['admin', 'manager', 'staff'].includes(role) && (
                     <>
                       <button
                         className="text-orange-400 hover:text-orange-600 transition-colors"

@@ -3,7 +3,7 @@ import { Badge, Flex, IconButton } from '@radix-ui/themes'
 import type { ColumnDef } from '@tanstack/react-table'
 import { FaRegEdit, FaRegEye, FaRegTrashAlt } from 'react-icons/fa'
 import { Link } from '@tanstack/react-router'
-import { useSession } from '@/lib/auth-client'
+import { useSessionContext } from '@/providers/AuthProvider'
 
 export const ScheduleColumns: ColumnDef<ScheduleType>[] = [
   { accessorKey: 'id', header: 'ល.រ' },
@@ -45,56 +45,59 @@ export const ScheduleColumns: ColumnDef<ScheduleType>[] = [
     id: 'actions',
     header: 'សកម្មភាព',
     enableSorting: false,
-    cell: ({ row }) => {
-      const s = row.original as any
-      const { data: session } = useSession()
-      const role = (session?.user as any)?.role
-      return (
-        <Flex gap="2">
-          <IconButton
-            size="1"
-            color="blue"
-            variant="surface"
-            style={{ cursor: 'pointer' }}
-            asChild
-          >
-            <Link
-              to="/admin/schedule/$scheduleId"
-              params={{ scheduleId: String(row.original.id) }}
-            >
-              <FaRegEye />
-            </Link>
-          </IconButton>
-
-          {['manager', 'staff'].includes(role) && (
-            <IconButton
-              size="1"
-              color="orange"
-              variant="surface"
-              style={{ cursor: 'pointer' }}
-              onClick={() => s.onEdit?.(s.id)}
-            >
-              <FaRegEdit />
-            </IconButton>
-          )}
-
-          {['manager', 'staff'].includes(role) && (
-            <IconButton
-              size="1"
-              color="red"
-              variant="surface"
-              style={{ cursor: 'pointer' }}
-              onClick={() => {
-                if (window.confirm('តើអ្នកពិតជាចង់លុបកាលវិភាគនេះមែនទេ?')) {
-                  s.onDelete?.(s.id)
-                }
-              }}
-            >
-              <FaRegTrashAlt />
-            </IconButton>
-          )}
-        </Flex>
-      )
-    },
+    cell: ({ row }) => <ScheduleActions row={row} />,
   },
 ]
+
+function ScheduleActions({ row }: { row: any }) {
+  const s = row.original as any
+  const { data: session } = useSessionContext()
+  const role = (session?.user as any)?.role
+
+  return (
+    <Flex gap="2">
+      <IconButton
+        size="1"
+        color="blue"
+        variant="surface"
+        style={{ cursor: 'pointer' }}
+        asChild
+      >
+        <Link
+          to="/admin/schedule/$scheduleId"
+          params={{ scheduleId: String(row.original.id) }}
+        >
+          <FaRegEye />
+        </Link>
+      </IconButton>
+
+      {['admin', 'manager', 'staff'].includes(role) && (
+        <IconButton
+          size="1"
+          color="orange"
+          variant="surface"
+          style={{ cursor: 'pointer' }}
+          onClick={() => s.onEdit?.(s.id)}
+        >
+          <FaRegEdit />
+        </IconButton>
+      )}
+
+      {['admin', 'manager', 'staff'].includes(role) && (
+        <IconButton
+          size="1"
+          color="red"
+          variant="surface"
+          style={{ cursor: 'pointer' }}
+          onClick={() => {
+            if (window.confirm('តើអ្នកពិតជាចង់លុបកាលវិភាគនេះមែនទេ?')) {
+              s.onDelete?.(s.id)
+            }
+          }}
+        >
+          <FaRegTrashAlt />
+        </IconButton>
+      )}
+    </Flex>
+  )
+}

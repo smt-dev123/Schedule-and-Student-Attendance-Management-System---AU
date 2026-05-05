@@ -178,7 +178,7 @@ function RouteComponent() {
         <Tabs.List size="2">
           <Tabs.Trigger value="account">គណនី (Account)</Tabs.Trigger>
           <Tabs.Trigger value="security">សុវត្ថិភាព (Security)</Tabs.Trigger>
-          {(user as any)?.role === 'manager' && (
+          {['admin', 'manager'].includes((user as any)?.role) && (
             <Tabs.Trigger value="backup">ការចម្លងទុក (Backup)</Tabs.Trigger>
           )}
         </Tabs.List>
@@ -207,7 +207,7 @@ function RouteComponent() {
             />
           </Tabs.Content>
 
-          {(user as any)?.role === 'manager' && (
+          {['admin', 'manager'].includes((user as any)?.role) && (
             <Tabs.Content value="backup">
               <BackupTab />
             </Tabs.Content>

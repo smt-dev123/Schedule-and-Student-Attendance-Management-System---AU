@@ -8,7 +8,7 @@ import { ScheduleTable } from '@/features/schedule/ScheduleTable'
 import toast from 'react-hot-toast'
 import ScheduleCreate from './-actions/Create'
 import ScheduleUpdate from './-actions/Update'
-import { useSession } from '@/lib/auth-client'
+import { useSessionContext } from '@/providers/AuthProvider'
 import { useState } from 'react'
 
 export const Route = createFileRoute('/admin/schedule/')({
@@ -16,7 +16,7 @@ export const Route = createFileRoute('/admin/schedule/')({
 })
 
 function ScheduleListComponent() {
-  const { data: session } = useSession()
+  const { data: session } = useSessionContext()
   const role = (session?.user as any)?.role
   const { selectedYearId } = useAcademicStore()
   const queryClient = useQueryClient()
@@ -67,7 +67,7 @@ function ScheduleListComponent() {
           {role === 'student' ? 'កាលវិភាគសិក្សារបស់ខ្ញុំ' : 'គ្រប់គ្រងកាលវិភាគសិក្សា'}
         </Text>
         <Flex gap="3">
-          {['manager', 'staff'].includes(role) && <ScheduleCreate />}
+          {['admin', 'manager', 'staff'].includes(role) && <ScheduleCreate />}
         </Flex>
       </Flex>
 

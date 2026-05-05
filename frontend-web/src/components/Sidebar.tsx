@@ -16,7 +16,7 @@ import { LiaChalkboardTeacherSolid } from 'react-icons/lia'
 import { AiOutlineSchedule } from 'react-icons/ai'
 import { PiStudent } from 'react-icons/pi'
 import { Link } from '@tanstack/react-router'
-import { useSession } from '@/lib/auth-client'
+import { useSessionContext } from '@/providers/AuthProvider'
 import { useSidebarStore } from '@/stores/sidebarStore'
 import { useAcademicYears } from '@/hooks/useAcademicYears'
 import type { AcademicYearsType } from '@/types'
@@ -44,7 +44,7 @@ export default function Sidebar({
 }: SidebarProps) {
   const { isDesktopOpen, isMobileOpen, setMobileSidebar } = useSidebarStore()
   const { t } = useTranslation()
-  const { data: session } = useSession()
+  const { data: session } = useSessionContext()
   const user = session?.user
   const role = (user as any)?.role || ''
 

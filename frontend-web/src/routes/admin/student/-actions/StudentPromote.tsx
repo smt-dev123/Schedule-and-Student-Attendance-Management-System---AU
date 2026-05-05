@@ -173,7 +173,7 @@ const StudentPromote = ({ student }: PromoteProps) => {
               />
 
               <FormSelect
-                label="ឆមាស *"
+                label="ឆមាស"
                 name="semester"
                 error={errors.semester}
                 control={control}

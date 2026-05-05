@@ -5,9 +5,7 @@ import type { StudentsType } from '@/types'
 import { Avatar, Badge, Flex, IconButton, Text } from '@radix-ui/themes'
 import type { ColumnDef } from '@tanstack/react-table'
 import { FaRegEye } from 'react-icons/fa'
-import { useSession } from '@/lib/auth-client'
-
-
+import { useSessionContext } from '@/providers/AuthProvider'
 
 export const STUDENT_STATUS = {
   ACTIVE: 'សកម្ម',
@@ -100,12 +98,12 @@ export const StudentColumns: ColumnDef<StudentsType>[] = [
 ]
 
 function StudentActions({ row }: { row: any }) {
-  const { data: session } = useSession()
+  const { data: session } = useSessionContext()
   const role = (session?.user as any)?.role
 
   return (
     <Flex gap="2">
-      {['manager', 'staff'].includes(role) && (
+      {['admin', 'manager', 'staff'].includes(role) && (
         <StudentPromote student={row.original} />
       )}
       <IconButton
@@ -117,10 +115,10 @@ function StudentActions({ row }: { row: any }) {
       >
         <FaRegEye />
       </IconButton>
-      {['manager', 'staff'].includes(role) && (
+      {['admin', 'manager', 'staff'].includes(role) && (
         <StudentUpdate data={row.original} />
       )}
-      {['manager', 'staff'].includes(role) && (
+      {['admin', 'manager', 'staff'].includes(role) && (
         <StudentDelete data={row.original} />
       )}
     </Flex>

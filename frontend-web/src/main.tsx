@@ -31,6 +31,8 @@ declare module '@tanstack/react-router' {
   }
 }
 
+import { AuthProvider } from './providers/AuthProvider'
+
 // Render the app
 const rootElement = document.getElementById('app')
 if (rootElement && !rootElement.innerHTML) {
@@ -41,7 +43,9 @@ if (rootElement && !rootElement.innerHTML) {
         <main>
           <I18nextProvider i18n={i18n}>
             <QueryClientProvider client={queryClient}>
-              <RouterProvider router={router} />
+              <AuthProvider>
+                <RouterProvider router={router} />
+              </AuthProvider>
             </QueryClientProvider>
           </I18nextProvider>
         </main>

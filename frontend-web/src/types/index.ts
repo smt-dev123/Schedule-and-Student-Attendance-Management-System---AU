@@ -145,10 +145,7 @@ export interface StudentsType {
   dob?: string | Date
   address?: string
   isActive?: boolean
-  academicYear?: {
-    id?: number
-    name?: string
-  }
+  academicYear?: AcademicYearsType
   image?: string
 }
 
@@ -210,7 +207,7 @@ export interface ScheduleType {
     name: string
     building?: { name: string }
   }
-  academicYear?: { name: string }
+  academicYear?: AcademicYearsType
   sessionTime?: SessionTimeType
   courses?: CoursesType[]
   updatedAt?: string

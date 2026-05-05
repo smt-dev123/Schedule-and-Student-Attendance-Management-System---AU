@@ -6,14 +6,20 @@ import toast from 'react-hot-toast'
 import type { AcademicYearsType } from '@/types'
 import { createAcademicYear } from '@/api/AcademicYearAPI'
 import { FormInput } from '@/components/ui/forms/Input'
+import { FormCheckbox } from '@/components/ui/forms/Checkbox'
 
 const AcademicYearCreate = () => {
   const {
     register,
     handleSubmit,
     reset,
+    control,
     formState: { errors },
-  } = useForm<AcademicYearsType>()
+  } = useForm<AcademicYearsType>({
+    defaultValues: {
+      isCurrent: false,
+    },
+  })
   const queryClient = useQueryClient()
   const [open, setOpen] = useState(false)
 
@@ -84,6 +90,13 @@ const AcademicYearCreate = () => {
                 required: 'សូមបំពេញថ្ងៃបញ្ចប់',
               }}
               isRequired
+            />
+
+            <FormCheckbox
+              label="កំណត់ជាឆ្នាំសិក្សាបច្ចុប្បន្ន"
+              name="isCurrent"
+              control={control}
+              placeholder="ឆ្នាំសិក្សាបច្ចុប្បន្ន"
             />
           </Flex>
 

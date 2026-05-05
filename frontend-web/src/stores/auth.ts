@@ -1,7 +1,8 @@
-import { useSession, signOut as betterSignOut } from '@/lib/auth-client'
+import { signOut as betterSignOut } from '@/lib/auth-client'
+import { useSessionContext } from '@/providers/AuthProvider'
 
 export const useAuth = () => {
-  const { data, isPending } = useSession()
+  const { data, isPending } = useSessionContext()
   return {
     user: data?.user || null,
     isPending,

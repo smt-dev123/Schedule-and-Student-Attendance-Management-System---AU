@@ -6,12 +6,22 @@ import type {
 } from "@/validators/academy";
 import { HTTPException } from "hono/http-exception";
 import { DatabaseError } from "pg";
+import type { DrizzleDb } from "@/database";
 
 export class AcademicYearService {
-  constructor(private readonly academicYearRepo: AcademicYearRepository) {}
+  constructor(
+    private readonly db: DrizzleDb,
+    private readonly academicYearRepo: AcademicYearRepository,
+  ) {}
 
   async create(data: AcademicYearInput): Promise<AcademicYear> {
     try {
+      if (data.isCurrent) {
+        return await this.db.transaction(async (tx) => {
+          await this.academicYearRepo.clearCurrent(tx);
+          return await this.academicYearRepo.create(data, tx);
+        });
+      }
       return this.academicYearRepo.create(data);
     } catch (error) {
       if (error instanceof DatabaseError && error.code === "23505") {
@@ -37,7 +47,14 @@ export class AcademicYearService {
 
     let updated: AcademicYear | undefined;
     try {
-      updated = await this.academicYearRepo.update(id, data);
+      if (data.isCurrent) {
+        updated = await this.db.transaction(async (tx) => {
+          await this.academicYearRepo.clearCurrent(tx);
+          return await this.academicYearRepo.update(id, data, tx);
+        });
+      } else {
+        updated = await this.academicYearRepo.update(id, data);
+      }
     } catch (error) {
       if (error instanceof DatabaseError && error.code === "23505") {
         throw new HTTPException(409, {

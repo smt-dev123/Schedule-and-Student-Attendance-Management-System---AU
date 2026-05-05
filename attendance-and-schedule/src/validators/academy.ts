@@ -47,7 +47,7 @@ export const academicYearSchema = z.object({
   name: z.string().min(1, "Academic year name is required"),
   startDate: z.coerce.date(),
   endDate: z.coerce.date(),
-  isCurrent: z.boolean().default(true),
+  isCurrent: z.boolean().default(false),
 });
 export const academicYearUpdateSchema = academicYearSchema.partial();
 

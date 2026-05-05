@@ -4,7 +4,7 @@ import type { TeachersType } from '@/types'
 import { Avatar, Badge, Flex, IconButton } from '@radix-ui/themes'
 import type { ColumnDef } from '@tanstack/react-table'
 import { FaRegEye } from 'react-icons/fa'
-import { useSession } from '@/lib/auth-client'
+import { useSessionContext } from '@/providers/AuthProvider'
 
 const handleViewImage = (imageUrl: string) => {
   window.open(imageUrl, '_blank')
@@ -64,7 +64,7 @@ export const TeachaerColumns: ColumnDef<TeachersType>[] = [
 ]
 
 function TeacherActions({ row }: { row: any }) {
-  const { data: session } = useSession()
+  const { data: session } = useSessionContext()
   const role = (session?.user as any)?.role
 
   return (
@@ -78,7 +78,7 @@ function TeacherActions({ row }: { row: any }) {
         <FaRegEye />
       </IconButton>
 
-      {['manager', 'staff'].includes(role) && (
+      {['admin', 'manager', 'staff'].includes(role) && (
         <>
           <TeacherUpdate data={row.original} />
           <TeacherDelete data={row.original} />
