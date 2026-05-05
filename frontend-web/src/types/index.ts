@@ -250,8 +250,9 @@ type GenderEnum = 'male' | 'female' | 'other'
 
 type EducationalStatusEnum =
   | 'enrolled'
+  | 'suspended'
   | 'graduated'
-  | 'dropped out'
+  | 'dropped_out'
   | 'transferred'
 
 type AttendanceStatusEnum = 'present' | 'absent' | 'late' | 'excused'

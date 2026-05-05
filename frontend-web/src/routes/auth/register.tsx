@@ -4,6 +4,7 @@ import { Button, Flex, Spinner, Text, TextField } from '@radix-ui/themes'
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { useState } from 'react'
 import toast from 'react-hot-toast'
+import Logo from '@/assets/au.webp'
 
 export const Route = createFileRoute('/auth/register')({
   component: Register,
@@ -17,7 +18,7 @@ function Register() {
     name: '',
     email: '',
     password: '',
-    confirmPassword: ''
+    confirmPassword: '',
   })
 
   useTitle('Register')
@@ -49,7 +50,7 @@ function Register() {
         name,
         email,
         password,
-        callbackURL: '/auth/login'
+        callbackURL: '/auth/login',
       })
 
       if (error) {
@@ -66,15 +67,18 @@ function Register() {
     }
   }
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>, field: string) => {
-    setFormData(prev => ({ ...prev, [field]: e.target.value }))
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    field: string,
+  ) => {
+    setFormData((prev) => ({ ...prev, [field]: e.target.value }))
   }
 
   return (
     <>
       <Flex direction="column" align="center" justify="center" mb="5" gap="2">
         <img
-          src="https://academics-bucket-sj19asxm-prod.s3.ap-southeast-1.amazonaws.com/884dc87f-2613-47fc-83b3-b138abc386df/884dc87f-2613-47fc-83b3-b138abc386df.png"
+          src={Logo}
           alt="App Logo"
           className="h-[110px] w-auto object-contain"
         />
@@ -83,11 +87,12 @@ function Register() {
         </Text>
       </Flex>
 
-      {/* ប្រើ Tag Form ដើម្បីឱ្យ User ងាយស្រួលចុច Enter នៅលើ Keyboard */}
       <form onSubmit={handleRegister}>
         <Flex direction="column" gap="3">
           <label>
-            <Text as="div" size="2" mb="1" weight="bold">Name</Text>
+            <Text as="div" size="2" mb="1" weight="bold">
+              Name
+            </Text>
             <TextField.Root
               placeholder="Enter your full name"
               required
@@ -97,7 +102,9 @@ function Register() {
           </label>
 
           <label>
-            <Text as="div" size="2" mb="1" weight="bold">Email</Text>
+            <Text as="div" size="2" mb="1" weight="bold">
+              Email
+            </Text>
             <TextField.Root
               type="email"
               placeholder="Enter your email"
@@ -108,7 +115,9 @@ function Register() {
           </label>
 
           <label>
-            <Text as="div" size="2" mb="1" weight="bold">Password</Text>
+            <Text as="div" size="2" mb="1" weight="bold">
+              Password
+            </Text>
             <TextField.Root
               type="password"
               placeholder="Enter your password"
@@ -119,7 +128,9 @@ function Register() {
           </label>
 
           <label>
-            <Text as="div" size="2" mb="1" weight="bold">Confirm Password</Text>
+            <Text as="div" size="2" mb="1" weight="bold">
+              Confirm Password
+            </Text>
             <TextField.Root
               type="password"
               placeholder="Confirm your password"

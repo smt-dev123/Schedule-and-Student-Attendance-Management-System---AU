@@ -110,7 +110,11 @@ export default function Sidebar({
           label: t('Sidebar.Study.faculty'),
           url: '/admin/faculty',
         },
-        { key: 'department', label: 'ដេប៉ាតឺម៉ង់', url: '/admin/department' },
+        {
+          key: 'department',
+          label: t('Sidebar.department'),
+          url: '/admin/department',
+        },
         { key: 'major', label: t('Sidebar.Study.major'), url: '/admin/major' },
         {
           key: 'grade_level',
@@ -119,12 +123,12 @@ export default function Sidebar({
         },
         {
           key: 'academic_year',
-          label: 'ឆ្នាំសិក្សា',
+          label: t('Sidebar.academic_year'),
           url: '/admin/academic_year',
         },
         {
           key: 'session_time',
-          label: 'ម៉ោងសិក្សា',
+          label: t('Sidebar.session_time'),
           url: '/admin/session_time',
         },
       ],
@@ -132,7 +136,7 @@ export default function Sidebar({
     {
       key: 'notification',
       icon: <RiNotification2Line />,
-      label: 'ការជូនដំណឹង',
+      label: t('Sidebar.notification'),
       url: '/admin/notification',
     },
     {
@@ -150,13 +154,13 @@ export default function Sidebar({
     {
       key: 'classes',
       icon: <AiOutlineSchedule />,
-      label: 'កាលវិភាគសិក្សា',
+      label: t('Sidebar.schedule'),
       url: '/admin/schedule',
     },
     {
       key: 'course',
       icon: <AiOutlineSchedule />,
-      label: 'វគ្គសិក្សា',
+      label: t('Sidebar.course'),
       url: '/admin/course',
     },
     {
@@ -240,7 +244,7 @@ export default function Sidebar({
                 {isDesktopOpen && (
                   <div className="flex flex-col items-start text-left overflow-hidden">
                     <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-none mb-1">
-                      ឆ្នាំសិក្សា
+                      {t('Sidebar.academic_year')}
                     </span>
                     <span className="text-sm font-semibold text-gray-700 dark:text-gray-200 flex items-center gap-1">
                       {currentYearName}{' '}
@@ -258,7 +262,7 @@ export default function Sidebar({
                 className="z-[100] min-w-[200px] bg-white dark:bg-gray-800 p-1.5 rounded-xl shadow-2xl border border-gray-100 dark:border-gray-700 animate-in fade-in zoom-in-95 duration-200"
               >
                 <div className="px-3 py-2 text-[10px] font-bold text-gray-400 uppercase tracking-widest border-b border-gray-50 dark:border-gray-700 mb-1">
-                  ជ្រើសរើសឆ្នាំសិក្សា
+                  {t('Sidebar.academic_year')}
                 </div>
                 {academicYears.map((year) => (
                   <DropdownMenu.Item
@@ -391,11 +395,7 @@ export default function Sidebar({
             <Dialog.Overlay className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[99] animate-in fade-in" />
             <Dialog.Content className="fixed top-0 left-0 h-full w-72 bg-white dark:bg-gray-900 shadow-2xl z-[100] flex flex-col animate-in slide-in-from-left duration-300">
               <div className="h-16 flex items-center justify-between px-4 border-b border-gray-100 dark:border-gray-800">
-                <img
-                  className="w-32"
-                  src="https://www.angkor.edu.kh/assets/images/AU-LOGO.png"
-                  alt="Logo"
-                />
+                <img className="w-32" src={LogoDestop} alt="Logo" />
                 <Dialog.Close className="p-2 text-gray-400 hover:text-gray-600">
                   ✕
                 </Dialog.Close>

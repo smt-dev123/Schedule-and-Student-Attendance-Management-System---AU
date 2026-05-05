@@ -7,23 +7,18 @@ import type { ColumnDef } from '@tanstack/react-table'
 import { FaRegEye } from 'react-icons/fa'
 import { useSessionContext } from '@/providers/AuthProvider'
 
-export const STUDENT_STATUS = {
-  ACTIVE: 'សកម្ម',
-  INACTIVE: 'អសកម្ម',
-  REST: 'សម្រាក',
-  DROPPED: 'បោះបង់',
-} as const
-
-const getStatusColor = (status: string) => {
+const getStatusColor = (status: StudentsType['educationalStatus']) => {
   switch (status) {
-    case STUDENT_STATUS.ACTIVE:
-      return 'blue'
-    case STUDENT_STATUS.INACTIVE:
+    case 'enrolled':
       return 'green'
-    case STUDENT_STATUS.REST:
+    case 'suspended':
       return 'yellow'
-    case STUDENT_STATUS.DROPPED:
+    case 'graduated':
+      return 'blue'
+    case 'dropped_out':
       return 'red'
+    case 'transferred':
+      return 'orange'
     default:
       return 'gray'
   }
@@ -81,9 +76,9 @@ export const StudentColumns: ColumnDef<StudentsType>[] = [
     accessorKey: 'status',
     header: 'ស្ថានភាព',
     cell: ({ row }) => {
-      const status = row.original.educationalStatus || 'ENROLLED'
+      const status = row.original.educationalStatus || 'enrolled'
       return (
-        <Badge color={getStatusColor(status as string)} variant="surface">
+        <Badge color={getStatusColor(status)} variant="surface">
           {status}
         </Badge>
       )

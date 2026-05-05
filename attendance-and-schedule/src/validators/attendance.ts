@@ -1,5 +1,14 @@
 import z from "zod";
 
+const zBoolean = z.preprocess((v) => {
+  if (typeof v === "string") {
+    if (v === "true") return true;
+    if (v === "false") return false;
+  }
+  return v;
+}, z.boolean());
+
+
 export const attendanceStatusEnum = z.enum([
   "present",
   "absent",
@@ -67,8 +76,8 @@ export const attendanceSummarySchema = z.object({
   absentPercentage: z.coerce.number().positive(),
   latePercentage: z.coerce.number().positive(),
   excusedPercentage: z.coerce.number().positive(),
-  withdrawFromTheExame: z.boolean(),
-  makeUpClass: z.boolean(),
+  withdrawFromTheExame: zBoolean,
+  makeUpClass: zBoolean,
 });
 
 export type AttendanceSummaryInput = z.infer<typeof attendanceSummarySchema>;

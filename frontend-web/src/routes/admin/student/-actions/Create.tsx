@@ -240,25 +240,33 @@ const StudentCreate = () => {
               <FormInput
                 label="ឈ្មោះនិស្សិត"
                 name="name"
-                placeholder="ឧ. លុយ សុមាត្រា"
+                placeholder="ឈ្មោះនិស្សិត"
                 control={control}
                 register={register}
                 error={errors.name}
                 rules={{
                   required: 'ត្រូវបញ្ចូលឈ្មោះនិស្សិត',
+                  pattern: {
+                    value: /^[\u1780-\u17FF\s]+$/,
+                    message: 'ឈ្មោះនិស្សិតត្រូវមានតែអក្សរខ្មែរ និង space',
+                  },
                 }}
                 isRequired
               />
 
               <FormInput
                 label="ឈ្មោះអង់គ្លេស"
-                placeholder="LUY Somatra"
+                placeholder="Student Name"
                 name="nameEn"
                 control={control}
                 register={register}
                 error={errors.nameEn}
                 rules={{
                   required: 'ត្រូវបញ្ចូលឈ្មោះអង់គ្លេស',
+                  pattern: {
+                    value: /^[a-zA-Z ]+$/,
+                    message: 'ឈ្មោះអង់គ្លេសត្រូវមានតែអក្សរ a-z A-Z និង space',
+                  },
                 }}
                 isRequired
               />
@@ -303,13 +311,13 @@ const StudentCreate = () => {
                 register={register}
                 error={errors.phone}
                 type="tel"
-                min={8}
-                max={15}
+                min={9}
+                max={12}
                 rules={{
                   required: 'ត្រូវបញ្ចូលលេខទូរស័ព្ទ',
                   pattern: {
-                    value: 15,
-                    message: 'លេខទូរស័ព្ទត្រូវមានយ៉ាងតិច 15 តួអក្សរ',
+                    value: /^[0-9+ ]+$/,
+                    message: 'លេខទូរស័ព្ទត្រូវមានតែលេខ 0-9 និង ដកឃ្លា',
                   },
                 }}
                 isRequired

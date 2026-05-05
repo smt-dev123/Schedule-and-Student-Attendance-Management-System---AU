@@ -5,36 +5,22 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1777279277209,
-      "tag": "0000_magical_nightmare",
+      "when": 1777983541435,
+      "tag": "0000_minor_black_knight",
       "breakpoints": true
     },
     {
       "idx": 1,
       "version": "7",
-      "when": 1777345723715,
-      "tag": "0001_dizzy_viper",
+      "when": 1777987385982,
+      "tag": "0001_natural_the_phantom",
       "breakpoints": true
     },
     {
       "idx": 2,
       "version": "7",
-      "when": 1777710608147,
-      "tag": "0002_smooth_mordo",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "7",
-      "when": 1777786159568,
-      "tag": "0003_good_mastermind",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "7",
-      "when": 1777786302394,
-      "tag": "0004_pretty_lord_tyger",
+      "when": 1777987931963,
+      "tag": "0002_dapper_ogun",
       "breakpoints": true
     }
   ]

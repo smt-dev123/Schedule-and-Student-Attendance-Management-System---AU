@@ -13,8 +13,6 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
 import { FaPlus, FaEdit } from 'react-icons/fa'
 import { CourseItem } from './components/ScheduleFormComponents'
-
-// API Imports
 import { getScheduleById, updateSchedule } from '@/api/SchedulesAPI'
 import { getFaculties } from '@/api/FacultyAPI'
 import { getDepartments } from '@/api/DepartmentAPI'
@@ -52,7 +50,6 @@ const ScheduleUpdate = ({ scheduleId, open, onOpenChange }: Props) => {
   const selectedFacultyId = watch('schedule.facultyId')
   const scheduleErrors = errors.schedule as any
 
-  // --- Data Fetching ---
   const { data: faculties = [] } = useQuery({
     queryKey: ['faculties'],
     queryFn: getFaculties,
@@ -73,7 +70,7 @@ const ScheduleUpdate = ({ scheduleId, open, onOpenChange }: Props) => {
 
   const { data: teachersResponse } = useQuery({
     queryKey: ['teachers'],
-    queryFn: () => getTeachers('all'),
+    queryFn: () => getTeachers(),
   })
   const teachers = (teachersResponse as any)?.data || []
   const { data: sessions = [] } = useQuery({
@@ -85,21 +82,18 @@ const ScheduleUpdate = ({ scheduleId, open, onOpenChange }: Props) => {
     queryFn: getDepartments,
   })
 
-  // Memoized Filtered Departments
   const departments = useMemo(() => {
     return (allDeps as any[]).filter(
       (d) => String(d.facultyId) === String(selectedFacultyId),
     )
   }, [allDeps, selectedFacultyId])
 
-  // Fetch Existing Schedule
   const { data: existingData, isLoading: isLoadingData } = useQuery({
     queryKey: ['schedule', scheduleId],
     queryFn: () => getScheduleById(scheduleId!),
     enabled: !!scheduleId && open,
   })
 
-  // Sync Data to Form
   useEffect(() => {
     if (open && existingData && !isLoadingData) {
       reset({

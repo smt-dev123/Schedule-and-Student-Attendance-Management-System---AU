@@ -37,14 +37,12 @@ const OverrideCreate = ({ scheduleId }: Props) => {
   const selectedCourseId = watch('originalCourseId')
   const isCancelled = watch('isCancelled')
 
-  // Fetch courses for the selected date
   const { data: allDailyCourses = [], isLoading: isLoadingCourses } = useQuery({
     queryKey: ['daily_schedule', selectedDate],
     queryFn: () => getDailySchedule(selectedDate),
     enabled: !!selectedDate && open,
   })
 
-  // Filter courses by scheduleId if provided
   const dailyCourses = useMemo(() => {
     if (!scheduleId) return allDailyCourses
     return (allDailyCourses as any[]).filter(
@@ -52,23 +50,24 @@ const OverrideCreate = ({ scheduleId }: Props) => {
     )
   }, [allDailyCourses, scheduleId])
 
-  // Fetch teachers and rooms for overrides
-  const { data: teachers = [] } = useQuery({
+  const { data: teachersResponse } = useQuery({
     queryKey: ['teachers'],
-    queryFn: getTeachers,
+    queryFn: () => getTeachers(),
     enabled: open,
   })
-  const { data: rooms = [] } = useQuery({
+  const teachers = (teachersResponse as any)?.data || []
+
+  const { data: roomsResponse } = useQuery({
     queryKey: ['rooms'],
     queryFn: () => getRoom('all'),
     enabled: open,
   })
+  const rooms = (roomsResponse as any)?.data || []
 
   useEffect(() => {
     if (!open) reset()
   }, [open, reset])
 
-  // Find selected course details
   const selectedCourse = useMemo(() => {
     return dailyCourses.find(
       (c: any) => String(c.id) === String(selectedCourseId),

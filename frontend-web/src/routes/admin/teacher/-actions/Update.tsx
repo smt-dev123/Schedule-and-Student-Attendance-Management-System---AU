@@ -261,39 +261,27 @@ const TeacherUpdate = ({ data }: Props) => {
                 }}
                 isRequired
               />
-
-              <FormInput
-                register={register}
-                control={control}
-                label="លេខទូរស័ព្ទ"
-                placeholder="012 345 678"
-                error={errors.phone}
-                name="phone"
-                rules={{
-                  required: 'សូមបំពេញលេខទូរស័ព្ទ',
-                }}
-                type="tel"
-                isRequired
-              />
-
-              <FormInput
-                register={register}
-                control={control}
-                label="ពាក្យសម្ងាត់"
-                placeholder="********"
-                error={errors.password}
-                name="password"
-                rules={{
-                  required: 'សូមបំពេញពាក្យសម្ងាត់',
-                  minLength: {
-                    value: 6,
-                    message: 'ពាក្យសម្ងាត់ត្រូវមានយ៉ាងតិច 6 តួអក្សរ',
-                  },
-                }}
-                type="password"
-                isRequired
-              />
             </Grid>
+
+            <FormInput
+              register={register}
+              control={control}
+              label="លេខទូរស័ព្ទ"
+              placeholder="012 345 678"
+              error={errors.phone}
+              name="phone"
+              min={9}
+              max={12}
+              rules={{
+                required: 'សូមបំពេញលេខទូរស័ព្ទ',
+                pattern: {
+                  value: /^[0-9+ ]+$/,
+                  message: 'លេខទូរស័ព្ទត្រូវមានតែលេខ 0-9 និង ដកឃ្លា',
+                },
+              }}
+              type="tel"
+              isRequired
+            />
 
             <FormTextArea
               register={register}

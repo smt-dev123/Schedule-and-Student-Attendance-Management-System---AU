@@ -334,13 +334,13 @@ const StudentUpdate = ({ data }: Props) => {
                 register={register}
                 error={errors.phone}
                 type="tel"
-                min={8}
-                max={15}
+                min={9}
+                max={12}
                 rules={{
                   required: 'ត្រូវបញ្ចូលលេខទូរស័ព្ទ',
                   pattern: {
-                    value: 15,
-                    message: 'លេខទូរស័ព្ទត្រូវមានយ៉ាងតិច 15 តួអក្សរ',
+                    value: /^[0-9+ ]+$/,
+                    message: 'លេខទូរស័ព្ទត្រូវមានតែលេខ 0-9 និង ដកឃ្លា',
                   },
                 }}
                 isRequired
@@ -528,37 +528,39 @@ const StudentUpdate = ({ data }: Props) => {
                 }}
                 isRequired
               />
-
-              {/* <FormInput
-                label="លេខសម្ងាត់"
-                name="password"
+              <FormSelect
+                label="ស្ថានភាពសិក្សា"
+                name="educationalStatus"
                 control={control}
                 register={register}
-                type="password"
-                error={errors.password}
-                min={8}
-                rules={{
-                  required: 'ត្រូវបញ្ចូលលេខសម្ងាត់',
-                  pattern: {
-                    value: 8,
-                    message: 'លេខសម្ងាត់ត្រូវមានយ៉ាងតិច 8 តួអក្សរ',
-                  },
-                }}
-                placeholder="សូមបំពេញលេខសម្ងាត់"
+                error={errors.educationalStatus}
+                placeholder="សូមជ្រើសរើសស្ថានភាពសិក្សា"
                 isRequired
-              /> */}
-            </Grid>
-            <Box mt="2">
-              <FormCheckbox
-                control={control}
-                label="ស្ថានភាព"
-                placeholder="សកម្ម (Active)"
-                name="isActive"
-                error={errors.isActive}
+                options={[
+                  { id: 'enrolled', name: 'សកម្ម' },
+                  { id: 'suspended', name: 'ព្យួរ' },
+                  { id: 'graduated', name: 'បញ្ចប់ការសិក្សា' },
+                  { id: 'dropped_out', name: 'បោះបង់ការសិក្សា' },
+                  { id: 'transferred', name: 'ផ្ទេរចេញ' },
+                ]}
+                rules={{
+                  required: 'ត្រូវជ្រើសរើសស្ថានភាពសិក្សា',
+                }}
+                labelKey="name"
+                valueKey="id"
               />
-            </Box>
 
-            {/* ប៊ូតុងសកម្មភាព */}
+              <Box mt="2">
+                <FormCheckbox
+                  control={control}
+                  label="ស្ថានភាព"
+                  placeholder="សកម្ម (Active)"
+                  name="isActive"
+                  error={errors.isActive}
+                />
+              </Box>
+            </Grid>
+
             <Flex gap="3" mt="6" justify="end">
               <Dialog.Close>
                 <Button

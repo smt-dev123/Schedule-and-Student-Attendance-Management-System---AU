@@ -1,5 +1,5 @@
 {
-  "id": "19c5ba1a-7171-4763-8bae-a2e39924326c",
+  "id": "e475fc46-b5c4-4fa4-ac5d-b9e10334a0c3",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -462,6 +462,138 @@
           ]
         }
       },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.schedule_overrides": {
+      "name": "schedule_overrides",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "original_course_id": {
+          "name": "original_course_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "date": {
+          "name": "date",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "replacement_teacher_id": {
+          "name": "replacement_teacher_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "replacement_classroom_id": {
+          "name": "replacement_classroom_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "is_cancelled": {
+          "name": "is_cancelled",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        },
+        "note": {
+          "name": "note",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "unique_schedule_override": {
+          "name": "unique_schedule_override",
+          "columns": [
+            {
+              "expression": "original_course_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "date",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "schedule_overrides_original_course_id_courses_id_fk": {
+          "name": "schedule_overrides_original_course_id_courses_id_fk",
+          "tableFrom": "schedule_overrides",
+          "tableTo": "courses",
+          "columnsFrom": [
+            "original_course_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "schedule_overrides_replacement_teacher_id_teachers_id_fk": {
+          "name": "schedule_overrides_replacement_teacher_id_teachers_id_fk",
+          "tableFrom": "schedule_overrides",
+          "tableTo": "teachers",
+          "columnsFrom": [
+            "replacement_teacher_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "schedule_overrides_replacement_classroom_id_classrooms_classroom_id_fk": {
+          "name": "schedule_overrides_replacement_classroom_id_classrooms_classroom_id_fk",
+          "tableFrom": "schedule_overrides",
+          "tableTo": "classrooms",
+          "columnsFrom": [
+            "replacement_classroom_id"
+          ],
+          "columnsTo": [
+            "classroom_id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
@@ -1085,6 +1217,30 @@
           "primaryKey": false,
           "notNull": false
         },
+        "student_code": {
+          "name": "student_code",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "name_en": {
+          "name": "name_en",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "dob": {
+          "name": "dob",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "address": {
+          "name": "address",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
         "year": {
           "name": "year",
           "type": "integer",
@@ -1243,6 +1399,13 @@
           "columns": [
             "email"
           ]
+        },
+        "students_student_code_unique": {
+          "name": "students_student_code_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "student_code"
+          ]
         }
       },
       "policies": {},
@@ -1257,6 +1420,12 @@
           "name": "id",
           "type": "integer",
           "primaryKey": true,
+          "notNull": true
+        },
+        "teacher_code": {
+          "name": "teacher_code",
+          "type": "varchar",
+          "primaryKey": false,
           "notNull": true
         },
         "user_id": {
@@ -1289,6 +1458,12 @@
           "typeSchema": "public",
           "primaryKey": false,
           "notNull": true
+        },
+        "address": {
+          "name": "address",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
         },
         "academic_level_id": {
           "name": "academic_level_id",
@@ -1390,6 +1565,13 @@
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
+        "teachers_teacher_code_unique": {
+          "name": "teachers_teacher_code_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "teacher_code"
+          ]
+        },
         "teachers_user_id_unique": {
           "name": "teachers_user_id_unique",
           "nullsNotDistinct": false,

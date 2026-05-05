@@ -1,6 +1,6 @@
 {
-  "id": "3617894b-73e7-4357-8bae-95aacc2705a3",
-  "prevId": "998fb307-3a2b-455c-b66e-180999378be7",
+  "id": "7a000096-6154-497c-851a-3421dc94dd4e",
+  "prevId": "9065d29f-bf0a-4ac4-add3-930969d92242",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -1422,6 +1422,12 @@
           "primaryKey": true,
           "notNull": true
         },
+        "teacher_code": {
+          "name": "teacher_code",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
         "user_id": {
           "name": "user_id",
           "type": "text",
@@ -1452,6 +1458,12 @@
           "typeSchema": "public",
           "primaryKey": false,
           "notNull": true
+        },
+        "address": {
+          "name": "address",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
         },
         "academic_level_id": {
           "name": "academic_level_id",
@@ -1553,6 +1565,13 @@
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
+        "teachers_teacher_code_unique": {
+          "name": "teachers_teacher_code_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "teacher_code"
+          ]
+        },
         "teachers_user_id_unique": {
           "name": "teachers_user_id_unique",
           "nullsNotDistinct": false,
@@ -2972,8 +2991,9 @@
       "schema": "public",
       "values": [
         "enrolled",
+        "suspended",
         "graduated",
-        "dropped out",
+        "dropped_out",
         "transferred"
       ]
     },

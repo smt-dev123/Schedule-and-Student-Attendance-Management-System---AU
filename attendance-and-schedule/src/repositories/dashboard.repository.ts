@@ -28,7 +28,7 @@ export class DashboardRepository {
       this.db
         .select({ count: sql<number>`count(*)::int` })
         .from(students)
-        .where(eq(students.educationalStatus, "dropped out")),
+        .where(eq(students.educationalStatus, "dropped_out")),
     ]);
 
     return {

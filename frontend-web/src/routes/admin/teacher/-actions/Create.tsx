@@ -286,8 +286,14 @@ const TeacherCreate = () => {
                 placeholder="012 345 678"
                 error={errors.phone}
                 name="phone"
+                min={9}
+                max={12}
                 rules={{
                   required: 'សូមបំពេញលេខទូរស័ព្ទ',
+                  pattern: {
+                    value: /^[0-9+ ]+$/,
+                    message: 'លេខទូរស័ព្ទត្រូវមានតែលេខ 0-9 និង ដកឃ្លា',
+                  },
                 }}
                 type="tel"
                 isRequired

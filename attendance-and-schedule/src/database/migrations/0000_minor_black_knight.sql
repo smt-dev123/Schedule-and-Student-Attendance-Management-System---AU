@@ -58,6 +58,18 @@ CREATE TABLE "faculties" (
 	CONSTRAINT "faculties_name_unique" UNIQUE("name")
 );
 --> statement-breakpoint
+CREATE TABLE "schedule_overrides" (
+	"id" serial PRIMARY KEY NOT NULL,
+	"original_course_id" integer NOT NULL,
+	"date" date NOT NULL,
+	"replacement_teacher_id" integer,
+	"replacement_classroom_id" integer,
+	"is_cancelled" boolean DEFAULT false,
+	"note" varchar,
+	"created_at" timestamp DEFAULT now(),
+	"updated_at" timestamp DEFAULT now()
+);
+--> statement-breakpoint
 CREATE TABLE "schedules" (
 	"id" serial PRIMARY KEY NOT NULL,
 	"faculty_id" integer NOT NULL,
@@ -125,27 +137,35 @@ CREATE TABLE "students" (
 	"semester" integer NOT NULL,
 	"is_active" boolean DEFAULT true,
 	"image" varchar,
+	"student_code" varchar NOT NULL,
+	"name_en" varchar NOT NULL,
+	"dob" timestamp,
+	"address" varchar,
 	"year" integer,
 	"created_at" timestamp DEFAULT now(),
 	"updated_at" timestamp DEFAULT now(),
 	CONSTRAINT "students_user_id_unique" UNIQUE("user_id"),
 	CONSTRAINT "students_phone_unique" UNIQUE("phone"),
-	CONSTRAINT "students_email_unique" UNIQUE("email")
+	CONSTRAINT "students_email_unique" UNIQUE("email"),
+	CONSTRAINT "students_student_code_unique" UNIQUE("student_code")
 );
 --> statement-breakpoint
 CREATE TABLE "teachers" (
 	"id" integer PRIMARY KEY NOT NULL,
+	"teacher_code" varchar NOT NULL,
 	"user_id" text NOT NULL,
 	"name" varchar NOT NULL,
 	"phone" varchar NOT NULL,
 	"email" varchar NOT NULL,
 	"gender" "gender" NOT NULL,
+	"address" varchar,
 	"academic_level_id" integer NOT NULL,
 	"faculty_id" integer NOT NULL,
 	"is_active" boolean DEFAULT true,
 	"image" varchar,
 	"created_at" timestamp DEFAULT now(),
 	"updated_at" timestamp DEFAULT now(),
+	CONSTRAINT "teachers_teacher_code_unique" UNIQUE("teacher_code"),
 	CONSTRAINT "teachers_user_id_unique" UNIQUE("user_id"),
 	CONSTRAINT "teachers_phone_unique" UNIQUE("phone"),
 	CONSTRAINT "teachers_email_unique" UNIQUE("email")
@@ -312,6 +332,9 @@ ALTER TABLE "courses" ADD CONSTRAINT "courses_teacher_id_teachers_id_fk" FOREIGN
 ALTER TABLE "courses" ADD CONSTRAINT "courses_schedule_id_schedules_id_fk" FOREIGN KEY ("schedule_id") REFERENCES "public"."schedules"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "courses" ADD CONSTRAINT "courses_academic_year_id_academic_years_id_fk" FOREIGN KEY ("academic_year_id") REFERENCES "public"."academic_years"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "departments" ADD CONSTRAINT "departments_faculty_id_faculties_id_fk" FOREIGN KEY ("faculty_id") REFERENCES "public"."faculties"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "schedule_overrides" ADD CONSTRAINT "schedule_overrides_original_course_id_courses_id_fk" FOREIGN KEY ("original_course_id") REFERENCES "public"."courses"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "schedule_overrides" ADD CONSTRAINT "schedule_overrides_replacement_teacher_id_teachers_id_fk" FOREIGN KEY ("replacement_teacher_id") REFERENCES "public"."teachers"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "schedule_overrides" ADD CONSTRAINT "schedule_overrides_replacement_classroom_id_classrooms_classroom_id_fk" FOREIGN KEY ("replacement_classroom_id") REFERENCES "public"."classrooms"("classroom_id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "schedules" ADD CONSTRAINT "schedules_faculty_id_faculties_id_fk" FOREIGN KEY ("faculty_id") REFERENCES "public"."faculties"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "schedules" ADD CONSTRAINT "schedules_academic_level_id_academic_levels_id_fk" FOREIGN KEY ("academic_level_id") REFERENCES "public"."academic_levels"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "schedules" ADD CONSTRAINT "schedules_academic_year_id_academic_years_id_fk" FOREIGN KEY ("academic_year_id") REFERENCES "public"."academic_years"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
@@ -351,6 +374,7 @@ CREATE INDEX "idx_course_schedule" ON "courses" USING btree ("schedule_id");--> 
 CREATE INDEX "idx_course_day_schedule" ON "courses" USING btree ("day","schedule_id");--> statement-breakpoint
 CREATE UNIQUE INDEX "unique_schedule_day_classroom_time" ON "courses" USING btree ("schedule_id","day");--> statement-breakpoint
 CREATE UNIQUE INDEX "unique_faculty_department" ON "departments" USING btree ("faculty_id","name");--> statement-breakpoint
+CREATE UNIQUE INDEX "unique_schedule_override" ON "schedule_overrides" USING btree ("original_course_id","date");--> statement-breakpoint
 CREATE UNIQUE INDEX "unique_schedule_identifier" ON "schedules" USING btree ("faculty_id","academic_level_id","generation","semester","year","department_id","study_shift");--> statement-breakpoint
 CREATE INDEX "idx_schedule_faculty_generation" ON "schedules" USING btree ("faculty_id","generation");--> statement-breakpoint
 CREATE UNIQUE INDEX "unique_student_academic_year" ON "student_academic_years" USING btree ("student_id","academic_year_id");--> statement-breakpoint

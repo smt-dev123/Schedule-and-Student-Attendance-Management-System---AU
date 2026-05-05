@@ -13,7 +13,6 @@ import { getOverrides, deleteOverride } from '@/api/OverrideAPI'
 import {
   FaTrash,
   FaCalendarDay,
-  FaExchangeAlt,
   FaBan,
   FaMapMarkerAlt,
   FaUserTie,

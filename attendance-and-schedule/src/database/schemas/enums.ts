@@ -34,8 +34,9 @@ export const gender = pgEnum("gender", ["male", "female"]);
 
 export const educationalStatus = pgEnum("educational_status", [
   "enrolled",
+  "suspended",
   "graduated",
-  "dropped out",
+  "dropped_out",
   "transferred",
 ]);
 

@@ -37,7 +37,11 @@ function Login() {
       })
 
       if (error) {
-        if (error.status === 401 || error.code === 'INVALID_CREDENTIALS' || error.code === 'INVALID_EMAIL_OR_PASSWORD') {
+        if (
+          error.status === 401 ||
+          error.code === 'INVALID_CREDENTIALS' ||
+          error.code === 'INVALID_EMAIL_OR_PASSWORD'
+        ) {
           setErrorMessage('Email ឬ Password មិនត្រឹមត្រូវទេ!')
         } else {
           setErrorMessage(error.message || 'មានបញ្ហាក្នុងការចូលប្រើប្រាស់')
@@ -117,13 +121,18 @@ function Login() {
           </Flex>
 
           {errorMessage && (
-            <Text size="2" color="red" align="center" className="bg-red-50 p-2 rounded-md">
+            <Text
+              size="2"
+              color="red"
+              align="center"
+              className="bg-red-50 p-2 rounded-md"
+            >
               {errorMessage}
             </Text>
           )}
 
           <Button
-            type="submit" // ប្ដូរទៅជា submit
+            type="submit"
             disabled={loading}
             color="indigo"
             variant="solid"
@@ -136,6 +145,17 @@ function Login() {
       </form>
 
       <Flex justify="center" align="center" mt="4" gap="2">
+        <Text size="2">បើសិនអ្នកអត់មានគណនីទេ? ទាក់ទងមកកាន់</Text>
+        <a
+          className="text-indigo-600 font-medium hover:underline text-[14px]"
+          href="https://www.facebook.com/AngkorUniversity"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Angkor University
+        </a>
+      </Flex>
+      {/* <Flex justify="center" align="center" mt="4" gap="2">
         <Text size="2">Don't have an account?</Text>
         <Link
           className="text-indigo-600 font-medium hover:underline text-[14px]"
@@ -143,7 +163,7 @@ function Login() {
         >
           Signup
         </Link>
-      </Flex>
+      </Flex> */}
     </>
   )
 }

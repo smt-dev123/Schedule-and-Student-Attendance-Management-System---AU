@@ -7,8 +7,9 @@ const academicLevelEnum = z.enum(["Associate", "Bachelor", "Master", "PhD"]);
 const genderEnum = z.enum(["male", "female"]);
 const educationalStatusEnum = z.enum([
   "enrolled",
+  "suspended",
   "graduated",
-  "dropped out",
+  "dropped_out",
   "transferred",
 ]);
 const dayEnum = z.enum([
@@ -21,6 +22,15 @@ const dayEnum = z.enum([
   "Sunday",
 ]);
 const studyShiftEnum = z.enum(["morning", "evening", "night"]);
+
+/* Helpers */
+const zBoolean = z.preprocess((v) => {
+  if (typeof v === "string") {
+    if (v === "true") return true;
+    if (v === "false") return false;
+  }
+  return v;
+}, z.boolean());
 
 /* Faculty Schemas */
 export const facultySchema = z.object({
@@ -47,7 +57,7 @@ export const academicYearSchema = z.object({
   name: z.string().min(1, "Academic year name is required"),
   startDate: z.coerce.date(),
   endDate: z.coerce.date(),
-  isCurrent: z.boolean().default(false),
+  isCurrent: zBoolean.default(false),
 });
 export const academicYearUpdateSchema = academicYearSchema.partial();
 
@@ -82,7 +92,7 @@ export const studentCreateSchema = z.object({
   generation: z.coerce.number().positive(),
   skillId: z.coerce.number().positive(),
   semester: z.coerce.number().positive(),
-  isActive: z.boolean().default(true),
+  isActive: zBoolean.default(true),
   academicYearId: z.coerce.number().positive(),
   year: z.coerce.number().positive(),
 });
@@ -123,7 +133,7 @@ export const teacherCreateSchema = z.object({
   address: z.string().optional(),
   academicLevelId: z.coerce.number().positive(),
   facultyId: z.coerce.number().positive(),
-  isActive: z.boolean().default(true),
+  isActive: zBoolean.default(true),
 });
 export const teacherUpdateSchema = teacherCreateSchema.partial();
 export const teacherQuerySchema = z.object({
@@ -149,7 +159,7 @@ export const courseSchema = z.object({
   scheduleId: z.coerce.number().positive(),
   hours: z.string().min(1, "Hours is required"),
   academicYearId: z.coerce.number().positive(),
-  isActive: z.boolean().default(true),
+  isActive: zBoolean.default(true),
 });
 export const courseUpdateSchema = courseSchema.partial();
 export const courseQuerySchema = z.object({
@@ -176,7 +186,7 @@ export const sessionTimeSchema = z.object({
     .string()
     .min(1, "Second session end time is required"),
   description: z.string().optional(),
-  isActive: z.boolean().default(true),
+  isActive: zBoolean.default(true),
 });
 export const sessionTimeUpdateSchema = sessionTimeSchema.partial();
 
@@ -229,7 +239,7 @@ export const scheduleUpdateWithCoursesSchema = z.object({
         day: dayEnum,
         teacherId: z.coerce.number().positive(),
         hours: z.string().min(1, "Hours is required"),
-        isActive: z.boolean().default(true),
+        isActive: zBoolean.default(true),
       }),
     )
     .optional(),
@@ -267,7 +277,7 @@ export const scheduleOverrideSchema = z.object({
   date: z.string(), // Drizzle date type expects string YYYY-MM-DD
   replacementTeacherId: z.coerce.number().positive().nullable().optional(),
   replacementClassroomId: z.coerce.number().positive().nullable().optional(),
-  isCancelled: z.boolean().default(false),
+  isCancelled: zBoolean.default(false),
   note: z.string().nullable().optional(),
 });
 export const scheduleOverrideUpdateSchema = scheduleOverrideSchema.partial();

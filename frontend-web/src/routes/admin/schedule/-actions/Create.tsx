@@ -79,7 +79,7 @@ const ScheduleCreate = () => {
 
   const { data: teachersResponse } = useQuery({
     queryKey: ['teachers'],
-    queryFn: () => getTeachers('all'),
+    queryFn: () => getTeachers(),
   })
   const teachers = (teachersResponse as any)?.data || []
   const { data: sessions = [] } = useQuery({

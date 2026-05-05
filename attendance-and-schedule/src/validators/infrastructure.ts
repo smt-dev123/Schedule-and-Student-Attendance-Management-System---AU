@@ -1,17 +1,26 @@
 import z from "zod";
 
+const zBoolean = z.preprocess((v) => {
+  if (typeof v === "string") {
+    if (v === "true") return true;
+    if (v === "false") return false;
+  }
+  return v;
+}, z.boolean());
+
+
 /**
  * Building Schemas
  */
 
 export const buildingSchema = z.object({
   name: z.string().min(3).max(99),
-  isActive: z.boolean().optional(),
+  isActive: zBoolean.optional(),
 });
 export const buildingUpdateSchema = buildingSchema.partial();
 export const buildingQuerySchema = z.object({
   name: z.string().optional(),
-  isActive: z.coerce.boolean().optional(),
+  isActive: zBoolean.optional(),
   page: z.coerce.number().int().positive().optional(),
   limit: z.coerce.number().int().positive().optional(),
 });
@@ -28,13 +37,13 @@ export const classroomSchema = z.object({
   name: z.string().min(3).max(99),
   buildingId: z.number().int().positive(),
   floor: z.number().int().nonnegative(),
-  isAvailable: z.boolean().optional(),
+  isAvailable: zBoolean.optional(),
 });
 export const classroomUpdateSchema = classroomSchema.partial();
 export const classroomQuerySchema = z.object({
   name: z.string().optional(),
   floor: z.coerce.number().int().nonnegative().optional(),
-  isAvailable: z.coerce.boolean().optional(),
+  isAvailable: zBoolean.optional(),
   page: z.coerce.number().int().positive().optional(),
   limit: z.coerce.number().int().positive().optional(),
 });
