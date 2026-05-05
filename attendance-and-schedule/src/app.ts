@@ -25,6 +25,8 @@ import courseRoutes from "./routes/course.routes";
 import scheduleOverrideRoutes from "./routes/schedule-override.routes";
 import dashboardRoutes from "./routes/dashboard.routes";
 
+import maintenanceRoutes from "./routes/maintenance.routes";
+
 const app = new Hono();
 
 app.use("*", logger());
@@ -79,6 +81,7 @@ app.route("/api/courses", courseRoutes);
 app.route("/api/schedule-overrides", scheduleOverrideRoutes);
 app.route("/api/dashboard", dashboardRoutes);
 app.route("/api/upload", uploadRoutes);
+app.route("/api/maintenance", maintenanceRoutes);
 
 app.onError((e, c) => errorHandler(c, e));
 

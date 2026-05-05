@@ -24,6 +24,7 @@ const statement = {
   teacher: ["create", "read", "update", "delete"],
   attendance: ["create", "read", "update", "delete"],
   notification: ["create", "read", "update", "delete", "read-own"],
+  system: ["manage"],
 } as const;
 
 type PermissionStatement = typeof statement;
@@ -62,6 +63,7 @@ const manager = ac.newRole({
   student: ["create", "read", "update", "delete"],
   teacher: ["create", "read", "update", "delete"],
   attendance: ["create", "read", "update", "delete"],
+  system: ["manage"],
 });
 
 const teacher = ac.newRole({

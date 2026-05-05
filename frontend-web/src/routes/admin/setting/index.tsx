@@ -19,6 +19,9 @@ import { authClient } from '@/lib/auth-client'
 import toast from 'react-hot-toast'
 import { useEffect, useState, useRef } from 'react'
 import api from '@/lib/axios'
+import { SecurityTab } from './-tabs/SecurityTab'
+import { BackupTab } from './-tabs/BackupTab'
+import { AccountTab } from './-tabs/AccountTab'
 
 export const Route = createFileRoute('/admin/setting/')({
   component: RouteComponent,
@@ -160,7 +163,6 @@ function RouteComponent() {
 
   return (
     <Card size="3">
-      {/* Header Section */}
       <Flex justify="between" align="center" mb="5">
         <Box>
           <Text as="div" size="6" weight="bold">
@@ -182,266 +184,32 @@ function RouteComponent() {
         </Tabs.List>
 
         <Box pt="4">
-          {/* --- TAB: ACCOUNT --- */}
           <Tabs.Content value="account">
-            <Flex direction="column" gap="4">
-              {/* Profile Picture Card */}
-              <Card variant="surface">
-                <Flex justify="between" align="center" wrap="wrap" gap="3">
-                  <Flex gap="4" align="center">
-                    <Avatar
-                      size="6"
-                      src={user?.image}
-                      radius="full"
-                      fallback={user?.name?.charAt(0) || 'T'}
-                    />
-                    <Box>
-                      <Text as="div" size="3" weight="bold">
-                        រូបភាពកម្រងព័ត៌មាន
-                      </Text>
-                      <Text as="div" size="2" color="gray">
-                        JPG, PNG, WEBP ទំហំអតិបរមា 2MB
-                      </Text>
-                    </Box>
-                  </Flex>
-                  <Flex gap="2">
-                    <Button
-                      variant="soft"
-                      color="blue"
-                      onClick={() => fileInputRef.current?.click()}
-                      loading={isUploadingImage}
-                      style={{ cursor: 'pointer' }}
-                    >
-                      ប្តូររូបភាព
-                    </Button>
-                    <input
-                      type="file"
-                      ref={fileInputRef}
-                      onChange={handleFileChange}
-                      accept="image/jpeg, image/png, image/webp"
-                      style={{ display: 'none' }}
-                    />
-                  </Flex>
-                </Flex>
-              </Card>
-
-              {/* Personal Information */}
-              <Box>
-                <form onSubmit={handleProfileSubmit(onSubmitProfile)}>
-                  <Text size="4" weight="bold">
-                    ព័ត៌មានផ្ទាល់ខ្លួន
-                  </Text>
-                  <Separator size="4" my="3" />
-                  <Flex
-                    gap="4"
-                    direction={{ initial: 'column', sm: 'row' }}
-                    mb="4"
-                  >
-                    <Box className="grow">
-                      <Text as="div" size="2" mb="1" weight="bold">
-                        ឈ្មោះ <span className="text-red-500">*</span>
-                      </Text>
-                      <TextField.Root
-                        {...registerProfile('name', {
-                          required: 'សូមបញ្ចូលឈ្មោះ',
-                        })}
-                        placeholder="បញ្ចូលឈ្មោះ"
-                      />
-                      {profileErrors.name && (
-                        <Text size="1" color="red">
-                          {profileErrors.name.message as string}
-                        </Text>
-                      )}
-                    </Box>
-                    <Box className="grow">
-                      <Text as="div" size="2" mb="1" weight="bold">
-                        អ៊ីមែល
-                      </Text>
-                      <TextField.Root
-                        type="email"
-                        {...registerProfile('email')}
-                        disabled
-                        placeholder="example@mail.com"
-                      />
-                    </Box>
-                  </Flex>
-                  <Button
-                    type="submit"
-                    loading={isUpdatingProfile}
-                    size="2"
-                    style={{ cursor: 'pointer' }}
-                  >
-                    រក្សាទុកការផ្លាស់ប្តូរ
-                  </Button>
-                </form>
-              </Box>
-            </Flex>
+            <AccountTab
+              user={user}
+              register={registerProfile}
+              errors={profileErrors}
+              onSubmit={handleProfileSubmit(onSubmitProfile)}
+              isUpdating={isUpdatingProfile}
+              isUploading={isUploadingImage}
+              fileInputRef={fileInputRef}
+              onFileChange={handleFileChange}
+            />
           </Tabs.Content>
 
-          {/* --- TAB: SECURITY --- */}
           <Tabs.Content value="security">
-            <Flex direction="column" gap="4">
-              <Text size="4" weight="bold">
-                ប្តូរលេខសម្ងាត់
-              </Text>
-              <Separator size="4" my="1" />
-
-              <Box maxWidth="400px">
-                <form onSubmit={handlePwdSubmit(onSubmitPwd)}>
-                  <Flex direction="column" gap="3">
-                    <Box>
-                      <Text as="div" size="2" mb="1" weight="bold">
-                        លេខសម្ងាត់ចាស់ <span className="text-red-500">*</span>
-                      </Text>
-                      <TextField.Root
-                        type="password"
-                        {...registerPwd('currentPassword', {
-                          required: 'សូមបញ្ចូលលេខសម្ងាត់ចាស់',
-                        })}
-                        placeholder="••••••••"
-                      />
-                      {pwdErrors.currentPassword && (
-                        <Text size="1" color="red">
-                          {pwdErrors.currentPassword.message as string}
-                        </Text>
-                      )}
-                    </Box>
-                    <Box>
-                      <Text as="div" size="2" mb="1" weight="bold">
-                        លេខសម្ងាត់ថ្មី <span className="text-red-500">*</span>
-                      </Text>
-                      <TextField.Root
-                        type="password"
-                        {...registerPwd('newPassword', {
-                          required: 'សូមបញ្ចូលលេខសម្ងាត់ថ្មី',
-                          minLength: { value: 8, message: 'យ៉ាងតិច 8 ខ្ទង់' },
-                        })}
-                        placeholder="••••••••"
-                      />
-                      {pwdErrors.newPassword && (
-                        <Text size="1" color="red">
-                          {pwdErrors.newPassword.message as string}
-                        </Text>
-                      )}
-                    </Box>
-                    <Box>
-                      <Text as="div" size="2" mb="1" weight="bold">
-                        បញ្ជាក់លេខសម្ងាត់ថ្មី{' '}
-                        <span className="text-red-500">*</span>
-                      </Text>
-                      <TextField.Root
-                        type="password"
-                        {...registerPwd('confirmPassword', {
-                          required: 'សូមបញ្ជាក់លេខសម្ងាត់ថ្មី',
-                          validate: (val) =>
-                            val === newPassword || 'លេខសម្ងាត់មិនត្រូវគ្នា',
-                        })}
-                        placeholder="••••••••"
-                      />
-                      {pwdErrors.confirmPassword && (
-                        <Text size="1" color="red">
-                          {pwdErrors.confirmPassword.message as string}
-                        </Text>
-                      )}
-                    </Box>
-                    <Button
-                      type="submit"
-                      mt="2"
-                      loading={isUpdatingPwd}
-                      variant="outline"
-                      style={{ width: 'fit-content', cursor: 'pointer' }}
-                    >
-                      ធ្វើបច្ចុប្បន្នភាពលេខសម្ងាត់
-                    </Button>
-                  </Flex>
-                </form>
-              </Box>
-            </Flex>
+            <SecurityTab
+              register={registerPwd}
+              errors={pwdErrors}
+              onSubmit={handlePwdSubmit(onSubmitPwd)}
+              isUpdating={isUpdatingPwd}
+              newPasswordValue={newPassword}
+            />
           </Tabs.Content>
 
-          {/* --- TAB: BACKUP --- */}
           {(user as any)?.role === 'manager' && (
             <Tabs.Content value="backup">
-              <Flex direction="column" gap="5">
-                <Box>
-                  <Text size="4" weight="bold">
-                    ការចម្លងទុកទិន្នន័យ (Backup & Restore)
-                  </Text>
-                  <Text size="2" color="gray">
-                    គ្រប់គ្រងសុវត្ថិភាពទិន្នន័យប្រព័ន្ធរបស់អ្នក
-                  </Text>
-                </Box>
-
-                <Card variant="surface">
-                  <Flex justify="between" align="center">
-                    <Box>
-                      <Text as="div" size="3" weight="bold">
-                        Auto Backup
-                      </Text>
-                      <Text as="div" size="2" color="gray">
-                        ដំណើរការការចម្លងទុកដោយស្វ័យប្រវត្តិទៅកាន់ Cloud Storage
-                      </Text>
-                    </Box>
-                    <Switch defaultChecked size="3" color="green" />
-                  </Flex>
-                </Card>
-
-                <Flex gap="4" direction={{ initial: 'column', sm: 'row' }}>
-                  <Box className="grow">
-                    <Text as="div" size="2" mb="1" weight="bold">
-                      ភាពញឹកញាប់ (Frequency)
-                    </Text>
-                    <Select.Root defaultValue="daily">
-                      <Select.Trigger className="w-full" />
-                      <Select.Content>
-                        <Select.Item value="hourly">រាល់ម៉ោង</Select.Item>
-                        <Select.Item value="daily">រៀងរាល់ថ្ងៃ</Select.Item>
-                        <Select.Item value="weekly">រៀងរាល់សប្តាហ៍</Select.Item>
-                      </Select.Content>
-                    </Select.Root>
-                  </Box>
-
-                  <Box className="grow">
-                    <Text as="div" size="2" mb="1" weight="bold">
-                      រក្សាទុកក្នុងរយៈពេល (Retention)
-                    </Text>
-                    <Select.Root defaultValue="30">
-                      <Select.Trigger className="w-full" />
-                      <Select.Content>
-                        <Select.Item value="7">៧ ថ្ងៃ</Select.Item>
-                        <Select.Item value="30">៣០ ថ្ងៃ</Select.Item>
-                        <Select.Item value="always">
-                          រហូតដល់លុបដោយផ្ទាល់
-                        </Select.Item>
-                      </Select.Content>
-                    </Select.Root>
-                  </Box>
-                </Flex>
-
-                <Separator size="4" />
-
-                <Box>
-                  <Text size="3" weight="bold" mb="2" as="div">
-                    សកម្មភាពបន្ទាប់បន្សំ
-                  </Text>
-                  <Flex gap="3">
-                    <Button
-                      variant="soft"
-                      color="gray"
-                      onClick={() => toast('មុខងារនេះនឹងមាននៅពេលក្រោយ')}
-                    >
-                      ទាញយក Database ឥឡូវនេះ (.sql)
-                    </Button>
-                    <Button
-                      variant="soft"
-                      color="orange"
-                      onClick={() => toast('មុខងារនេះនឹងមាននៅពេលក្រោយ')}
-                    >
-                      ផ្ទេរទិន្នន័យទៅ Google Drive
-                    </Button>
-                  </Flex>
-                </Box>
-              </Flex>
+              <BackupTab />
             </Tabs.Content>
           )}
         </Box>
