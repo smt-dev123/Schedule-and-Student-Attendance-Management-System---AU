@@ -39,6 +39,19 @@ const UserCreate = () => {
     },
     onError: (error: any) => {
       const data = error?.response?.data
+      const errorMessage = data?.message || ''
+
+      if (
+        errorMessage.includes('already exists') ||
+        errorMessage.includes('email')
+      ) {
+        setError('email', {
+          type: 'server',
+          message: 'អ៊ីម៉ែលនេះមានរួចហើយ សូមប្រើអ៊ីម៉ែលផ្សេង',
+        })
+        toast.error('អ៊ីម៉ែលនេះមានរួចហើយ')
+        return
+      }
 
       let issues: any[] = []
       try {
