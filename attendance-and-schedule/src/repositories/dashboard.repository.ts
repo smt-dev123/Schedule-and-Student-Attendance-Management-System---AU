@@ -1,4 +1,4 @@
-import { eq, sql, desc } from "drizzle-orm";
+import { eq, sql, desc, inArray } from "drizzle-orm";
 import {
   user,
   students,
@@ -16,7 +16,7 @@ export class DashboardRepository {
       this.db
         .select({ count: sql<number>`count(*)::int` })
         .from(user)
-        .where(eq(user.role, "admin" || "staff")),
+        .where(inArray(user.role, ["manager", "staff"])),
       this.db
         .select({ count: sql<number>`count(*)::int` })
         .from(teachers)
@@ -32,10 +32,10 @@ export class DashboardRepository {
     ]);
 
     return {
-      staffCount: staffRes[0].count,
-      teacherCount: teacherRes[0].count,
-      studentCount: studentRes[0].count,
-      dropoutCount: dropoutRes[0].count,
+      staffCount: staffRes[0]?.count ?? 0,
+      teacherCount: teacherRes[0]?.count ?? 0,
+      studentCount: studentRes[0]?.count ?? 0,
+      dropoutCount: dropoutRes[0]?.count ?? 0,
     };
   }
 
