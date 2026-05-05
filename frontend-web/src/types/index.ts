@@ -223,9 +223,11 @@ export interface UsersType {
   id: string
   name: string
   email: string
+  emailVerified?: boolean
   password?: string
-  role: string
+  role: RoleEnum
   image?: string
+  twoFactorEnabled: boolean
   createdAt?: string
   updatedAt?: string
 }
@@ -253,3 +255,5 @@ type EducationalStatusEnum =
   | 'transferred'
 
 type AttendanceStatusEnum = 'present' | 'absent' | 'late' | 'excused'
+
+type RoleEnum = 'admin' | 'teacher' | 'student' | 'staff' | 'manager'

@@ -6,16 +6,19 @@ import { UserTable } from '@/features/user/UserTable'
 import { useQuery } from '@tanstack/react-query'
 import { getUsers } from '@/api/UserAPI'
 import FetchData from '@/components/FetchData'
+import { useState } from 'react'
+import UserCreate from './-actions/Create'
+import { useSessionContext } from '@/providers/AuthProvider'
 
 export const Route = createFileRoute('/admin/user/')({
   component: RouteComponent,
 })
 
-import { useState } from 'react'
-import UserCreate from './-actions/Create'
-
 function RouteComponent() {
   useTitle('User Management')
+  const { data: session } = useSessionContext()
+  const role = (session?.user as any)?.role
+
   const [search, setSearch] = useState('')
 
   const { data, isLoading, error } = useQuery({
@@ -29,9 +32,10 @@ function RouteComponent() {
     return <FetchData isLoading={isLoading} error={error} data={data} />
   }
 
-  const filteredData = data.filter((user: any) =>
-    user.name?.toLowerCase().includes(search.toLowerCase()) ||
-    user.email?.toLowerCase().includes(search.toLowerCase())
+  const filteredData = data.filter(
+    (user: any) =>
+      user.name?.toLowerCase().includes(search.toLowerCase()) ||
+      user.email?.toLowerCase().includes(search.toLowerCase()),
   )
 
   return (
@@ -42,13 +46,13 @@ function RouteComponent() {
             <Text size="5" className="font-bold">
               អ្នកប្រើប្រាស់
             </Text>
-            <UserCreate />
+            {['admin', 'manager'].includes(role) && <UserCreate />}
           </Flex>
           {/* Header */}
           <Flex justify="between">
             {/* Search */}
             <Box width="250px" maxWidth="250px">
-              <TextField.Root 
+              <TextField.Root
                 placeholder="ស្វែងរក..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}

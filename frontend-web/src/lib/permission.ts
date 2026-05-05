@@ -15,6 +15,7 @@ const menuPermissions: Record<string, string[]> = {
   student: ['admin', 'manager', 'staff', 'teacher'],
   classes: ['admin', 'manager', 'staff', 'teacher', 'student'],
   course: ['admin', 'manager', 'staff', 'teacher', 'student'],
+  user: ['admin', 'manager', 'staff'],
   setting: ['admin', 'manager', 'staff', 'teacher', 'student'],
 }
 
