@@ -5,7 +5,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
 import type { FacultiesType } from '@/types'
 import { createFaculties } from '@/api/FacultyAPI'
-import { FormInput } from '@/components/ui/Input'
+import { FormInput } from '@/components/ui/forms/Input'
 
 const FacultyCreate = () => {
   const {

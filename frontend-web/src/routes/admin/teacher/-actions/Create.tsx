@@ -7,7 +7,11 @@ import type { TeachersType } from '@/types'
 import { createTeachers } from '@/api/TeacherAPI'
 import { getAcademicLevels } from '@/api/AcademicLevelAPI'
 import { getFaculties } from '@/api/FacultyAPI'
-import { FormInput, FormSelect } from '@/components/ui/Input'
+import {
+  FormInput,
+  FormSelect,
+  FormTextArea,
+} from '@/components/ui/forms/Input'
 
 const TeacherCreate = () => {
   const queryClient = useQueryClient()
@@ -87,7 +91,10 @@ const TeacherCreate = () => {
 
       let issues: any[] = []
       try {
-        if (data?.error?.name === 'ZodError' && typeof data?.error?.message === 'string') {
+        if (
+          data?.error?.name === 'ZodError' &&
+          typeof data?.error?.message === 'string'
+        ) {
           issues = JSON.parse(data.error.message)
         } else {
           issues = data?.error?.issues || data?.errors || []
@@ -239,6 +246,7 @@ const TeacherCreate = () => {
                 }}
                 error={errors.academicLevelId}
                 isRequired
+                valueAsNumber
               />
 
               <FormSelect
@@ -255,6 +263,7 @@ const TeacherCreate = () => {
                 isRequired
                 labelKey="name"
                 valueKey="id"
+                valueAsNumber
               />
 
               <FormInput
@@ -302,6 +311,16 @@ const TeacherCreate = () => {
                 isRequired
               />
             </Grid>
+            <FormTextArea
+              register={register}
+              control={control}
+              label="អាសយដ្ឋាន"
+              name="address"
+              placeholder="សូមបំពេញអាសយដ្ឋាន (មិនទាមទារ)"
+              error={errors.address}
+              rows={3}
+              resize="vertical"
+            />
           </Flex>
 
           <Flex gap="3" mt="4" justify="end">

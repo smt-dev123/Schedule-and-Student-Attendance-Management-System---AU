@@ -6,7 +6,7 @@ import toast from 'react-hot-toast'
 import { useEffect, useState } from 'react'
 import type { GradeLevelType } from '@/types'
 import { updateGradeLevel } from '@/api/GradeLevelAPI'
-import { FormSelect } from '@/components/ui/Input'
+import { FormSelect } from '@/components/ui/forms/Input'
 
 interface Props {
   data: GradeLevelType

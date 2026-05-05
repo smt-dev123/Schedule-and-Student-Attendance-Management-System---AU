@@ -1,4 +1,4 @@
-import { FormInput, FormSelect } from '@/components/ui/Input'
+import { FormInput, FormSelect } from '@/components/ui/forms/Input'
 import { Box, Grid, IconButton } from '@radix-ui/themes'
 import { useWatch } from 'react-hook-form'
 import { FaTrash } from 'react-icons/fa'

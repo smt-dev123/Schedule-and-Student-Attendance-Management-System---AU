@@ -6,8 +6,7 @@ import toast from 'react-hot-toast'
 import type { BuildingType, RoomType } from '@/types'
 import { createRoom } from '@/api/RoomAPI'
 import { getBuilding } from '@/api/BuildingAPI'
-import { FormInput, FormSelect } from '@/components/ui/Input'
-
+import { FormInput, FormSelect } from '@/components/ui/forms/Input'
 const RoomCreate = () => {
   const {
     control,

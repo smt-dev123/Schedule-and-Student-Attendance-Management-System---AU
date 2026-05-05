@@ -112,15 +112,16 @@ export interface TeachersType {
   teacherCode: string
   name: string
   gender: GenderEnum
-  academicLevelId: number
-  facultyId: number
   email: string
   phone: string
   password: string
-  education_level?: string
   address?: string
   image?: string
-  departmentId?: number
+  academicLevelId: number
+  facultyId: number
+  academicLevel?: AcademicLevelType
+  faculty?: FacultiesType
+  isActive?: boolean
 }
 
 export interface StudentsType {

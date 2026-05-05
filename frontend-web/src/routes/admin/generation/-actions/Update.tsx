@@ -4,11 +4,11 @@ import {
   Flex,
   IconButton,
   Text,
-  Select, // Import Select
+  Select,
   TextField,
 } from '@radix-ui/themes'
 import { FaRegEdit } from 'react-icons/fa'
-import { useForm, Controller } from 'react-hook-form' // Import Controller
+import { useForm, Controller } from 'react-hook-form'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
 import { useEffect, useState } from 'react'
@@ -27,8 +27,7 @@ const GenerationUpdate = ({ data }: Props) => {
     control,
     formState: { errors },
   } = useForm<AcademicLevelType>({
-    defaultValues: {
-    },
+    defaultValues: {},
   })
 
   const queryClient = useQueryClient()
@@ -63,7 +62,12 @@ const GenerationUpdate = ({ data }: Props) => {
   return (
     <Dialog.Root open={open} onOpenChange={setOpen}>
       <Dialog.Trigger>
-        <IconButton size="1" color="blue" variant="surface" style={{ cursor: 'pointer' }}>
+        <IconButton
+          size="1"
+          color="blue"
+          variant="surface"
+          style={{ cursor: 'pointer' }}
+        >
           <FaRegEdit />
         </IconButton>
       </Dialog.Trigger>
@@ -75,7 +79,9 @@ const GenerationUpdate = ({ data }: Props) => {
           <Flex direction="column" gap="3">
             {/* Level Field - Now a Select Dropdown */}
             <label>
-              <Text as="div" size="2" mb="1" weight="bold">កម្រិតសិក្សា</Text>
+              <Text as="div" size="2" mb="1" weight="bold">
+                កម្រិតសិក្សា
+              </Text>
               <Controller
                 control={control}
                 name="level"
@@ -85,7 +91,10 @@ const GenerationUpdate = ({ data }: Props) => {
                     onValueChange={field.onChange}
                     value={field.value}
                   >
-                    <Select.Trigger placeholder="ជ្រើសរើសកម្រិត..." style={{ width: '100%' }} />
+                    <Select.Trigger
+                      placeholder="ជ្រើសរើសកម្រិត..."
+                      style={{ width: '100%' }}
+                    />
                     <Select.Content>
                       <Select.Item value="Associate">Associate</Select.Item>
                       <Select.Item value="Bachelor">Bachelor</Select.Item>
@@ -96,13 +105,17 @@ const GenerationUpdate = ({ data }: Props) => {
                 )}
               />
               {errors.level && (
-                <Text size="2" color="red">{errors.level.message}</Text>
+                <Text size="2" color="red">
+                  {errors.level.message}
+                </Text>
               )}
             </label>
 
             {/* Description Field */}
             <label>
-              <Text as="div" size="2" mb="1" weight="bold">ការពិពណ៌នា</Text>
+              <Text as="div" size="2" mb="1" weight="bold">
+                ការពិពណ៌នា
+              </Text>
               <TextField.Root
                 {...register('description')}
                 placeholder="បញ្ចូលការពិពណ៌នា"
@@ -112,9 +125,13 @@ const GenerationUpdate = ({ data }: Props) => {
 
           <Flex gap="3" mt="4" justify="end">
             <Dialog.Close>
-              <Button variant="soft" color="gray">ចាកចេញ</Button>
+              <Button variant="soft" color="gray">
+                ចាកចេញ
+              </Button>
             </Dialog.Close>
-            <Button type="submit" loading={mutation.isPending}>រក្សាទុក</Button>
+            <Button type="submit" loading={mutation.isPending}>
+              រក្សាទុក
+            </Button>
           </Flex>
         </form>
       </Dialog.Content>

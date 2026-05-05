@@ -5,7 +5,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { createBuilding } from '@/api/BuildingAPI'
 import { useState } from 'react'
 import toast from 'react-hot-toast'
-import { FormInput } from '@/components/ui/Input'
+import { FormInput } from '@/components/ui/forms/Input'
 
 const BuildingCreate = () => {
   const {

@@ -1,19 +1,13 @@
 import type { BuildingType } from '@/types'
-import {
-  Button,
-  Dialog,
-  Flex,
-  IconButton,
-  Text,
-  TextField,
-} from '@radix-ui/themes'
+import { Button, Dialog, Flex, IconButton } from '@radix-ui/themes'
 import { FaRegEdit } from 'react-icons/fa'
 import { useForm } from 'react-hook-form'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { updateBuilding } from '@/api/BuildingAPI'
 import toast from 'react-hot-toast'
 import { useEffect, useState } from 'react'
-import { FormInput } from '@/components/ui/Input'
+import { FormInput } from '@/components/ui/forms/Input'
+import { FormCheckbox } from '@/components/ui/forms/Checkbox'
 
 interface Props {
   data: BuildingType
@@ -24,10 +18,12 @@ const BuildingUpdate = ({ data }: Props) => {
     register,
     handleSubmit,
     reset,
+    control,
     formState: { errors },
   } = useForm<BuildingType>({
     defaultValues: {
       name: data.name,
+      isActive: data.isActive,
     },
   })
   const queryClient = useQueryClient()
@@ -56,6 +52,7 @@ const BuildingUpdate = ({ data }: Props) => {
     if (open) {
       reset({
         name: data.name,
+        isActive: data.isActive,
       })
     }
   }, [open, data, reset])
@@ -93,6 +90,13 @@ const BuildingUpdate = ({ data }: Props) => {
                   },
                 }}
                 isRequired
+              />
+              <FormCheckbox
+                control={control}
+                label="ស្ថានភាព"
+                placeholder="សកម្ម (Active)"
+                name="isActive"
+                error={errors.isActive}
               />
             </Flex>
 

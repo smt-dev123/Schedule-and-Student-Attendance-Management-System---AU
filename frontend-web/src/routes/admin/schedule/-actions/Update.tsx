@@ -23,7 +23,7 @@ import { getAcademicYear } from '@/api/AcademicYearAPI'
 import { getRoom } from '@/api/RoomAPI'
 import { getTeachers } from '@/api/TeacherAPI'
 import { getSessionTime } from '@/api/SessionTime'
-import { FormSelect, FormInput } from '@/components/ui/Input'
+import { FormSelect, FormInput } from '@/components/ui/forms/Input'
 
 interface Props {
   scheduleId: number | null

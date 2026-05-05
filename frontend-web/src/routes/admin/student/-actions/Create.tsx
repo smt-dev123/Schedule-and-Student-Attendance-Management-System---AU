@@ -10,7 +10,7 @@ import { getDepartments } from '@/api/DepartmentAPI'
 import { getAcademicLevels } from '@/api/AcademicLevelAPI'
 import { getAcademicYear } from '@/api/AcademicYearAPI'
 import { getMajors } from '@/api/MajorAPI'
-import { FormInput, FormSelect } from '@/components/ui/Input'
+import { FormInput, FormSelect } from '@/components/ui/forms/Input'
 
 const StudentCreate = () => {
   const [open, setOpen] = useState(false)
@@ -303,8 +303,8 @@ const StudentCreate = () => {
                 register={register}
                 error={errors.phone}
                 type="tel"
-                minLength={8}
-                maxLength={15}
+                min={8}
+                max={15}
                 rules={{
                   required: 'ត្រូវបញ្ចូលលេខទូរស័ព្ទ',
                   pattern: {

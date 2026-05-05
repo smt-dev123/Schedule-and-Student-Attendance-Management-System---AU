@@ -8,8 +8,8 @@ export const BuildingColumns: ColumnDef<BuildingType>[] = [
   { accessorKey: 'id', header: 'ល.រ' },
   { accessorKey: 'name', header: 'អាគារសិក្សា' },
   {
-    id: 'building-actions',
-    header: 'សកម្មភាព',
+    accessorKey: 'isActive',
+    header: 'ស្ថានភាព',
     cell: ({ row }) => (
       <Badge color={row.original.isActive ? 'blue' : 'red'}>
         {row.original.isActive ? 'បង្ហាញ' : 'មិនបង្ហាញ'}

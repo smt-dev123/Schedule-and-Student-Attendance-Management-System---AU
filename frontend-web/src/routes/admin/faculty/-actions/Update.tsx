@@ -6,7 +6,7 @@ import toast from 'react-hot-toast'
 import { useEffect, useState } from 'react'
 import type { FacultiesType } from '@/types'
 import { updateFaculties } from '@/api/FacultyAPI'
-import { FormInput } from '@/components/ui/Input'
+import { FormInput } from '@/components/ui/forms/Input'
 
 interface Props {
   data: FacultiesType

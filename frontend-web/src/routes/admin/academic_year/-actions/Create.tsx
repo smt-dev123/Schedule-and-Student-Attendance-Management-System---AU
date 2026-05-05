@@ -5,7 +5,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
 import type { AcademicYearsType } from '@/types'
 import { createAcademicYear } from '@/api/AcademicYearAPI'
-import { FormInput } from '@/components/ui/Input'
+import { FormInput } from '@/components/ui/forms/Input'
 
 const AcademicYearCreate = () => {
   const {

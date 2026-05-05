@@ -14,7 +14,7 @@ export const SessionTimeColumns: ColumnDef<SessionTimeType>[] = [
   { accessorKey: 'description', header: 'បរិយាយ' },
   {
     accessorKey: 'isActive',
-    header: 'សកម្មភាព',
+    header: 'ស្ថានភាព',
     cell: ({ row }) => {
       const isActive = row.original.isActive
       return (

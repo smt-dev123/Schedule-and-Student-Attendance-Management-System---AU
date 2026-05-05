@@ -6,7 +6,7 @@ import toast from 'react-hot-toast'
 import { useEffect, useState } from 'react'
 import type { AcademicYearsType } from '@/types'
 import { updateAcademicYear } from '@/api/AcademicYearAPI'
-import { FormInput } from '@/components/ui/Input'
+import { FormInput } from '@/components/ui/forms/Input'
 
 interface Props {
   data: AcademicYearsType

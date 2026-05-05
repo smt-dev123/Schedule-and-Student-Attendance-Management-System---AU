@@ -17,7 +17,12 @@ import type { TeachersType } from '@/types'
 import { getFaculties } from '@/api/FacultyAPI'
 import { getAcademicLevels } from '@/api/AcademicLevelAPI'
 import { updateTeachers } from '@/api/TeacherAPI'
-import { FormInput, FormSelect } from '@/components/ui/Input'
+import {
+  FormInput,
+  FormSelect,
+  FormTextArea,
+} from '@/components/ui/forms/Input'
+import { FormCheckbox } from '@/components/ui/forms/Checkbox'
 
 interface Props {
   data: TeachersType
@@ -107,6 +112,7 @@ const TeacherUpdate = ({ data }: Props) => {
       payload.append('teacherCode', formData.teacherCode)
     if (formData.password) payload.append('password', formData.password)
     if (formData.address) payload.append('address', formData.address)
+    payload.append('isActive', String(formData.isActive))
     if (imageFile) payload.append('image', imageFile)
 
     mutation.mutate(payload)
@@ -223,6 +229,7 @@ const TeacherUpdate = ({ data }: Props) => {
                 }}
                 error={errors.academicLevelId}
                 isRequired
+                valueAsNumber
               />
 
               <FormSelect
@@ -239,6 +246,7 @@ const TeacherUpdate = ({ data }: Props) => {
                 isRequired
                 labelKey="name"
                 valueKey="id"
+                valueAsNumber
               />
 
               <FormInput
@@ -286,6 +294,25 @@ const TeacherUpdate = ({ data }: Props) => {
                 isRequired
               />
             </Grid>
+
+            <FormTextArea
+              register={register}
+              control={control}
+              label="អាសយដ្ឋាន"
+              name="address"
+              placeholder="សូមបំពេញអាសយដ្ឋាន (មិនទាមទារ)"
+              error={errors.address}
+              rows={3}
+              resize="vertical"
+            />
+
+            <FormCheckbox
+              control={control}
+              label="ស្ថានភាព"
+              placeholder="សកម្ម (Active)"
+              name="isActive"
+              error={errors.isActive}
+            />
           </Flex>
 
           <Flex gap="3" mt="6" justify="end">

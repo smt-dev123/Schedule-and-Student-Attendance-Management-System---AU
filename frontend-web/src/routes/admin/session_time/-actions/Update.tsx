@@ -1,11 +1,4 @@
-import {
-  Button,
-  Dialog,
-  Flex,
-  Grid,
-  IconButton,
-  Text,
-} from '@radix-ui/themes'
+import { Button, Dialog, Flex, Grid, IconButton, Text } from '@radix-ui/themes'
 import { FaRegEdit } from 'react-icons/fa'
 import { useForm } from 'react-hook-form'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
@@ -13,7 +6,8 @@ import toast from 'react-hot-toast'
 import { useEffect, useState } from 'react'
 import type { SessionTimeType } from '@/types'
 import { updateSessionTime } from '@/api/SessionTime'
-import { FormInput, FormSelect } from '@/components/ui/Input'
+import { FormInput, FormSelect } from '@/components/ui/forms/Input'
+import { FormCheckbox } from '@/components/ui/forms/Checkbox'
 
 interface Props {
   data: SessionTimeType
@@ -48,10 +42,10 @@ const SessionTimeUpdate = ({ data }: Props) => {
   const [open, setOpen] = useState(false)
 
   const toMinutes = (timeStr: string | undefined) => {
-  if (!timeStr) return 0;
-  const [hours, minutes] = timeStr.split(':').map(Number);
-  return hours * 60 + minutes;
-}
+    if (!timeStr) return 0
+    const [hours, minutes] = timeStr.split(':').map(Number)
+    return hours * 60 + minutes
+  }
 
   const mutation = useMutation({
     mutationFn: (formData: SessionTimeType) =>
@@ -103,7 +97,6 @@ const SessionTimeUpdate = ({ data }: Props) => {
 
         <form onSubmit={handleSubmit(onSubmit)}>
           <Flex direction="column" gap="4">
-
             {/* 1. Shift Selection (Enum) */}
             <FormSelect
               name="shift"
@@ -122,7 +115,9 @@ const SessionTimeUpdate = ({ data }: Props) => {
 
             {/* 2. Session 1 Times with Validation */}
             <fieldset style={{ border: 'none', padding: 0, margin: 0 }}>
-              <Text size="2" weight="bold" mb="2" color="blue">ម៉ោងសិក្សាទី ១</Text>
+              <Text size="2" weight="bold" mb="2" color="blue">
+                ម៉ោងសិក្សាទី ១
+              </Text>
               <Grid columns="2" gap="3">
                 <FormInput
                   type="time"
@@ -142,7 +137,10 @@ const SessionTimeUpdate = ({ data }: Props) => {
                   register={register}
                   rules={{
                     required: 'តម្រូវឱ្យបញ្ចូល',
-                    validate: (val: string) => toMinutes(val) > toMinutes(getValues('firstSessionStartTime')) || 'ម៉ោងបញ្ចប់ត្រូវតែធំជាងម៉ោងចាប់ផ្ដើម'
+                    validate: (val: string) =>
+                      toMinutes(val) >
+                        toMinutes(getValues('firstSessionStartTime')) ||
+                      'ម៉ោងបញ្ចប់ត្រូវតែធំជាងម៉ោងចាប់ផ្ដើម',
                   }}
                   isRequired
                   label="ម៉ោងបញ្ចប់"
@@ -152,7 +150,9 @@ const SessionTimeUpdate = ({ data }: Props) => {
 
             {/* 3. Session 2 Times with Validation */}
             <fieldset style={{ border: 'none', padding: 0, margin: 0 }}>
-              <Text size="2" weight="bold" mb="2" color="blue">ម៉ោងសិក្សាទី ២</Text>
+              <Text size="2" weight="bold" mb="2" color="blue">
+                ម៉ោងសិក្សាទី ២
+              </Text>
               <Grid columns="2" gap="3">
                 <FormInput
                   type="time"
@@ -160,7 +160,10 @@ const SessionTimeUpdate = ({ data }: Props) => {
                   register={register}
                   rules={{
                     required: 'តម្រូវឱ្យបញ្ចូល',
-                    validate: (val: string) => toMinutes(val) > toMinutes(getValues('firstSessionEndTime')) || 'ត្រូវចាប់ផ្ដើមក្រោយវេនទី ១ បញ្ចប់'
+                    validate: (val: string) =>
+                      toMinutes(val) >
+                        toMinutes(getValues('firstSessionEndTime')) ||
+                      'ត្រូវចាប់ផ្ដើមក្រោយវេនទី ១ បញ្ចប់',
                   }}
                   isRequired
                   error={errors.secondSessionStartTime}
@@ -172,7 +175,10 @@ const SessionTimeUpdate = ({ data }: Props) => {
                   register={register}
                   rules={{
                     required: 'តម្រូវឱ្យបញ្ចូល',
-                    validate: (val: string) => toMinutes(val) > toMinutes(getValues('secondSessionStartTime')) || 'ម៉ោងបញ្ចប់ត្រូវតែធំជាងម៉ោងចាប់ផ្ដើម'
+                    validate: (val: string) =>
+                      toMinutes(val) >
+                        toMinutes(getValues('secondSessionStartTime')) ||
+                      'ម៉ោងបញ្ចប់ត្រូវតែធំជាងម៉ោងចាប់ផ្ដើម',
                   }}
                   isRequired
                   error={errors.secondSessionEndTime}
@@ -189,11 +195,21 @@ const SessionTimeUpdate = ({ data }: Props) => {
               label="ការពិពណ៌នា"
               placeholder="ផ្សេងៗ..."
             />
+
+            <FormCheckbox
+              control={control}
+              label="ស្ថានភាព"
+              placeholder="សកម្ម (Active)"
+              name="isActive"
+              error={errors.isActive}
+            />
           </Flex>
 
           <Flex gap="3" mt="5" justify="end">
             <Dialog.Close>
-              <Button variant="soft" color="gray">ចាកចេញ</Button>
+              <Button variant="soft" color="gray">
+                ចាកចេញ
+              </Button>
             </Dialog.Close>
             <Button type="submit" loading={mutation.isPending}>
               រក្សាទុក

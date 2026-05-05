@@ -3,9 +3,7 @@ import {
   Button,
   Dialog,
   Flex,
-  Select,
   Text,
-  TextField,
   Grid,
   Box,
   Badge,
@@ -17,7 +15,7 @@ import toast from 'react-hot-toast'
 import { IoArrowUpCircle } from 'react-icons/io5'
 import { getAcademicYear } from '@/api/AcademicYearAPI'
 import { promoteStudent } from '@/api/StudentAPI'
-import { FormSelect } from '@/components/ui/Input'
+import { FormSelect } from '@/components/ui/forms/Input'
 
 interface PromoteProps {
   student: any

@@ -20,7 +20,8 @@ import { getDepartments } from '@/api/DepartmentAPI'
 import { getAcademicLevels } from '@/api/AcademicLevelAPI'
 import { getAcademicYear } from '@/api/AcademicYearAPI'
 import { getMajors } from '@/api/MajorAPI'
-import { FormInput, FormSelect } from '@/components/ui/Input'
+import { FormInput, FormSelect } from '@/components/ui/forms/Input'
+import { FormCheckbox } from '@/components/ui/forms/Checkbox'
 
 interface Props {
   data: StudentsType
@@ -99,6 +100,7 @@ const StudentUpdate = ({ data }: Props) => {
         year: data.year,
         semester: data.semester,
         generation: data.generation,
+        isActive: data.isActive,
       })
       if (data.image || (data as any).image) {
         setPreviewUrl(
@@ -198,6 +200,7 @@ const StudentUpdate = ({ data }: Props) => {
     if (formData.generation)
       payload.append('generation', String(formData.generation))
     if (formData.password) payload.append('password', formData.password)
+    payload.append('isActive', String(formData.isActive))
     if (imageFile) payload.append('image', imageFile)
     mutation.mutate(payload)
   }
@@ -215,7 +218,10 @@ const StudentUpdate = ({ data }: Props) => {
         </IconButton>
       </Dialog.Trigger>
 
-      <Dialog.Content maxWidth="650px" onInteractOutside={(e) => e.preventDefault()}>
+      <Dialog.Content
+        maxWidth="650px"
+        onInteractOutside={(e) => e.preventDefault()}
+      >
         <Dialog.Title>កែប្រែព័ត៌មាននិស្សិត</Dialog.Title>
 
         <form onSubmit={handleSubmit(onSubmit)}>
@@ -328,8 +334,8 @@ const StudentUpdate = ({ data }: Props) => {
                 register={register}
                 error={errors.phone}
                 type="tel"
-                minLength={8}
-                maxLength={15}
+                min={8}
+                max={15}
                 rules={{
                   required: 'ត្រូវបញ្ចូលលេខទូរស័ព្ទ',
                   pattern: {
@@ -542,6 +548,15 @@ const StudentUpdate = ({ data }: Props) => {
                 isRequired
               /> */}
             </Grid>
+            <Box mt="2">
+              <FormCheckbox
+                control={control}
+                label="ស្ថានភាព"
+                placeholder="សកម្ម (Active)"
+                name="isActive"
+                error={errors.isActive}
+              />
+            </Box>
 
             {/* ប៊ូតុងសកម្មភាព */}
             <Flex gap="3" mt="6" justify="end">

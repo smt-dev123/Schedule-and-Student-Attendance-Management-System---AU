@@ -1,10 +1,5 @@
 import type { BuildingType, RoomType } from '@/types'
-import {
-  Button,
-  Dialog,
-  Flex,
-  IconButton,
-} from '@radix-ui/themes'
+import { Button, Dialog, Flex, IconButton } from '@radix-ui/themes'
 import { FaRegEdit } from 'react-icons/fa'
 import { useForm } from 'react-hook-form'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
@@ -12,7 +7,7 @@ import { getBuilding } from '@/api/BuildingAPI'
 import toast from 'react-hot-toast'
 import { useEffect, useState } from 'react'
 import { updateRoom } from '@/api/RoomAPI'
-import { FormInput, FormSelect } from '@/components/ui/Input'
+import { FormInput, FormSelect } from '@/components/ui/forms/Input'
 
 interface Props {
   data: RoomType

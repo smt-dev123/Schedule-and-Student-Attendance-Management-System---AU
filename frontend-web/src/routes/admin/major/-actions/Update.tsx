@@ -7,7 +7,7 @@ import toast from 'react-hot-toast'
 import { useEffect, useState } from 'react'
 import { updateMajors } from '@/api/MajorAPI'
 import { getFaculties } from '@/api/FacultyAPI'
-import { FormInput, FormSelect } from '@/components/ui/Input'
+import { FormInput, FormSelect } from '@/components/ui/forms/Input'
 
 interface Props {
   data: MajorsType

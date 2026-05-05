@@ -4,8 +4,7 @@ import { useForm, useFieldArray } from 'react-hook-form'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
 import { FaPlus, FaRegCalendarAlt } from 'react-icons/fa'
-import { FormInput, FormSelect } from '@/components/ui/Input'
-import { CourseItem } from './components/ScheduleFormComponents'
+import { FormInput, FormSelect } from '@/components/ui/forms/Input'
 import { createSchedule } from '@/api/SchedulesAPI'
 import { getFaculties } from '@/api/FacultyAPI'
 import { getDepartments } from '@/api/DepartmentAPI'
@@ -14,6 +13,7 @@ import { getAcademicYear } from '@/api/AcademicYearAPI'
 import { getRoom } from '@/api/RoomAPI'
 import { getTeachers } from '@/api/TeacherAPI'
 import { getSessionTime } from '@/api/SessionTime'
+import { CourseItem } from './components/ScheduleFormComponents'
 
 const ScheduleCreate = () => {
   const queryClient = useQueryClient()
@@ -186,7 +186,6 @@ const ScheduleCreate = () => {
                   control={control}
                   options={faculties}
                   placeholder="រើសមហាវិទ្យាល័យ"
-                  style={{ width: '100%' }}
                   error={errors.schedule?.facultyId}
                   isRequired={true}
                 />

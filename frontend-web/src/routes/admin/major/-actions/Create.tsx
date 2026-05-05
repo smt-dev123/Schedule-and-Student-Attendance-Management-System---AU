@@ -6,7 +6,7 @@ import toast from 'react-hot-toast'
 import type { FacultiesType, MajorsType } from '@/types'
 import { createMajors } from '@/api/MajorAPI'
 import { getFaculties } from '@/api/FacultyAPI'
-import { FormInput, FormSelect } from '@/components/ui/Input'
+import { FormInput, FormSelect } from '@/components/ui/forms/Input'
 
 const MajorCreate = () => {
   const {

@@ -5,7 +5,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
 import type { SessionTimeType } from '@/types'
 import { createSessionTime } from '@/api/SessionTime'
-import { FormInput, FormSelect } from '@/components/ui/Input'
+import { FormInput, FormSelect } from '@/components/ui/forms/Input'
 
 const toMinutes = (timeStr: string | undefined) => {
   if (!timeStr) return 0
@@ -40,7 +40,10 @@ const SessionTimeCreate = () => {
 
       let issues: any[] = []
       try {
-        if (data?.error?.name === 'ZodError' && typeof data?.error?.message === 'string') {
+        if (
+          data?.error?.name === 'ZodError' &&
+          typeof data?.error?.message === 'string'
+        ) {
           issues = JSON.parse(data.error.message)
         } else {
           issues = data?.error?.issues || data?.errors || []
