@@ -92,7 +92,7 @@ const staff = ac.newRole({
   schedule: ["create", "read", "update", "delete"],
   student: ["create", "read", "update", "delete", "promote"],
   teacher: ["create", "read", "update", "delete"],
-  attendance: ["read", "update", "delete"],
+  attendance: ["create", "read", "update", "delete"],
   notification: ["create", "read", "update", "delete"],
   user: ["read"],
 });
@@ -105,7 +105,7 @@ const teacher = ac.newRole({
   academicLevel: ["read"],
   skill: ["read"],
   schedule: ["read"],
-  attendance: ["read"],
+  attendance: ["create", "read", "update", "delete"],
   course: ["read"],
   sessionTime: ["read"],
   student: ["read"],

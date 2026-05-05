@@ -23,7 +23,7 @@ import { UserRepository } from "@/repositories/user.repository";
 
 // Services
 import { AcademicLevelService } from "@/services/academic-level.service";
-import { AttendanceService } from "@/services/attendace.service";
+import { AttendanceService } from "@/services/attendance.service";
 import { BuildingService } from "@/services/building.service";
 import { ClassroomService } from "@/services/classroom.service";
 import { DepartmentService } from "@/services/department.service";

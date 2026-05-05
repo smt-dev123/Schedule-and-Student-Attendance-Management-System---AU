@@ -50,7 +50,7 @@ export type AttendanceInput = {
   session: number;
   status: "present" | "absent" | "late" | "excused";
   notes?: string;
-  recordedBy: number;
+  recordedBy?: number;
 };
 
 export type AttendanceReportQuery = {

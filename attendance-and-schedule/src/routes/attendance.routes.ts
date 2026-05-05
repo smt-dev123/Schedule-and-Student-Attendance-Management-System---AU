@@ -20,7 +20,7 @@ router.post(
     const user = c.get("user");
     const data = c.req.valid("json");
     const { attendanceService } = c.get("container");
-    const result = await attendanceService.markBulkAttendance(data, (user as any).id);
+    const result = await attendanceService.markBulkAttendance(data, user as any);
     return c.json(result);
   },
 );
@@ -34,6 +34,27 @@ router.get(
     const { attendanceService } = c.get("container");
     const records = await attendanceService.getAttendanceByStudentId(
       Number(id),
+    );
+    return c.json(records);
+  },
+);
+
+router.get(
+  "/course/:courseId",
+  authentication,
+  requirePermission("attendance", "read"),
+  async (c) => {
+    const courseId = Number(c.req.param("courseId"));
+    const date = c.req.query("date");
+
+    if (!date) {
+      return c.json({ message: "Date is required" }, 400);
+    }
+
+    const { attendanceService } = c.get("container");
+    const records = await attendanceService.getAttendanceByCourseIdAndDate(
+      courseId,
+      date,
     );
     return c.json(records);
   },

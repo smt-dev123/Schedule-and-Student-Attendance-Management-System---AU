@@ -23,12 +23,45 @@ export class AttendanceRepository {
     return client.insert(attendanceRecords).values(data).returning();
   }
 
+  async upsertAttendance(
+    data: AttendanceInput[],
+    tx?: Transaction,
+  ): Promise<AttendanceRecord[]> {
+    const client = tx ?? this.db;
+    return client
+      .insert(attendanceRecords)
+      .values(data)
+      .onConflictDoUpdate({
+        target: [
+          attendanceRecords.courseId,
+          attendanceRecords.studentId,
+          attendanceRecords.date,
+          attendanceRecords.session,
+        ],
+        set: {
+          status: sql`EXCLUDED.status`,
+          notes: sql`EXCLUDED.notes`,
+          updatedAt: new Date(),
+        },
+      })
+      .returning();
+  }
+
   async getAttendanceByStudentId(studentId: number) {
     return this.db.query.attendanceRecords.findMany({
       where: eq(attendanceRecords.studentId, studentId),
       with: {
         course: { columns: { name: true } },
       },
+    });
+  }
+
+  async getAttendanceByCourseIdAndDate(courseId: number, date: string) {
+    return this.db.query.attendanceRecords.findMany({
+      where: and(
+        eq(attendanceRecords.courseId, courseId),
+        eq(attendanceRecords.date, date),
+      ),
     });
   }
 

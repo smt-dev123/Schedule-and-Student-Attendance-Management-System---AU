@@ -22,6 +22,8 @@ import { FaArrowLeft, FaInfoCircle, FaSave, FaFileAlt } from 'react-icons/fa'
 import { getCourseStudents, getCourseById } from '@/api/CourseAPI'
 import { getCourseAttendance, markBulkAttendance } from '@/api/AttendanceAPI'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useSessionContext } from '@/providers/AuthProvider'
+import { formatDate } from '@/hooks/useDate'
 
 export const Route = createFileRoute('/admin/course/attendance/$attendanceId')({
   component: RouteComponent,
@@ -39,61 +41,82 @@ function RouteComponent() {
   const router = useRouter()
   const { attendanceId }: any = Route.useParams()
   const courseId = Number(attendanceId)
-  const today = new Date().toISOString().split('T')[0]
+  const today = useMemo(() => new Date().toISOString().split('T')[0], [])
   const queryClient = useQueryClient()
+  const { data: session } = useSessionContext()
+  const user = session?.user
+  const role = (user as any)?.role || ''
+  const canChangeDate = role === 'admin' || role === 'manager'
 
-  // 1) Fetch Students for the course
+  const [selectedDate, setSelectedDate] = useState(today)
+
+  // Fetch Students for the course
   const { data: studentsData, isLoading: isLoadStudents } = useQuery({
     queryKey: ['course_students', courseId],
     queryFn: () => getCourseStudents(courseId),
   })
-  const students = studentsData || []
 
-  // 1.1) Fetch Course Details
+  const formattedStudentsData = studentsData?.map((student: any) => ({
+    ...student,
+    dob: formatDate(student.dob).display(),
+  }))
+
+  const students = formattedStudentsData || []
+
+  // Fetch Course Details
   const { data: course, isLoading: isLoadCourse } = useQuery({
     queryKey: ['course_detail', courseId],
     queryFn: () => getCourseById(courseId),
   })
 
-  // 2) Fetch existing attendance for today
+  // Fetch existing attendance for the selected date
   const { data: existingRecordsData, isLoading: isLoadAttendance } = useQuery({
-    queryKey: ['course_attendance', courseId, today],
-    queryFn: () => getCourseAttendance(courseId, today),
+    queryKey: ['course_attendance', courseId, selectedDate],
+    queryFn: () => getCourseAttendance(courseId, selectedDate),
   })
   const existingRecords = existingRecordsData || []
 
   const [selected, setSelected] = useState<Record<string, string>>({})
+  const [notes, setNotes] = useState<Record<string, string>>({})
+  const [isEditing, setIsEditing] = useState(false)
 
-  // 3) Prepopulate selections
+  // Prepopulate selections
   useEffect(() => {
     if (isLoadStudents || isLoadAttendance || isLoadCourse) return
-    const initial: Record<string, string> = {}
+    const initialSelected: Record<string, string> = {}
+    const initialNotes: Record<string, string> = {}
 
     // If existing records found, prepopulate with them
     if (existingRecords && existingRecords.length > 0) {
       existingRecords.forEach((record: any) => {
-        initial[record.studentId] = record.status
+        initialSelected[record.studentId] = record.status
+        initialNotes[record.studentId] = record.notes || ''
       })
       // Fill the rest with absent
       students.forEach((s: any) => {
         if (
-          !initial[s.id] &&
+          !initialSelected[s.id] &&
           s.isActive &&
           s.educationalStatus === 'enrolled'
         ) {
-          initial[s.id] = 'absent'
+          initialSelected[s.id] = 'absent'
+          initialNotes[s.id] = ''
         }
       })
+      setIsEditing(false)
     } else {
       // Default all enrolled to absent
       students.forEach((s: any) => {
         if (s.isActive && s.educationalStatus === 'enrolled') {
-          initial[s.id] = 'absent'
+          initialSelected[s.id] = 'absent'
+          initialNotes[s.id] = ''
         }
       })
+      setIsEditing(true)
     }
 
-    setSelected(initial)
+    setSelected(initialSelected)
+    setNotes(initialNotes)
   }, [studentsData, existingRecordsData, isLoadStudents, isLoadAttendance])
 
   const mutation = useMutation({
@@ -101,8 +124,9 @@ function RouteComponent() {
     onSuccess: () => {
       toast.success('រក្សាទុកវត្តមានបានជោគជ័យ!')
       queryClient.invalidateQueries({
-        queryKey: ['course_attendance', courseId, today],
+        queryKey: ['course_attendance', courseId, selectedDate],
       })
+      setIsEditing(false)
     },
     onError: (error: any) => {
       toast.error(
@@ -134,6 +158,10 @@ function RouteComponent() {
     setSelected(newSelection)
   }
 
+  const handleNoteChange = (studentId: string, note: string) => {
+    setNotes((prev) => ({ ...prev, [studentId]: note }))
+  }
+
   const handleSubmit = async () => {
     const markedCount = Object.keys(selected).length
     if (markedCount < activeStudents.length) {
@@ -143,7 +171,7 @@ function RouteComponent() {
 
     const payload = {
       courseId: courseId,
-      date: today,
+      date: selectedDate,
       session:
         course?.schedule?.sessionTime?.shift === 'morning'
           ? 1
@@ -153,11 +181,10 @@ function RouteComponent() {
       academicYearId: course?.academicYearId,
       facultyId: course?.schedule?.faculty?.id,
       departmentId: course?.schedule?.department?.id,
-      recordedBy: 1, // hardcoded for now, coerce to number
       mark: activeStudents.map((s: any) => ({
         studentId: s.id,
         status: selected[s.id],
-        notes: '',
+        notes: notes[s.id] || '',
       })),
     }
 
@@ -187,13 +214,39 @@ function RouteComponent() {
             >
               សម្រង់វត្តមាននិស្សិត
             </Text>
-            {/* <Text size="2" color="gray">
-              ID ថ្នាក់រៀន: {attendanceId}
-            </Text> */}
           </Flex>
         </Flex>
 
-        <Flex gap="3">
+        <Flex gap="3" align="center">
+          {(role === 'admin' || role === 'manager') && (
+            <Flex align="center" gap="3">
+              <Text size="2" weight="bold">
+                កាលបរិច្ឆេទ៖
+              </Text>
+              <input
+                type="date"
+                value={selectedDate}
+                onChange={(e) => setSelectedDate(e.target.value)}
+                disabled={!canChangeDate}
+                className={`p-1 border rounded-md text-sm outline-none focus:ring-1 focus:ring-blue-500 ${!canChangeDate ? 'bg-gray-100 cursor-not-allowed opacity-70' : 'bg-white cursor-pointer'}`}
+              />
+              {!canChangeDate && (
+                <Badge color="yellow" variant="soft" size="1">
+                  ស្វ័យប្រវត្តិ
+                </Badge>
+              )}
+            </Flex>
+          )}
+          {(role === 'admin' || role === 'manager') && (
+            <Button
+              variant="surface"
+              color={isEditing ? 'red' : 'blue'}
+              onClick={() => setIsEditing(!isEditing)}
+              style={{ cursor: 'pointer' }}
+            >
+              {isEditing ? 'បោះបង់ការកែប្រែ' : 'កែប្រែវត្តមាន'}
+            </Button>
+          )}
           <Button variant="soft" color="gray" asChild>
             <Link
               to="/admin/course/attendance/report/$attendanceReportId"
@@ -202,11 +255,14 @@ function RouteComponent() {
               <FaFileAlt /> របាយការណ៍
             </Link>
           </Button>
+
           <Button
             size="2"
             color="blue"
             onClick={handleSubmit}
             loading={mutation.isPending}
+            disabled={!isEditing}
+            style={{ cursor: isEditing ? 'pointer' : 'not-allowed' }}
           >
             <FaSave /> រក្សាទុកទិន្នន័យ
           </Button>
@@ -268,6 +324,12 @@ function RouteComponent() {
             <CellTable className="bg-gray-50" isHeader rowSpan={2}>
               គោត្តនាម - នាម
             </CellTable>
+            <CellTable className="bg-gray-50" isHeader rowSpan={2}>
+              ឈ្មោះជាភាសាអង់គ្លេស
+            </CellTable>
+            <CellTable className="bg-gray-50" isHeader rowSpan={2}>
+              ថ្ងៃខែឆ្នាំកំណើត
+            </CellTable>
             <CellTable className="w-16 bg-gray-50" isHeader rowSpan={2}>
               ភេទ
             </CellTable>
@@ -276,7 +338,7 @@ function RouteComponent() {
             </CellTable>
             <CellTable
               isHeader
-              columSpan={4}
+              columSpan={5}
               noRightBorder
               className="bg-blue-600 border-blue-600"
             >
@@ -309,6 +371,13 @@ function RouteComponent() {
                 </Flex>
               </CellTable>
             ))}
+            <CellTable
+              className="w-48 text-xs bg-blue-50 text-blue-800"
+              isHeader
+              noRightBorder
+            >
+              សម្គាល់
+            </CellTable>
           </RowTable>
         </HeaderTable>
 
@@ -323,13 +392,19 @@ function RouteComponent() {
               >
                 <CellTable className="text-center">{idx + 1}</CellTable>
                 <CellTable className="font-mono text-xs">
-                  {student.code}
+                  {student.studentCode}
                 </CellTable>
                 <CellTable
                   className={`text-left font-medium dark:text-white ${isInactive ? 'text-gray-400' : 'text-slate-700'}`}
                 >
                   {student.name}
                 </CellTable>
+                <CellTable
+                  className={`text-left font-medium dark:text-white ${isInactive ? 'text-gray-400' : 'text-slate-700'}`}
+                >
+                  {student.nameEn}
+                </CellTable>
+                <CellTable className="text-center">{student.dob}</CellTable>
                 <CellTable className="text-center">
                   {student.gender === 'male'
                     ? 'ប្រុស'
@@ -350,7 +425,7 @@ function RouteComponent() {
                     noRightBorder={index === 3}
                   >
                     <Checkbox
-                      disabled={isInactive}
+                      disabled={isInactive || !isEditing}
                       checked={selected[student.id] === opt.value}
                       onCheckedChange={() =>
                         handleSelect(student.id, opt.value)
@@ -359,14 +434,39 @@ function RouteComponent() {
                     />
                   </CellTable>
                 ))}
+                <CellTable className="text-center" noRightBorder>
+                  <input
+                    type="text"
+                    value={notes[student.id] || ''}
+                    onChange={(e) =>
+                      handleNoteChange(student.id, e.target.value)
+                    }
+                    disabled={isInactive || !isEditing}
+                    placeholder="..."
+                    className={`w-full p-1 text-xs border rounded transition-all ${!isEditing ? 'bg-gray-50 border-transparent text-gray-500' : 'bg-white border-gray-200 focus:border-blue-500'}`}
+                  />
+                </CellTable>
               </Table.Row>
             )
           })}
         </Table.Body>
       </RootTable>
 
+      {activeStudents.length > 0 && (
+        <Callout.Root color="red" variant="soft">
+          <Callout.Icon>
+            <FaInfoCircle />
+          </Callout.Icon>
+          <Callout.Text>
+            ចំណាំ៖ លោកគ្រូ/អ្នកគ្រូ
+            មិនអាចស្រង់វត្តមាននិស្សិតក្រៅពីម៉ោងសិក្សាជាផ្លូវការ
+            ឬក្រោយម៉ោងសិក្សាជាផ្លូវការ ១៥នាទីបានទេ។
+          </Callout.Text>
+        </Callout.Root>
+      )}
+
       {activeStudents.length === 0 && (
-        <Callout.Root color="orange" variant="soft">
+        <Callout.Root color="red" variant="soft">
           <Callout.Icon>
             <FaInfoCircle />
           </Callout.Icon>
