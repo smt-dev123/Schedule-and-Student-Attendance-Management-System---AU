@@ -213,9 +213,10 @@ const ScheduleCreate = () => {
                   name="schedule.academicLevelId"
                   control={control}
                   options={levels}
+                  labelKey="level"
                   placeholder="កម្រិត"
                   error={errors.schedule?.academicLevelId}
-                  isRequired={true}
+                  isRequired
                 />
 
                 <Grid columns="2" gap="2">

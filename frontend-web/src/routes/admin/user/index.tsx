@@ -11,8 +11,12 @@ export const Route = createFileRoute('/admin/user/')({
   component: RouteComponent,
 })
 
+import { useState } from 'react'
+import UserCreate from './-actions/Create'
+
 function RouteComponent() {
   useTitle('User Management')
+  const [search, setSearch] = useState('')
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['users'],
@@ -25,22 +29,30 @@ function RouteComponent() {
     return <FetchData isLoading={isLoading} error={error} data={data} />
   }
 
+  const filteredData = data.filter((user: any) =>
+    user.name?.toLowerCase().includes(search.toLowerCase()) ||
+    user.email?.toLowerCase().includes(search.toLowerCase())
+  )
+
   return (
     <div>
       <Flex direction="column" gap="4">
         <Flex direction="column">
-          {/*  */}
           <Flex justify="between" mb="4">
             <Text size="5" className="font-bold">
               អ្នកប្រើប្រាស់
             </Text>
-            {/* បង្កើតអ្នកប្រើប្រាស់ */}
+            <UserCreate />
           </Flex>
           {/* Header */}
           <Flex justify="between">
             {/* Search */}
             <Box width="250px" maxWidth="250px">
-              <TextField.Root placeholder="ស្វែងរក...">
+              <TextField.Root 
+                placeholder="ស្វែងរក..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              >
                 <TextField.Slot>
                   <IoSearch height="16" width="16" />
                 </TextField.Slot>
@@ -50,7 +62,7 @@ function RouteComponent() {
         </Flex>
 
         {/* Table */}
-        <UserTable data={data} />
+        <UserTable data={filteredData} />
       </Flex>
     </div>
   )

@@ -1,13 +1,22 @@
 import type { UsersType } from '@/types'
 import { Flex, IconButton } from '@radix-ui/themes'
 import type { ColumnDef } from '@tanstack/react-table'
-import { FaRegEdit, FaRegEye, FaRegTrashAlt } from 'react-icons/fa'
+import { FaRegEye } from 'react-icons/fa'
+
+import UserUpdate from '@/routes/admin/user/-actions/Update'
+import UserDelete from '@/routes/admin/user/-actions/Delete'
 
 export const UserColumns: ColumnDef<UsersType>[] = [
-  { accessorKey: 'id', header: 'ល.រ' },
-  { accessorKey: 'username', header: 'ឈ្មោះ' },
-  { accessorKey: 'email', header: 'ភេទ' },
-  { accessorKey: 'role', header: 'ថ្ងៃ ខែ ឆ្នាំកំណើត' },
+  {
+    accessorKey: 'no',
+    header: 'ល.រ',
+    cell: ({ row }) => {
+      return <span>{row.index + 1}</span>
+    },
+  },
+  { accessorKey: 'name', header: 'ឈ្មោះ' },
+  { accessorKey: 'email', header: 'អ៊ីមែល' },
+  { accessorKey: 'role', header: 'តួនាទី' },
   {
     id: 'user-actions',
     header: 'សកម្មភាព',
@@ -23,24 +32,9 @@ export const UserColumns: ColumnDef<UsersType>[] = [
           <FaRegEye />
         </IconButton>
 
-        <IconButton
-          size="1"
-          color="cyan"
-          variant="surface"
-          style={{ cursor: 'pointer' }}
-          // onClick={() => handleUpdate(row.original.id)}
-        >
-          <FaRegEdit />
-        </IconButton>
+        <UserUpdate user={row.original} />
 
-        <IconButton
-          size="1"
-          color="red"
-          variant="surface"
-          style={{ cursor: 'pointer' }}
-        >
-          <FaRegTrashAlt />
-        </IconButton>
+        <UserDelete userId={row.original.id} userName={row.original.name} />
       </Flex>
     ),
   },

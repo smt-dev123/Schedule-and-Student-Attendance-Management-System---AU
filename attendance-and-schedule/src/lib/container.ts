@@ -19,6 +19,7 @@ import { NotificationRepository } from "@/repositories/notification.repository";
 import { AcademicYearRepository } from "@/repositories/academic-year.repository";
 import { ScheduleOverrideRepository } from "@/repositories/schedule-override.repository";
 import { DashboardRepository } from "@/repositories/dashboard.repository";
+import { UserRepository } from "@/repositories/user.repository";
 
 // Services
 import { AcademicLevelService } from "@/services/academic-level.service";
@@ -37,6 +38,7 @@ import { AcademicYearService } from "@/services/academic-year.service";
 import { CourseService } from "@/services/course.service";
 import { ScheduleOverrideService } from "@/services/schedule-override.service";
 import { DashboardService } from "@/services/dashboard.service";
+import { UserService } from "@/services/user.service";
 
 // WebSocket
 import { WebSocketManager } from "@/lib/ws-manager";
@@ -67,6 +69,7 @@ export interface ICradle {
   skillRepository: SkillRepository;
   scheduleOverrideRepository: ScheduleOverrideRepository;
   dashboardRepository: DashboardRepository;
+  userRepository: UserRepository;
 
   // Services
   academicLevelService: AcademicLevelService;
@@ -86,6 +89,7 @@ export interface ICradle {
   skillService: SkillService;
   scheduleOverrideService: ScheduleOverrideService;
   dashboardService: DashboardService;
+  userService: UserService;
 }
 
 // Instantiate Infrastructure
@@ -107,9 +111,10 @@ const teacherRepository = new TeacherRepository(db);
 const translationRepository = new TranslationRepository(db);
 const notificationRepository = new NotificationRepository(db);
 const academicYearRepository = new AcademicYearRepository(db);
-const skillRepository = new SkillRepository(db);
+  const skillRepository = new SkillRepository(db);
 const scheduleOverrideRepository = new ScheduleOverrideRepository(db);
 const dashboardRepository = new DashboardRepository(db);
+const userRepository = new UserRepository(db);
 // Instantiate Services
 const academicLevelService = new AcademicLevelService(academicLevelRepository);
 const attendanceService = new AttendanceService(
@@ -148,6 +153,7 @@ const courseService = new CourseService(courseRepository);
 const skillService = new SkillService(skillRepository);
 const scheduleOverrideService = new ScheduleOverrideService(scheduleOverrideRepository, db);
 const dashboardService = new DashboardService(dashboardRepository);
+const userService = new UserService(userRepository);
 
 export const container: ICradle = {
   db,
@@ -171,6 +177,7 @@ export const container: ICradle = {
   skillRepository,
   scheduleOverrideRepository,
   dashboardRepository,
+  userRepository,
 
   academicLevelService,
   attendanceService,
@@ -189,4 +196,5 @@ export const container: ICradle = {
   skillService,
   scheduleOverrideService,
   dashboardService,
+  userService,
 };

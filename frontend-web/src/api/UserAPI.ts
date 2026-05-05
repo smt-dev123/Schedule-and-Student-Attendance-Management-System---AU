@@ -12,14 +12,14 @@ export const createUsers = async (newUsers: UsersType) => {
 }
 
 export const updateUsers = async (
-  id: number,
+  id: string,
   updateUsers: UsersType,
 ) => {
   const res = await api.put(`/users/${id}`, updateUsers)
   return res.data?.data
 }
 
-export const deleteUsers = async (id: number) => {
+export const deleteUsers = async (id: string) => {
   const res = await api.delete(`/users/${id}`)
   return res.data?.data
 }

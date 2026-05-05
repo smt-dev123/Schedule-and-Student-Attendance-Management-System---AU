@@ -24,6 +24,7 @@ const statement = {
   teacher: ["create", "read", "update", "delete"],
   attendance: ["create", "read", "update", "delete"],
   notification: ["create", "read", "update", "delete", "read-own"],
+  user: ["create", "read", "update", "delete"],
   system: ["manage"],
 } as const;
 
@@ -55,6 +56,26 @@ const admin = ac.newRole({
   teacher: ["create", "read", "update", "delete"],
   attendance: ["create", "read", "update", "delete"],
   notification: ["create", "read", "update", "delete", "read-own"],
+  user: ["create", "read", "update", "delete"],
+  system: ["manage"],
+});
+
+const manager = ac.newRole({
+  dashboard: ["read"],
+  building: ["create", "read", "update", "delete"],
+  classroom: ["create", "read", "update", "delete"],
+  faculty: ["create", "read", "update", "delete"],
+  skill: ["create", "read", "update", "delete"],
+  department: ["create", "read", "update", "delete"],
+  academicLevel: ["create", "read", "update", "delete"],
+  academicYear: ["create", "read", "update", "delete"],
+  course: ["create", "read", "update", "delete"],
+  sessionTime: ["create", "read", "update", "delete"],
+  schedule: ["create", "read", "update", "delete"],
+  student: ["create", "read", "update", "delete", "promote"],
+  teacher: ["create", "read", "update", "delete"],
+  attendance: ["create", "read", "update", "delete"],
+  user: ["create", "read", "update", "delete"],
   system: ["manage"],
 });
 
@@ -73,24 +94,7 @@ const staff = ac.newRole({
   teacher: ["create", "read", "update", "delete"],
   attendance: ["read", "update", "delete"],
   notification: ["create", "read", "update", "delete"],
-});
-
-const manager = ac.newRole({
-  dashboard: ["read"],
-  building: ["create", "read", "update", "delete"],
-  classroom: ["create", "read", "update", "delete"],
-  faculty: ["create", "read", "update", "delete"],
-  skill: ["create", "read", "update", "delete"],
-  department: ["create", "read", "update", "delete"],
-  academicLevel: ["create", "read", "update", "delete"],
-  academicYear: ["create", "read", "update", "delete"],
-  course: ["create", "read", "update", "delete"],
-  sessionTime: ["create", "read", "update", "delete"],
-  schedule: ["create", "read", "update", "delete"],
-  student: ["create", "read", "update", "delete", "promote"],
-  teacher: ["create", "read", "update", "delete"],
-  attendance: ["create", "read", "update", "delete"],
-  system: ["manage"],
+  user: ["read"],
 });
 
 const teacher = ac.newRole({

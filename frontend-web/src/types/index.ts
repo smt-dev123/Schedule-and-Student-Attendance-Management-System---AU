@@ -220,12 +220,14 @@ export interface TranslationType {
 }
 
 export interface UsersType {
-  id?: number
-  username?: string
+  id: string
+  name: string
   email: string
-  password: string
+  password?: string
   role: string
-  profile?: string
+  image?: string
+  createdAt?: string
+  updatedAt?: string
 }
 
 // Enums

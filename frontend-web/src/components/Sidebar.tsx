@@ -10,6 +10,7 @@ import {
   RiArrowRightSLine,
   RiCalendarEventLine,
   RiNotification2Line,
+  RiUser3Line,
 } from 'react-icons/ri'
 import { useTranslation } from 'react-i18next'
 import { LiaChalkboardTeacherSolid } from 'react-icons/lia'
@@ -157,6 +158,12 @@ export default function Sidebar({
       icon: <AiOutlineSchedule />,
       label: 'វគ្គសិក្សា',
       url: '/admin/course',
+    },
+    {
+      key: 'user',
+      icon: <RiUser3Line />,
+      label: t('Sidebar.user'),
+      url: '/admin/user',
     },
     {
       key: 'setting',
