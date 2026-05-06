@@ -225,7 +225,13 @@ export const scheduleUniqueKeySchema = z.object({
   semester: z.coerce.number().positive(),
   studyShift: studyShiftEnum,
 });
-export const scheduleUpdateSchema = scheduleSchema.partial();
+export const scheduleUpdateSchema = scheduleSchema.partial()
+export const scheduleQuerySchema = z.object({
+  academicYearId: z.coerce.number().optional(),
+  facultyId: z.coerce.number().optional(),
+  departmentId: z.coerce.number().optional(),
+  academicLevelId: z.coerce.number().optional(),
+})
 
 export const scheduleWithCoursesSchema = z.object({
   schedule: scheduleSchema,

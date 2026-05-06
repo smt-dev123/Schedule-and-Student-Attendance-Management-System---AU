@@ -19,8 +19,30 @@ export class ScheduleRepository {
     return schedule;
   }
 
-  async findAll(): Promise<Schedule[]> {
+  async findAll(query?: {
+    academicYearId?: number
+    facultyId?: number
+    departmentId?: number
+    academicLevelId?: number
+  }): Promise<Schedule[]> {
+    const conditions: any[] = []
+    if (query?.academicYearId) {
+      conditions.push(eq(schedules.academicYearId, query.academicYearId))
+    }
+    if (query?.facultyId) {
+      conditions.push(eq(schedules.facultyId, query.facultyId))
+    }
+    if (query?.departmentId) {
+      conditions.push(eq(schedules.departmentId, query.departmentId))
+    }
+    if (query?.academicLevelId) {
+      conditions.push(eq(schedules.academicLevelId, query.academicLevelId))
+    }
+
+    const where = conditions.length > 0 ? and(...conditions) : undefined
+
     return this.db.query.schedules.findMany({
+      where,
       with: {
         faculty: { columns: { id: true, name: true } },
         department: { columns: { id: true, name: true } },
@@ -47,7 +69,7 @@ export class ScheduleRepository {
           },
         },
       },
-    });
+    })
   }
 
   async findById(id: number): Promise<Schedule | null> {

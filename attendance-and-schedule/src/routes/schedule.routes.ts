@@ -3,6 +3,7 @@ import { zValidator } from "@hono/zod-validator";
 import {
   scheduleUpdateWithCoursesSchema,
   scheduleWithCoursesSchema,
+  scheduleQuerySchema,
 } from "@/validators/academy";
 import authentication from "@/middlewares/auth";
 import requirePermission from "@/middlewares/permission";
@@ -13,9 +14,11 @@ router.get(
   "/",
   authentication,
   requirePermission("schedule", "read"),
+  zValidator("query", scheduleQuerySchema),
   async (c) => {
     const { scheduleService } = c.var.container;
-    const schedules = await scheduleService.findAll();
+    const query = c.req.valid("query");
+    const schedules = await scheduleService.findAll(query);
     return c.json(schedules);
   },
 );

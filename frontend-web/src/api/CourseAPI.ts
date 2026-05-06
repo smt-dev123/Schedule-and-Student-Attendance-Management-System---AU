@@ -3,15 +3,18 @@ import type { CoursesType } from '@/types'
 
 const ENDPOINT = '/courses'
 
-export const getCourses = async (
-  academicYearId?: number,
-  page?: number,
-  limit?: number,
-  teacherId?: number,
-  studentId?: number,
-) => {
+export const getCourses = async (params: {
+  academicYearId?: number
+  page?: number
+  limit?: number
+  teacherId?: number
+  studentId?: number
+  facultyId?: number
+  departmentId?: number
+  academicLevelId?: number
+}) => {
   const res = await api.get(ENDPOINT, {
-    params: { academicYearId, page, limit, teacherId, studentId },
+    params,
   })
   return res.data
 }

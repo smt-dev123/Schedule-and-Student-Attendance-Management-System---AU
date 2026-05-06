@@ -6,6 +6,7 @@ export const getSchedules = async (params?: {
   facultyId?: number
   departmentId?: number
   academicYearId?: number | null
+  academicLevelId?: number
 }) => {
   const res = await api.get(ENDPOINT, {
     params,

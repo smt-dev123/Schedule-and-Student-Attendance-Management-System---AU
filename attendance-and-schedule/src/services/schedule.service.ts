@@ -71,8 +71,8 @@ export class ScheduleService {
     });
   }
 
-  async findAll(): Promise<Schedule[]> {
-    return this.scheduleRepo.findAll();
+  async findAll(query?: any): Promise<Schedule[]> {
+    return this.scheduleRepo.findAll(query);
   }
 
   async findById(id: number): Promise<Schedule> {
