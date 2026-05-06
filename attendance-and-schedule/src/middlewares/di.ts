@@ -4,6 +4,8 @@ import { container, type ICradle } from "@/lib/container";
 declare module "hono" {
   interface ContextVariableMap {
     container: ICradle;
+    session: any;
+    user: any;
   }
 }
 

@@ -16,8 +16,23 @@ router.get(
   requirePermission("course", "read"),
   zValidator("query", courseQuerySchema),
   async (c) => {
-    const { courseService } = c.var.container;
+    const { courseService, teacherRepository, studentRepository } =
+      c.var.container;
     const query = c.req.valid("query");
+    const user = c.var.user;
+
+    if (user.role === "teacher") {
+      const teacher = await teacherRepository.findByUserId(user.id);
+      if (teacher) {
+        query.teacherId = teacher.id;
+      }
+    } else if (user.role === "student") {
+      const student = await studentRepository.findByUserId(user.id);
+      if (student) {
+        query.studentId = student.id;
+      }
+    }
+
     const result = await courseService.findAll(query);
     return c.json(result);
   },

@@ -164,9 +164,16 @@ export const courseSchema = z.object({
 export const courseUpdateSchema = courseSchema.partial();
 export const courseQuerySchema = z.object({
   academicYearId: z.coerce.number().optional(),
+  teacherId: z.coerce.number().optional(),
+  studentId: z.coerce.number().optional(),
+  facultyId: z.coerce.number().optional(),
+  departmentId: z.coerce.number().optional(),
+  academicLevelId: z.coerce.number().optional(),
+  generation: z.coerce.number().optional(),
+  semester: z.coerce.number().optional(),
   page: z.coerce.number().int().positive().default(1),
   limit: z.coerce.number().int().positive().default(10),
-});
+})
 
 export type CourseInput = z.infer<typeof courseSchema>;
 export type CourseUpdateInput = z.infer<typeof courseUpdateSchema>;

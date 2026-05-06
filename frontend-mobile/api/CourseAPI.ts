@@ -7,11 +7,9 @@ export const getCourses = async (
   academicYearId?: number,
   page?: number,
   limit?: number,
-  teacherId?: number,
-  studentId?: number,
 ) => {
   const res = await api.get(ENDPOINT, {
-    params: { academicYearId, page, limit, teacherId, studentId },
+    params: { academicYearId, page, limit },
   })
   return res.data
 }

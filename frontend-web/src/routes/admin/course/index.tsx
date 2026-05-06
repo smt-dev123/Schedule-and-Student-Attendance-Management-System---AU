@@ -74,6 +74,17 @@ function CourseListComponent() {
     })
   }
 
+  if (courses.length === 0 && !isLoading) {
+    return (
+      <div className="flex h-[calc(100vh-200px)] flex-col items-center justify-center">
+        <Text className="text-lg font-bold text-gray-500">
+          មិនទាន់មានវគ្គសិក្សាទេ
+        </Text>
+        {['admin', 'manager', 'staff'].includes(role) && <CourseCreate />}
+      </div>
+    )
+  }
+
   return (
     <>
       <Flex justify="between" mb="4">

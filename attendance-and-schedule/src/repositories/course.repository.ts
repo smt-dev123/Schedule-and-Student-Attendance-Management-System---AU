@@ -1,9 +1,9 @@
 // repository
 import { type DrizzleDb, type Transaction } from "@/database";
-import { courses, students } from "@/database/schemas";
+import { courses, students, schedules } from "@/database/schemas";
 import type { Course } from "@/types/academy";
 import type { CourseInput, CourseUpdateInput, CourseQueryInput } from "@/validators/academy";
-import { and, eq, sql } from "drizzle-orm";
+import { and, eq, sql, inArray } from "drizzle-orm";
 
 const SESSION_DURATION = 1.5; // hours per session
 
@@ -35,35 +35,117 @@ export class CourseRepository {
     page: number
     limit: number
   }> {
-    const { academicYearId, page = 1, limit = 10 } = query
+    const {
+      academicYearId,
+      teacherId,
+      studentId,
+      facultyId,
+      departmentId,
+      academicLevelId,
+      generation,
+      semester,
+      page = 1,
+      limit = 10,
+    } = query
     const offset = (page - 1) * limit
 
-    const where = academicYearId ? eq(courses.academicYearId, academicYearId) : undefined
+    const conditions: any[] = []
 
-    const data = await this.db.query.courses.findMany({
-      where,
-      limit,
-      offset,
-      with: {
-        schedule: {
-          with: {
-            faculty: true,
-            academicLevel: true,
-            sessionTime: true,
-            classroom: true,
-            department: true,
-          },
-        },
-        teacher: true,
-      },
-    })
+    if (academicYearId) {
+      conditions.push(eq(courses.academicYearId, academicYearId))
+    }
+
+    if (teacherId) {
+      conditions.push(eq(courses.teacherId, teacherId))
+    }
+
+    if (facultyId) {
+      conditions.push(eq(schedules.facultyId, facultyId))
+    }
+    if (departmentId) {
+      conditions.push(eq(schedules.departmentId, departmentId))
+    }
+    if (academicLevelId) {
+      conditions.push(eq(schedules.academicLevelId, academicLevelId))
+    }
+    if (generation) {
+      conditions.push(eq(schedules.generation, generation))
+    }
+    if (semester) {
+      conditions.push(eq(schedules.semester, semester))
+    }
+
+    // If studentId is provided, we filter courses by student's academic profile
+    if (studentId) {
+      const student = await this.db.query.students.findFirst({
+        where: eq(students.id, studentId),
+      })
+
+      if (student) {
+        if (student.facultyId)
+          conditions.push(eq(schedules.facultyId, student.facultyId))
+        if (student.departmentId)
+          conditions.push(eq(schedules.departmentId, student.departmentId))
+        if (student.academicLevelId)
+          conditions.push(
+            eq(schedules.academicLevelId, student.academicLevelId),
+          )
+        if (student.generation)
+          conditions.push(eq(schedules.generation, student.generation))
+        if (student.semester)
+          conditions.push(eq(schedules.semester, student.semester))
+        if (student.academicYearId)
+          conditions.push(eq(schedules.academicYearId, student.academicYearId))
+      }
+    }
+
+    const where = conditions.length > 0 ? and(...conditions) : undefined
+
+    // Use core drizzle for join filtering
+    const baseQuery = this.db
+      .select({ id: courses.id })
+      .from(courses)
+      .leftJoin(schedules, eq(courses.scheduleId, schedules.id))
+      .where(where)
 
     const totalResult = await this.db
       .select({ total: sql<number>`count(*)` })
-      .from(courses)
-      .where(where)
+      .from(baseQuery.as('subquery'))
 
     const total = totalResult[0]?.total ?? 0
+
+    // Get the IDs first for pagination, then use findMany with relations
+    const paginatedIds = await this.db
+      .select({ id: courses.id })
+      .from(courses)
+      .leftJoin(schedules, eq(courses.scheduleId, schedules.id))
+      .where(where)
+      .limit(limit)
+      .offset(offset)
+
+    const ids = paginatedIds.map((item) => item.id)
+
+    let data: Course[] = []
+    if (ids.length > 0) {
+      data = await this.db.query.courses.findMany({
+        where: inArray(courses.id, ids),
+        with: {
+          schedule: {
+            with: {
+              faculty: true,
+              academicLevel: true,
+              sessionTime: true,
+              classroom: true,
+              department: true,
+            },
+          },
+          teacher: true,
+        },
+      })
+      
+      // Sort data to match IDs order if necessary, but findMany usually returns in order or we can sort
+      data.sort((a, b) => ids.indexOf(a.id) - ids.indexOf(b.id))
+    }
 
     return {
       data,
