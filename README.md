@@ -1,12 +1,12 @@
 # Full Stack Application
 
-A comprehensive full-stack application built with modern technologies including Express.js backend, Next.js web frontend, and Expo React Native mobile app.
+A comprehensive full-stack application built with modern technologies including Bun.js backend, React.js web frontend, and Expo React Native mobile app.
 
 ## 🚀 Tech Stack
 
 ### Backend
 
-- **Node.js** with **Express.js** - RESTful API server
+- **Bun.js** with **Hono.js** - RESTful API server
 - **PostgreSQL** - Database (specify your choice)
 - **JWT** - Authentication
 - **Bcrypt** - Password hashing
@@ -15,7 +15,7 @@ A comprehensive full-stack application built with modern technologies including 
 
 ### Frontend Web
 
-- **Next.js 15** - React framework with App Router
+- **React.js** - React library with App Router
 - **TypeScript** - Type safety
 - **Tailwind CSS** - Styling
 - **Axios** - HTTP client
@@ -34,7 +34,7 @@ A comprehensive full-stack application built with modern technologies including 
 
 ```
 project-root/
-├── backend/                 # Express.js API server
+├── attendance-and-schedule/                 # Hono.js API server
 │   ├── src/
 │   │   ├── controllers/    # Route controllers
 │   │   ├── models/        # Database models
@@ -43,9 +43,9 @@ project-root/
 │   │   └── utils/         # Utility functions
 │   ├── uploads/           # File uploads
 │   └── package.json
-├── frontend-web/           # Next.js web application
-│   ├── app/
-│   │   ├── app/          # App Router pages
+├── frontend-web/           # React.js web application
+│   ├── src/
+│   │   ├── pages/          # App Router pages
 │   │   ├── components/   # Reusable components
 │   │   ├── lib/          # Utilities and configurations
 │   │   └── types/        # TypeScript type definitions
@@ -62,13 +62,6 @@ project-root/
 
 ## 🛠️ Installation & Setup
 
-### Prerequisites
-
-- Node.js (v18 or higher)
-- npm or yarn
-- MongoDB/PostgreSQL (depending on your choice)
-- Expo CLI (`npm install -g @expo/cli`)
-
 ### Backend Setup
 
 ```bash
@@ -79,11 +72,18 @@ npm install
 Create `.env` file in backend directory:
 
 ```env
-NODE_ENV=development
-PORT=5000
-DATABASE_URL=your_database_connection_string
-JWT_SECRET=your_jwt_secret_key
-JWT_EXPIRES_IN=7d
+PORT = 3000
+NODE_ENV = "development"
+LOG_LEVEL = info
+DATABASE_URL = "postgresql://postgres:postgres@localhost:5432/postgres"
+BETTER_AUTH_SECRET = SCRETE_KEY
+BETTER_AUTH_URL = http://localhost:3000
+
+WS_PORT = 3000
+ADMIN_EMAIL = "[EMAIL_ADDRESS]"
+ADMIN_PASSWORD = "[PASSWORD]"
+ADMIN_NAME = "Super Admin"
+
 ```
 
 Start the backend server:
