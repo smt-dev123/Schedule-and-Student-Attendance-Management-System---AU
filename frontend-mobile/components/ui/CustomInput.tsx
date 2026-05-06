@@ -1,13 +1,14 @@
+import "@/styles/unistyles";
 import { Ionicons } from "@expo/vector-icons";
 import React, { useState } from "react";
 import {
-  StyleSheet,
   Text,
   TextInput,
   TextInputProps,
   TouchableOpacity,
   View,
 } from "react-native";
+import { StyleSheet, useUnistyles } from "react-native-unistyles";
 
 interface Props extends TextInputProps {
   label: string;
@@ -22,17 +23,18 @@ const CustomInput = ({
 }: Props) => {
   const [isFocused, setIsFocused] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const { theme } = useUnistyles();
 
   const isPassword = secureTextEntry === true;
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.label}>{label}</Text>
-      <View style={[styles.inputWrapper, isFocused && styles.inputFocused]}>
+    <View style={stylesheet.container}>
+      <Text style={stylesheet.label}>{label}</Text>
+      <View style={[stylesheet.inputWrapper, isFocused && stylesheet.inputFocused]}>
         <TextInput
-          style={styles.input}
+          style={stylesheet.input}
           placeholder={placeholder}
-          placeholderTextColor="#999"
+          placeholderTextColor={theme.colors.textSecondary}
           secureTextEntry={isPassword && !showPassword}
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
@@ -42,12 +44,12 @@ const CustomInput = ({
         {isPassword && (
           <TouchableOpacity
             onPress={() => setShowPassword(!showPassword)}
-            style={styles.eyeBtn}
+            style={stylesheet.eyeBtn}
           >
             <Ionicons
               name={showPassword ? "eye-off-outline" : "eye-outline"}
               size={22}
-              color="#666"
+              color={theme.colors.textSecondary}
             />
           </TouchableOpacity>
         )}
@@ -56,11 +58,11 @@ const CustomInput = ({
   );
 };
 
-const styles = StyleSheet.create({
+const stylesheet = StyleSheet.create((theme) => ({
   container: { marginBottom: 16, width: "100%" },
   label: {
-    fontSize: 14, // ទំហំ Label ប៉ុនគ្នាគ្រប់កន្លែង
-    color: "#444",
+    fontSize: 14,
+    color: theme.colors.text,
     marginBottom: 8,
     fontWeight: "600",
   },
@@ -68,25 +70,25 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     borderWidth: 1.5,
-    borderColor: "#E0E0E0",
+    borderColor: theme.colors.border,
     borderRadius: 12,
-    backgroundColor: "#F9F9F9",
+    backgroundColor: theme.colors.background,
   },
   inputFocused: {
-    borderColor: "#00529B",
-    backgroundColor: "#fff",
+    borderColor: theme.colors.primary,
+    backgroundColor: theme.colors.card,
   },
   input: {
     flex: 1,
     padding: 13,
     fontSize: 15,
-    color: "#222",
+    color: theme.colors.text,
   },
   eyeBtn: {
     paddingHorizontal: 12,
     justifyContent: "center",
     alignItems: "center",
   },
-});
+}));
 
 export default CustomInput;

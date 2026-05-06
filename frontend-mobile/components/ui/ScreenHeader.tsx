@@ -1,7 +1,9 @@
+import "@/styles/unistyles";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React from "react";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Text, TouchableOpacity, View } from "react-native";
+import { StyleSheet, useUnistyles } from "react-native-unistyles";
 
 interface ScreenHeaderProps {
   title: string;
@@ -29,32 +31,32 @@ export function ScreenHeader({
   };
 
   return (
-    <View style={styles.header}>
-      <View style={styles.headerLeft}>
+    <View style={stylesheet.header}>
+      <View style={stylesheet.headerLeft}>
         {showBack ? (
-          <TouchableOpacity onPress={handleBack} style={styles.backButton}>
+          <TouchableOpacity onPress={handleBack} style={stylesheet.backButton}>
             <Ionicons name="arrow-back" size={24} color="#fff" />
           </TouchableOpacity>
         ) : (
-          <View style={styles.backPlaceholder} />
+          <View style={stylesheet.backPlaceholder} />
         )}
-        <View style={styles.titleGroup}>
-          <Text style={styles.headerTitle}>{title}</Text>
+        <View style={stylesheet.titleGroup}>
+          <Text style={stylesheet.headerTitle}>{title}</Text>
           {subtitle ? (
-            <Text style={styles.headerSubtitle}>{subtitle}</Text>
+            <Text style={stylesheet.headerSubtitle}>{subtitle}</Text>
           ) : null}
         </View>
       </View>
       {rightAction ? (
-        <View style={styles.rightAction}>{rightAction}</View>
+        <View style={stylesheet.rightAction}>{rightAction}</View>
       ) : null}
     </View>
   );
 }
 
-const styles = StyleSheet.create({
+const stylesheet = StyleSheet.create((theme) => ({
   header: {
-    backgroundColor: "#00529B",
+    backgroundColor: theme.colors.primary,
     paddingTop: 28,
     paddingBottom: 20,
     paddingHorizontal: 18,
@@ -90,4 +92,4 @@ const styles = StyleSheet.create({
   rightAction: {
     marginLeft: 12,
   },
-});
+}));

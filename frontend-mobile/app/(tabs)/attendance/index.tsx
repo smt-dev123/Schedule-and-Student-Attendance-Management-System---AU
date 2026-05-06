@@ -1,3 +1,4 @@
+import "@/styles/unistyles";
 import { ScreenHeader } from "@/components/ui/ScreenHeader";
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -7,12 +8,13 @@ import {
   SafeAreaView,
   ScrollView,
   StatusBar,
-  StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
+import { useTranslation } from "react-i18next";
+import { StyleSheet, useUnistyles } from "react-native-unistyles";
 
 type Status = "present" | "absent" | "late" | null;
 
@@ -37,10 +39,12 @@ const initialStudents: Student[] = [
 ];
 
 export default function AttendanceScreen() {
+  const { t } = useTranslation();
   const [students, setStudents] = useState<Student[]>(initialStudents);
   const [search, setSearch] = useState("");
   const [saved, setSaved] = useState(false);
   const router = useRouter();
+  const { theme } = useUnistyles();
 
   const filtered = useMemo(
     () =>
@@ -120,85 +124,85 @@ export default function AttendanceScreen() {
   });
 
   return (
-    <SafeAreaView style={styles.safe}>
+    <SafeAreaView style={stylesheet.safe}>
       <StatusBar barStyle="dark-content" />
-      <ScreenHeader title="Attendance" showBack />
-      <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-        <View style={styles.header}>
-          <View style={styles.headerTop}>
+      <ScreenHeader title={t("attendance.recordTitle") || "Attendance"} showBack />
+      <ScrollView style={stylesheet.container} showsVerticalScrollIndicator={false}>
+        <View style={stylesheet.header}>
+          <View style={stylesheet.headerTop}>
             <View style={{ flex: 1 }}>
-              <Text style={styles.className}>
+              <Text style={stylesheet.className}>
                 Mobile App Development - Year 4
               </Text>
             </View>
           </View>
-          <View style={styles.headerDateRow}>
-            <Text style={styles.dateText}>Record attendance for {dateStr}</Text>
-            <Text style={styles.timeText}>{timeStr}</Text>
+          <View style={stylesheet.headerDateRow}>
+            <Text style={stylesheet.dateText}>Record attendance for {dateStr}</Text>
+            <Text style={stylesheet.timeText}>{timeStr}</Text>
           </View>
         </View>
 
-        <View style={styles.searchBox}>
+        <View style={stylesheet.searchBox}>
           <Ionicons
             name="search-outline"
             size={16}
-            color="#aaa"
+            color={theme.colors.textSecondary}
             style={{ marginRight: 6 }}
           />
           <TextInput
-            style={styles.searchInput}
+            style={stylesheet.searchInput}
             placeholder="Search students by name or ID..."
-            placeholderTextColor="#aaa"
+            placeholderTextColor={theme.colors.textSecondary}
             value={search}
             onChangeText={setSearch}
           />
         </View>
 
-        <View style={styles.actionRow}>
-          <TouchableOpacity style={styles.btnPresent} onPress={markAllPresent}>
-            <Ionicons name="checkmark" size={16} color="#1D9E75" />
-            <Text style={styles.btnPresentText}>Mark All Present</Text>
+        <View style={stylesheet.actionRow}>
+          <TouchableOpacity style={stylesheet.btnPresent} onPress={markAllPresent}>
+            <Ionicons name="checkmark" size={16} color={theme.colors.success} />
+            <Text style={stylesheet.btnPresentText}>Mark All Present</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.btnClear} onPress={clearAll}>
-            <Ionicons name="close" size={16} color="#E24B4A" />
-            <Text style={styles.btnClearText}>Clear All</Text>
+          <TouchableOpacity style={stylesheet.btnClear} onPress={clearAll}>
+            <Ionicons name="close" size={16} color={theme.colors.error} />
+            <Text style={stylesheet.btnClearText}>Clear All</Text>
           </TouchableOpacity>
         </View>
 
-        <View style={styles.card}>
-          <Text style={styles.cardTitle}>Student List</Text>
+        <View style={stylesheet.card}>
+          <Text style={stylesheet.cardTitle}>Student List</Text>
           {filtered.length === 0 ? (
-            <View style={styles.noResult}>
-              <Text style={styles.noResultText}>
+            <View style={stylesheet.noResult}>
+              <Text style={stylesheet.noResultText}>
                 No students matched your search.
               </Text>
             </View>
           ) : (
             filtered.map((student, index) => (
               <View key={student.id}>
-                {index > 0 && <View style={styles.divider} />}
-                <View style={styles.studentRow}>
+                {index > 0 && <View style={stylesheet.divider} />}
+                <View style={stylesheet.studentRow}>
                   <View style={{ flex: 1 }}>
-                    <Text style={styles.studentName}>{student.name}</Text>
-                    <Text style={styles.studentMeta}>
+                    <Text style={stylesheet.studentName}>{student.name}</Text>
+                    <Text style={stylesheet.studentMeta}>
                       ID: {student.id} Year: {student.class}
                     </Text>
-                    <View style={styles.statusRow}>
+                    <View style={stylesheet.statusRow}>
                       {(["present", "absent", "late"] as Status[]).map((s) => (
                         <TouchableOpacity
                           key={s as string}
-                          style={styles.checkItem}
+                          style={stylesheet.checkItem}
                           onPress={() => setStatus(student.id, s)}
                         >
                           <View
                             style={[
-                              styles.checkbox,
+                              stylesheet.checkbox,
                               student.status === s &&
                                 (s === "present"
-                                  ? styles.checkPresent
+                                  ? stylesheet.checkPresent
                                   : s === "absent"
-                                    ? styles.checkAbsent
-                                    : styles.checkLate),
+                                    ? stylesheet.checkAbsent
+                                    : stylesheet.checkLate),
                             ]}
                           >
                             {student.status === s && (
@@ -209,7 +213,7 @@ export default function AttendanceScreen() {
                               />
                             )}
                           </View>
-                          <Text style={styles.checkLabel}>
+                          <Text style={stylesheet.checkLabel}>
                             {s === "present"
                               ? "Present"
                               : s === "absent"
@@ -226,42 +230,41 @@ export default function AttendanceScreen() {
           )}
         </View>
 
-        <View style={styles.card}>
-          <Text style={styles.cardTitle}>Attendance Summary</Text>
-          <View style={styles.summaryGrid}>
-            <View style={styles.summaryItem}>
-              <Text style={[styles.summaryNum, { color: "#185FA5" }]}>
+        <View style={stylesheet.card}>
+          <Text style={stylesheet.cardTitle}>Attendance Summary</Text>
+          <View style={stylesheet.summaryGrid}>
+            <View style={stylesheet.summaryItem}>
+              <Text style={[stylesheet.summaryNum, { color: theme.colors.primary }]}>
                 {total}
               </Text>
-              <Text style={styles.summaryLabel}>Total Students</Text>
+              <Text style={stylesheet.summaryLabel}>Total Students</Text>
             </View>
-            <View style={styles.summaryItem}>
-              <Text style={[styles.summaryNum, { color: "#1D9E75" }]}>
+            <View style={stylesheet.summaryItem}>
+              <Text style={[stylesheet.summaryNum, { color: theme.colors.success }]}>
                 {present}
               </Text>
-              <Text style={styles.summaryLabel}>Present</Text>
+              <Text style={stylesheet.summaryLabel}>Present</Text>
             </View>
-            <View style={styles.summaryItem}>
-              <Text style={[styles.summaryNum, { color: "#E24B4A" }]}>
+            <View style={stylesheet.summaryItem}>
+              <Text style={[stylesheet.summaryNum, { color: theme.colors.error }]}>
                 {absent}
               </Text>
-              <Text style={styles.summaryLabel}>Absent</Text>
+              <Text style={stylesheet.summaryLabel}>Absent</Text>
             </View>
-            <View style={styles.summaryItem}>
-              <Text style={[styles.summaryNum, { color: "#BA7517" }]}>
+            <View style={stylesheet.summaryItem}>
+              <Text style={[stylesheet.summaryNum, { color: theme.colors.warning }]}>
                 {late}
               </Text>
-              <Text style={styles.summaryLabel}>Late</Text>
+              <Text style={stylesheet.summaryLabel}>Late</Text>
             </View>
           </View>
-          <View style={styles.rateDivider} />
-          {/* កែប្រែពី <div> មកជា <View> វិញដើម្បីដោះស្រាយ Error */}
-          <View style={styles.rateRow}>
-            <Text style={styles.rateLabel}>Attendance Rate</Text>
+          <View style={stylesheet.rateDivider} />
+          <View style={stylesheet.rateRow}>
+            <Text style={stylesheet.rateLabel}>Attendance Rate</Text>
             <Text
               style={[
-                styles.rateValue,
-                { color: rate >= 80 ? "#1D9E75" : "#E24B4A" },
+                stylesheet.rateValue,
+                { color: rate >= 80 ? theme.colors.success : theme.colors.error },
               ]}
             >
               {rate}%
@@ -270,15 +273,15 @@ export default function AttendanceScreen() {
         </View>
 
         <TouchableOpacity
-          style={styles.historyBtn}
+          style={stylesheet.historyBtn}
           onPress={() => router.push("/(tabs)/attendance/attendance-history")}
         >
-          <Text style={styles.historyBtnText}>Record History</Text>
-          <Ionicons name="chevron-forward" size={18} color="#00529B" />
+          <Text style={stylesheet.historyBtnText}>Record History</Text>
+          <Ionicons name="chevron-forward" size={18} color={theme.colors.primary} />
         </TouchableOpacity>
 
         <TouchableOpacity
-          style={[styles.saveBtn, saved && styles.saveBtnDone]}
+          style={[stylesheet.saveBtn, saved && stylesheet.saveBtnDone]}
           onPress={handleSaveAttendance}
         >
           <Ionicons
@@ -286,7 +289,7 @@ export default function AttendanceScreen() {
             size={18}
             color="white"
           />
-          <Text style={styles.saveBtnText}>
+          <Text style={stylesheet.saveBtnText}>
             {saved ? "Attendance Saved!" : "Save Attendance"}
           </Text>
         </TouchableOpacity>
@@ -296,41 +299,62 @@ export default function AttendanceScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: "#F7F8FA" },
-  container: { flex: 1 },
+const stylesheet = StyleSheet.create((theme) => ({
+  safe: { 
+    flex: 1, 
+    backgroundColor: theme.colors.background 
+  },
+  container: { 
+    flex: 1 
+  },
   header: {
-    backgroundColor: "white",
+    backgroundColor: theme.colors.card,
     padding: 16,
     borderBottomWidth: 0.5,
-    borderBottomColor: "#EBEBEB",
+    borderBottomColor: theme.colors.border,
   },
-  headerTop: { flexDirection: "row", alignItems: "center", marginBottom: 8 },
-  className: { fontSize: 18, fontWeight: "700", color: "#111" },
+  headerTop: { 
+    flexDirection: "row", 
+    alignItems: "center", 
+    marginBottom: 8 
+  },
+  className: { 
+    fontSize: 18, 
+    fontWeight: "700", 
+    color: theme.colors.text 
+  },
   headerDateRow: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
   },
-  dateText: { fontSize: 12, color: "#888", flex: 1 },
+  dateText: { 
+    fontSize: 12, 
+    color: theme.colors.textSecondary, 
+    flex: 1 
+  },
   timeText: {
     fontSize: 12,
     fontWeight: "600",
-    color: "#E24B4A",
+    color: theme.colors.error,
     marginLeft: 8,
   },
   searchBox: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "white",
+    backgroundColor: theme.colors.card,
     margin: 12,
     borderRadius: 10,
     paddingHorizontal: 12,
     paddingVertical: 10,
     borderWidth: 0.5,
-    borderColor: "#E5E5E5",
+    borderColor: theme.colors.border,
   },
-  searchInput: { flex: 1, fontSize: 14, color: "#333" },
+  searchInput: { 
+    flex: 1, 
+    fontSize: 14, 
+    color: theme.colors.text 
+  },
   actionRow: {
     flexDirection: "row",
     gap: 10,
@@ -343,89 +367,158 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     gap: 6,
-    backgroundColor: "#EAF3DE",
+    backgroundColor: theme.colors.success + "22",
     borderRadius: 10,
     paddingVertical: 11,
     borderWidth: 0.5,
-    borderColor: "#9FE1CB",
+    borderColor: theme.colors.success + "55",
   },
-  btnPresentText: { fontSize: 13, fontWeight: "600", color: "#1D9E75" },
+  btnPresentText: { 
+    fontSize: 13, 
+    fontWeight: "600", 
+    color: theme.colors.success 
+  },
   btnClear: {
     flex: 1,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
     gap: 6,
-    backgroundColor: "#FCEBEB",
+    backgroundColor: theme.colors.error + "22",
     borderRadius: 10,
     paddingVertical: 11,
     borderWidth: 0.5,
-    borderColor: "#F7C1C1",
+    borderColor: theme.colors.error + "55",
   },
-  btnClearText: { fontSize: 13, fontWeight: "600", color: "#E24B4A" },
+  btnClearText: { 
+    fontSize: 13, 
+    fontWeight: "600", 
+    color: theme.colors.error 
+  },
   card: {
-    backgroundColor: "white",
+    backgroundColor: theme.colors.card,
     marginHorizontal: 12,
     marginBottom: 10,
     borderRadius: 12,
     padding: 14,
     borderWidth: 0.5,
-    borderColor: "#EBEBEB",
+    borderColor: theme.colors.border,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 5,
   },
   cardTitle: {
     fontSize: 14,
     fontWeight: "700",
-    color: "#111",
+    color: theme.colors.text,
     marginBottom: 12,
   },
-  divider: { height: 0.5, backgroundColor: "#F0F0F0", marginVertical: 10 },
-  noResult: { paddingVertical: 24, alignItems: "center" },
-  noResultText: { color: "#888", fontSize: 13 },
-  studentRow: { flexDirection: "row" },
-  studentName: { fontSize: 15, fontWeight: "600", color: "#111" },
-  studentMeta: { fontSize: 11, color: "#aaa", marginTop: 2 },
+  divider: { 
+    height: 0.5, 
+    backgroundColor: theme.colors.border, 
+    marginVertical: 10 
+  },
+  noResult: { 
+    paddingVertical: 24, 
+    alignItems: "center" 
+  },
+  noResultText: { 
+    color: theme.colors.textSecondary, 
+    fontSize: 13 
+  },
+  studentRow: { 
+    flexDirection: "row" 
+  },
+  studentName: { 
+    fontSize: 15, 
+    fontWeight: "600", 
+    color: theme.colors.text 
+  },
+  studentMeta: { 
+    fontSize: 11, 
+    color: theme.colors.textSecondary, 
+    marginTop: 2 
+  },
   statusRow: {
     flexDirection: "row",
     gap: 14,
     marginTop: 8,
     alignItems: "center",
   },
-  checkItem: { flexDirection: "row", alignItems: "center", gap: 5 },
+  checkItem: { 
+    flexDirection: "row", 
+    alignItems: "center", 
+    gap: 5 
+  },
   checkbox: {
     width: 17,
     height: 17,
     borderRadius: 4,
     borderWidth: 1.5,
-    borderColor: "#CCC",
+    borderColor: theme.colors.border,
     alignItems: "center",
     justifyContent: "center",
   },
-  checkPresent: { backgroundColor: "#1D9E75", borderColor: "#1D9E75" },
-  checkAbsent: { backgroundColor: "#E24B4A", borderColor: "#E24B4A" },
-  checkLate: { backgroundColor: "#BA7517", borderColor: "#BA7517" },
-  checkLabel: { fontSize: 12, color: "#555" },
-  summaryGrid: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
+  checkPresent: { 
+    backgroundColor: theme.colors.success, 
+    borderColor: theme.colors.success 
+  },
+  checkAbsent: { 
+    backgroundColor: theme.colors.error, 
+    borderColor: theme.colors.error 
+  },
+  checkLate: { 
+    backgroundColor: theme.colors.warning, 
+    borderColor: theme.colors.warning 
+  },
+  checkLabel: { 
+    fontSize: 12, 
+    color: theme.colors.text 
+  },
+  summaryGrid: { 
+    flexDirection: "row", 
+    flexWrap: "wrap", 
+    gap: 8 
+  },
   summaryItem: {
     flex: 1,
     minWidth: "40%",
-    backgroundColor: "#F7F8FA",
+    backgroundColor: theme.colors.background,
     borderRadius: 10,
     padding: 12,
     alignItems: "center",
   },
-  summaryNum: { fontSize: 28, fontWeight: "700" },
-  summaryLabel: { fontSize: 11, color: "#888", marginTop: 2 },
-  rateDivider: { height: 0.5, backgroundColor: "#F0F0F0", marginVertical: 12 },
+  summaryNum: { 
+    fontSize: 28, 
+    fontWeight: "700" 
+  },
+  summaryLabel: { 
+    fontSize: 11, 
+    color: theme.colors.textSecondary, 
+    marginTop: 2 
+  },
+  rateDivider: { 
+    height: 0.5, 
+    backgroundColor: theme.colors.border, 
+    marginVertical: 12 
+  },
   rateRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
   },
-  rateLabel: { fontSize: 13, color: "#888" },
-  rateValue: { fontSize: 15, fontWeight: "700" },
+  rateLabel: { 
+    fontSize: 13, 
+    color: theme.colors.textSecondary 
+  },
+  rateValue: { 
+    fontSize: 15, 
+    fontWeight: "700" 
+  },
   saveBtn: {
     marginHorizontal: 12,
-    backgroundColor: "#00529B",
+    backgroundColor: theme.colors.primary,
     borderRadius: 12,
     paddingVertical: 15,
     flexDirection: "row",
@@ -433,12 +526,18 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     gap: 8,
   },
-  saveBtnDone: { backgroundColor: "#1D9E75" },
-  saveBtnText: { color: "white", fontSize: 15, fontWeight: "700" },
+  saveBtnDone: { 
+    backgroundColor: theme.colors.success 
+  },
+  saveBtnText: { 
+    color: "white", 
+    fontSize: 15, 
+    fontWeight: "700" 
+  },
   historyBtn: {
     marginHorizontal: 12,
     marginBottom: 10,
-    backgroundColor: "white",
+    backgroundColor: theme.colors.card,
     borderRadius: 12,
     paddingVertical: 14,
     paddingHorizontal: 16,
@@ -446,12 +545,12 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 8,
     borderWidth: 1,
-    borderColor: "#00529B",
+    borderColor: theme.colors.primary,
   },
   historyBtnText: {
     flex: 1,
-    color: "#00529B",
+    color: theme.colors.primary,
     fontSize: 14,
     fontWeight: "600",
   },
-});
+}));

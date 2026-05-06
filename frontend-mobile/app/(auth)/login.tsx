@@ -1,3 +1,4 @@
+import "@/styles/unistyles";
 import CustomInput from "@/components/ui/CustomInput";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
@@ -10,13 +11,12 @@ import {
   Platform,
   ScrollView,
   StatusBar,
-  StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from "react-native";
 import { useTranslation } from "react-i18next";
-import { Colors } from "../../constants/theme";
+import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const REMEMBER_ME_KEY = "remember_user_id";
@@ -24,6 +24,7 @@ const REMEMBER_ME_KEY = "remember_user_id";
 export default function Login() {
   const { t } = useTranslation();
   const router = useRouter();
+  const { theme } = useUnistyles();
   
   const [userId, setUserId] = useState("");
   const [password, setPassword] = useState("");
@@ -69,36 +70,36 @@ export default function Login() {
   };
 
   return (
-    <View style={styles.container}>
+    <View style={stylesheet.container}>
       <StatusBar barStyle="light-content" />
 
       <ImageBackground
-        source={require("../../assets/images/image.png")}
-        style={styles.bgImage}
+        source={require("@/assets/images/image.png")}
+        style={stylesheet.bgImage}
         resizeMode="cover"
       >
-        <View style={styles.overlay}>
+        <View style={stylesheet.overlay}>
           <KeyboardAvoidingView
             behavior={Platform.OS === "ios" ? "padding" : "height"}
             style={{ flex: 1 }}
           >
             <ScrollView
-              contentContainerStyle={styles.scrollContent}
+              contentContainerStyle={stylesheet.scrollContent}
               showsVerticalScrollIndicator={false}
             >
-              <View style={styles.header}>
-                <View style={styles.logoWrapper}>
+              <View style={stylesheet.header}>
+                <View style={stylesheet.logoWrapper}>
                   <Image
-                    source={require("../../assets/images/logo.png")}
-                    style={styles.logo}
+                    source={require("@/assets/images/logo.png")}
+                    style={stylesheet.logo}
                     resizeMode="contain"
                   />
                 </View>
-                <Text style={styles.titleKh}>{t("login.title") || "ចូលប្រើប្រាស់"}</Text>
-                <Text style={styles.titleEn}>USER LOGIN</Text>
+                <Text style={stylesheet.titleKh}>{t("login.title") || "ចូលប្រើប្រាស់"}</Text>
+                <Text style={stylesheet.titleEn}>USER LOGIN</Text>
               </View>
 
-              <View style={styles.formCard}>
+              <View style={stylesheet.formCard}>
                 <CustomInput
                   label={t("login.userId") || "អត្តលេខ / User ID"}
                   placeholder={t("login.idPlaceholder") || "ឧទាហរណ៍: 001"}
@@ -122,24 +123,24 @@ export default function Login() {
                 />
 
                 {error !== "" && (
-                  <View style={styles.errorBox}>
-                    <Text style={styles.errorText}>⚠️ {error}</Text>
+                  <View style={stylesheet.errorBox}>
+                    <Text style={stylesheet.errorText}>⚠️ {error}</Text>
                   </View>
                 )}
 
                 {/* ✅ បន្ថែមជួរ Remember Me & Forgot Password */}
-                <View style={styles.rowActions}>
+                <View style={stylesheet.rowActions}>
                   <TouchableOpacity
-                    style={styles.rememberMe}
+                    style={stylesheet.rememberMe}
                     activeOpacity={0.7}
                     onPress={() => setRememberMe(!rememberMe)}
                   >
                     <View
                       style={[
-                        styles.checkbox,
+                        stylesheet.checkbox,
                         rememberMe && {
-                          backgroundColor: Colors.light.tint,
-                          borderColor: Colors.light.tint,
+                          backgroundColor: theme.colors.primary,
+                          borderColor: theme.colors.primary,
                         },
                       ]}
                     >
@@ -147,14 +148,14 @@ export default function Login() {
                         <Ionicons name="checkmark" size={12} color="#fff" />
                       )}
                     </View>
-                    <Text style={styles.rememberText}>
+                    <Text style={stylesheet.rememberText}>
                       {t("login.rememberMe") || "ចងចាំខ្ញុំ"}
                     </Text>
                   </TouchableOpacity>
 
-                  <TouchableOpacity style={styles.forgotPass}>
+                  <TouchableOpacity style={stylesheet.forgotPass}>
                     <Text
-                      style={[styles.forgotText, { color: Colors.light.tint }]}
+                      style={[stylesheet.forgotText, { color: theme.colors.primary }]}
                     >
                       {t("login.forgotPassword")}
                     </Text>
@@ -163,8 +164,8 @@ export default function Login() {
 
                 <TouchableOpacity
                   style={[
-                    styles.loginBtn,
-                    { backgroundColor: Colors.light.tint },
+                    stylesheet.loginBtn,
+                    { backgroundColor: theme.colors.primary },
                     loading && { opacity: 0.7 },
                   ]}
                   onPress={handleLogin}
@@ -173,7 +174,7 @@ export default function Login() {
                   {loading ? (
                     <ActivityIndicator color="#fff" />
                   ) : (
-                    <Text style={styles.loginBtnText}>
+                    <Text style={stylesheet.loginBtnText}>
                       {t("login.loginBtn")}
                     </Text>
                   )}
@@ -182,9 +183,9 @@ export default function Login() {
 
               <TouchableOpacity
                 onPress={() => router.back()}
-                style={styles.backBtn}
+                style={stylesheet.backBtn}
               >
-                <Text style={styles.backText}>{t("login.back")}</Text>
+                <Text style={stylesheet.backText}>{t("login.back")}</Text>
               </TouchableOpacity>
             </ScrollView>
           </KeyboardAvoidingView>
@@ -194,12 +195,12 @@ export default function Login() {
   );
 }
 
-const styles = StyleSheet.create({
+const stylesheet = StyleSheet.create((theme) => ({
   container: { flex: 1 },
   bgImage: { flex: 1, width: "100%", height: "100%" },
   overlay: {
     flex: 1,
-    backgroundColor: "rgba(0, 30, 80, 0.55)",
+    backgroundColor: theme.colors.overlay,
     justifyContent: "center",
   },
   scrollContent: {
@@ -247,7 +248,6 @@ const styles = StyleSheet.create({
   },
   errorText: { color: "#CC0000", fontSize: 13, textAlign: "center" },
 
-  // ✅ Styles ថ្មីសម្រាប់ Row Actions
   rowActions: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -287,4 +287,4 @@ const styles = StyleSheet.create({
   loginBtnText: { color: "#fff", fontSize: 17, fontWeight: "bold" },
   backBtn: { marginTop: 20, alignItems: "center" },
   backText: { color: "#aaaaaa", fontSize: 15, fontWeight: "500" },
-});
+}));
