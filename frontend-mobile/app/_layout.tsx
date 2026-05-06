@@ -1,4 +1,3 @@
-// app/_layout.tsx
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
@@ -6,8 +5,8 @@ import i18n from "i18next";
 import { useEffect, useState } from "react";
 import { initReactI18next } from "react-i18next";
 import { ActivityIndicator, View } from "react-native";
-import en from "@/src/i18n/locales/en.json";
-import km from "@/src/i18n/locales/km.json";
+import en from "../lib/i18n/locales/en.json";
+import km from "../lib/i18n/locales/km.json";
 
 const LANG_KEY = "app_language";
 
