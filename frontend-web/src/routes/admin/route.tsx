@@ -1,24 +1,16 @@
 import Footer from '@/components/Footer'
 import Navbar from '@/components/Navbar'
 import Sidebar from '@/components/Sidebar'
-import { authClient } from '@/lib/auth-client'
+import { sessionQueryOptions } from '@/lib/session'
 import { createFileRoute, Outlet, redirect } from '@tanstack/react-router'
 import { Toaster } from 'react-hot-toast'
 
-let sessionCache: any = null
-let lastFetch = 0
-const CACHE_TTL = 2000 // 2 seconds cache is enough to prevent flood during drag
-
 export const Route = createFileRoute('/admin')({
-  beforeLoad: async () => {
-    const now = Date.now()
-    if (!sessionCache || now - lastFetch > CACHE_TTL) {
-      sessionCache = await authClient.getSession()
-      lastFetch = now
-    }
+  beforeLoad: async ({ context }) => {
+    const session =
+      await context.queryClient.ensureQueryData(sessionQueryOptions)
 
-    if (!sessionCache?.data) {
-      sessionCache = null // Reset cache if session is invalid
+    if (!session?.data) {
       throw redirect({ to: '/auth/login' })
     }
   },

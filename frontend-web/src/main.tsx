@@ -13,16 +13,18 @@ import '@radix-ui/themes/styles.css'
 import './styles.css'
 
 // Create a new router instance
+const queryClient = new QueryClient()
+
 const router = createRouter({
   routeTree,
-  context: {},
+  context: {
+    queryClient,
+  },
   defaultPreload: 'intent',
   scrollRestoration: true,
   defaultStructuralSharing: true,
   defaultPreloadStaleTime: 0,
 })
-
-const queryClient = new QueryClient()
 
 // Register the router instance for type safety
 declare module '@tanstack/react-router' {

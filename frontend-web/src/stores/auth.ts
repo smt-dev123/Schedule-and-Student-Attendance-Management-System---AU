@@ -9,6 +9,6 @@ export const useAuth = () => {
     logout: async () => {
       await betterSignOut()
       window.location.href = '/auth/login'
-    }
+    },
   }
 }
