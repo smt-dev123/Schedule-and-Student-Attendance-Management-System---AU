@@ -33,8 +33,41 @@ router.get(
 router.get("/profile/me", async (c) => {
   const { teacherService } = c.var.container;
   const user = c.get("user");
-  return c.json(user);
+  const teacher = await teacherService.findByUserId(user.id);
+  return c.json(teacher);
 });
+
+router.put(
+  "/profile/me",
+  authentication,
+  requirePermission("teacher", "update-own"),
+  upload("image"),
+  zValidator("form", teacherUpdateSchema),
+  async (c) => {
+    const user = c.get("user");
+    const data = c.req.valid("form");
+    const image = c.get("upload");
+    const { teacherService } = c.var.container;
+    try {
+      const teacher = await teacherService.findByUserId(user.id);
+      if (!teacher) {
+        return c.json({ message: "Teacher not found" }, 404);
+      }
+      const updated = await teacherService.update(
+        teacher.id,
+        data,
+        image?.url,
+        image?.filename,
+      );
+      return c.json(updated);
+    } catch (error) {
+      if (image?.filename) {
+        await deleteFile(image.filename).catch(() => {});
+      }
+      throw error;
+    }
+  },
+);
 
 router.post(
   "/",

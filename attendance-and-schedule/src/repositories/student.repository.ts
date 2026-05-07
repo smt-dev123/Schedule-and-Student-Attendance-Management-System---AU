@@ -113,6 +113,10 @@ export class StudentRepository {
   async findByUserId(id: string): Promise<Student | undefined> {
     return this.db.query.students.findFirst({
       where: eq(students.userId, id),
+      with: {
+        faculty: true,
+        department: true,
+      },
     });
   }
 

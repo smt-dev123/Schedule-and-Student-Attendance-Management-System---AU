@@ -57,3 +57,17 @@ export const deleteStudent = async (id: string) => {
   const res = await api.delete(`${ENDPOINT}/${id}`)
   return res.data
 }
+
+export const getStudentMe = async () => {
+  const res = await api.get(`${ENDPOINT}/profile/me`)
+  return res.data
+}
+
+export const updateStudentMe = async (data: FormData) => {
+  const res = await api.put(`${ENDPOINT}/profile/me`, data, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  })
+  return res.data
+}

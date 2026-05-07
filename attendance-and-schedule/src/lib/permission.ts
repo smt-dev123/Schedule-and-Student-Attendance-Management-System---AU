@@ -21,7 +21,7 @@ const statement = {
     "update-own",
     "promote",
   ],
-  teacher: ["create", "read", "update", "delete"],
+  teacher: ["create", "read", "update", "delete", "update-own"],
   attendance: ["create", "read", "update", "delete"],
   notification: ["create", "read", "update", "delete", "read-own"],
   user: ["create", "read", "update", "delete"],
@@ -109,6 +109,7 @@ const teacher = ac.newRole({
   course: ["read"],
   sessionTime: ["read"],
   student: ["read"],
+  teacher: ["read", "update-own"],
   notification: ["read", "create"],
 });
 

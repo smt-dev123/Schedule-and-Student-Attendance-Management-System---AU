@@ -35,7 +35,41 @@ router.get(
   requirePermission("student", "read-own"),
   async (c) => {
     const user = c.get("user");
-    return c.json(user);
+    const { studentService } = c.var.container;
+    const student = await studentService.findByUserId(user.id);
+    return c.json(student);
+  },
+);
+
+router.put(
+  "/profile/me",
+  authentication,
+  requirePermission("student", "update-own"),
+  upload("image"),
+  zValidator("form", studentUpdateSchema),
+  async (c) => {
+    const user = c.get("user");
+    const data = c.req.valid("form");
+    const image = c.get("upload");
+    const { studentService } = c.var.container;
+    try {
+      const student = await studentService.findByUserId(user.id);
+      if (!student) {
+        return c.json({ message: "Student not found" }, 404);
+      }
+      const updated = await studentService.update(
+        student.id,
+        data,
+        image?.url,
+        image?.filename,
+      );
+      return c.json(updated);
+    } catch (error) {
+      if (image?.filename) {
+        await deleteFile(image.filename).catch(() => {});
+      }
+      throw error;
+    }
   },
 );
 
@@ -68,8 +102,8 @@ router.post(
       const { studentService } = c.var.container;
       const student = await studentService.create({
         ...data,
-        userId: (user as any).id,
-        image: image?.url,
+        userId: user.id as string,
+        image: image?.url ?? "",
       });
       return c.json(student);
     } catch (error) {

@@ -72,6 +72,20 @@ export class TeacherRepository {
   async findByUserId(id: string): Promise<Teacher | undefined> {
     return await this.db.query.teachers.findFirst({
       where: eq(teachers.userId, id),
+      with: {
+        academicLevel: {
+          columns: {
+            id: true,
+            level: true,
+          },
+        },
+        faculty: {
+          columns: {
+            id: true,
+            name: true,
+          },
+        },
+      },
     });
   }
 

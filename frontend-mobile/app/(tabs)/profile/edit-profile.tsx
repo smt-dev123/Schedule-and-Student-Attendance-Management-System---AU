@@ -3,6 +3,10 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as ImagePicker from "expo-image-picker";
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
+import { useSession } from "@/lib/auth-client";
+import { getTeacherMe, updateTeacherMe } from "@/api/TeacherAPI";
+import { getStudentMe, updateStudentMe } from "@/api/StudentAPI";
+import { useTranslation } from "react-i18next";
 import {
   ActivityIndicator,
   Alert,
@@ -13,50 +17,74 @@ import {
   TextInput,
   TouchableOpacity,
   View,
+  Platform,
 } from "react-native";
 
-const STORAGE_KEY = "teacher_profile";
+// const STORAGE_KEY = "teacher_profile";
 
 export default function EditProfileScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
+  const { data: session, isPending: isSessionLoading } = useSession();
 
-  const [fullName, setFullName] = useState("Mr. Seung Sreang");
-  const [phone, setPhone] = useState("+855 12 345 678");
-  const [email, setEmail] = useState("sreang@university.edu");
-  const [address, setAddress] = useState("123 University Ave, PP");
-  const [dob, setDob] = useState("March 15, 1985");
+  const [fullName, setFullName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
+  const [address, setAddress] = useState("");
+  const [dob, setDob] = useState("");
   const [photoUri, setPhotoUri] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [loadingData, setLoadingData] = useState(true);
 
-  // ✅ Load saved data ពេល screen បើក
   useEffect(() => {
     const loadProfile = async () => {
+      if (isSessionLoading) return;
+      if (!session?.user) {
+        setLoadingData(false);
+        return;
+      }
       try {
-        const saved = await AsyncStorage.getItem(STORAGE_KEY);
-        if (saved) {
-          const data = JSON.parse(saved);
-          if (data.fullName) setFullName(data.fullName);
-          if (data.phone) setPhone(data.phone);
-          if (data.email) setEmail(data.email);
-          if (data.address) setAddress(data.address);
-          if (data.dob) setDob(data.dob);
-          if (data.photoUri) setPhotoUri(data.photoUri);
+        let data;
+        const userRole = (session.user as any).role;
+        if (userRole === "teacher") {
+          data = await getTeacherMe();
+        } else if (userRole === "student") {
+          data = await getStudentMe();
+        }
+
+        if (data) {
+          setFullName(data.name || "");
+          setPhone(data.phone || "");
+          setEmail(data.email || "");
+          setAddress(data.address || "");
+          if (data.dob) {
+            const date = new Date(data.dob);
+            if (!isNaN(date.getTime())) {
+              setDob(date.toISOString().split("T")[0]);
+            }
+          }
+          setPhotoUri(data.image || null);
+        } else {
+          setFullName(session.user.name || "");
+          setEmail(session.user.email || "");
+          setPhotoUri(session.user.image || null);
         }
       } catch (e) {
         console.log("Load error:", e);
+        setFullName(session.user.name || "");
+        setEmail(session.user.email || "");
+        setPhotoUri(session.user.image || null);
       } finally {
         setLoadingData(false);
       }
     };
     loadProfile();
-  }, []);
+  }, [session, isSessionLoading]);
 
-  // ✅ Pick image ពី gallery
   const handlePickImage = async () => {
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!permission.granted) {
-      Alert.alert("Permission", "សូម allow access ទៅ Photos");
+      Alert.alert(t("common.error"), t("editProfile.allowPhotos"));
       return;
     }
 
@@ -72,11 +100,10 @@ export default function EditProfileScreen() {
     }
   };
 
-  // ✅ Take photo ពី camera
   const handleTakePhoto = async () => {
     const permission = await ImagePicker.requestCameraPermissionsAsync();
     if (!permission.granted) {
-      Alert.alert("Permission", "សូម allow access ទៅ Camera");
+      Alert.alert(t("common.error"), t("editProfile.allowCamera"));
       return;
     }
 
@@ -91,31 +118,54 @@ export default function EditProfileScreen() {
     }
   };
 
-  // ✅ Show photo options
   const handleChangePhoto = () => {
-    Alert.alert("ប្ដូររូបភាព", "ជ្រើសរើស", [
-      { text: "📷 ថតរូប", onPress: handleTakePhoto },
-      { text: "🖼️ ជ្រើសពី Gallery", onPress: handlePickImage },
-      { text: "បោះបង់", style: "cancel" },
+    Alert.alert(t("editProfile.changePhoto"), "", [
+      { text: "📷 " + t("editProfile.takePhoto"), onPress: handleTakePhoto },
+      { text: "🖼️ " + t("editProfile.chooseGallery"), onPress: handlePickImage },
+      { text: t("common.cancel"), style: "cancel" },
     ]);
   };
 
-  // ✅ Save to AsyncStorage
   const handleSave = async () => {
     if (!fullName.trim() || !phone.trim() || !email.trim()) {
-      Alert.alert("⚠️ Error", "សូមបំពេញ Name, Phone, Email");
+      Alert.alert("⚠️ " + t("common.error"), t("editProfile.errorMsg"));
       return;
     }
 
     setLoading(true);
     try {
-      const profileData = { fullName, phone, email, address, dob, photoUri };
-      await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(profileData));
-      Alert.alert("✅ រួចរាល់", "ព័ត៌មានត្រូវបានរក្សាទុករួចហើយ!", [
+      const formData = new FormData();
+      formData.append("name", fullName);
+      formData.append("phone", phone);
+      formData.append("email", email);
+      formData.append("address", address);
+      if (dob) formData.append("dob", dob);
+
+      if (photoUri && !photoUri.startsWith("http")) {
+        const filename = photoUri.split("/").pop() || "photo.jpg";
+        const match = /\.(\w+)$/.exec(filename);
+        const type = match ? `image/${match[1]}` : `image/jpeg`;
+        formData.append("image", {
+          uri: photoUri,
+          name: filename,
+          type,
+        } as any);
+      }
+
+      const userRole = (session?.user as any)?.role;
+      if (userRole === "teacher") {
+        await updateTeacherMe(formData);
+      } else if (userRole === "student") {
+        await updateStudentMe(formData);
+      } else {
+        throw new Error("Unsupported user role: " + userRole);
+      }
+
+      Alert.alert("✅ " + t("common.ok"), t("editProfile.successMsg"), [
         { text: "OK", onPress: () => router.back() },
       ]);
     } catch (e) {
-      Alert.alert("❌ Error", "មិនអាចរក្សាទុកបាន — " + e);
+      Alert.alert("❌ " + t("common.error"), t("editProfile.errorMsg") + " — " + e);
     } finally {
       setLoading(false);
     }
@@ -136,7 +186,7 @@ export default function EditProfileScreen() {
         <TouchableOpacity style={styles.backBtn} onPress={() => router.back()}>
           <Ionicons name="arrow-back" size={24} color="#fff" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Edit Profile</Text>
+        <Text style={styles.headerTitle}>{t("editProfile.title")}</Text>
         <View style={{ width: 40 }} />
       </View>
 
@@ -163,7 +213,7 @@ export default function EditProfileScreen() {
           onPress={handleChangePhoto}
           style={styles.changePhotoBtn}
         >
-          <Text style={styles.changePhotoText}>ប្ដូររូបភាព</Text>
+          <Text style={styles.changePhotoText}>{t("editProfile.changePhoto")}</Text>
         </TouchableOpacity>
       </View>
 
@@ -171,11 +221,11 @@ export default function EditProfileScreen() {
       <View style={styles.card}>
         <View style={styles.cardHeader}>
           <Ionicons name="person-outline" size={20} color="#00529B" />
-          <Text style={styles.cardTitle}>Personal Information</Text>
+          <Text style={styles.cardTitle}>{t("editProfile.personalInfo")}</Text>
         </View>
 
         <View style={styles.fieldGroup}>
-          <Text style={styles.fieldLabel}>Full Name *</Text>
+          <Text style={styles.fieldLabel}>{t("profile.fullName")} *</Text>
           <TextInput
             style={styles.input}
             value={fullName}
@@ -186,12 +236,12 @@ export default function EditProfileScreen() {
         </View>
 
         <View style={styles.fieldGroup}>
-          <Text style={styles.fieldLabel}>Date of Birth</Text>
+          <Text style={styles.fieldLabel}>{t("profile.dob")}</Text>
           <TextInput
             style={styles.input}
             value={dob}
             onChangeText={setDob}
-            placeholder="e.g. March 15, 1985"
+            placeholder="YYYY-MM-DD"
             placeholderTextColor="#bbb"
           />
         </View>
@@ -201,11 +251,11 @@ export default function EditProfileScreen() {
       <View style={styles.card}>
         <View style={styles.cardHeader}>
           <Ionicons name="call-outline" size={20} color="#00529B" />
-          <Text style={styles.cardTitle}>Contact Information</Text>
+          <Text style={styles.cardTitle}>{t("editProfile.contactInfo")}</Text>
         </View>
 
         <View style={styles.fieldGroup}>
-          <Text style={styles.fieldLabel}>Phone *</Text>
+          <Text style={styles.fieldLabel}>{t("profile.phone")} *</Text>
           <TextInput
             style={styles.input}
             value={phone}
@@ -217,7 +267,7 @@ export default function EditProfileScreen() {
         </View>
 
         <View style={styles.fieldGroup}>
-          <Text style={styles.fieldLabel}>Email *</Text>
+          <Text style={styles.fieldLabel}>{t("profile.email")} *</Text>
           <TextInput
             style={styles.input}
             value={email}
@@ -230,7 +280,7 @@ export default function EditProfileScreen() {
         </View>
 
         <View style={styles.fieldGroup}>
-          <Text style={styles.fieldLabel}>Address</Text>
+          <Text style={styles.fieldLabel}>{t("profile.address")}</Text>
           <TextInput
             style={[styles.input, styles.inputMultiline]}
             value={address}
@@ -252,12 +302,12 @@ export default function EditProfileScreen() {
         {loading ? (
           <ActivityIndicator color="#fff" />
         ) : (
-          <Text style={styles.saveBtnText}>💾 រក្សាទុក</Text>
+          <Text style={styles.saveBtnText}>{t("editProfile.save")}</Text>
         )}
       </TouchableOpacity>
 
       <TouchableOpacity style={styles.cancelBtn} onPress={() => router.back()}>
-        <Text style={styles.cancelBtnText}>បោះបង់</Text>
+        <Text style={styles.cancelBtnText}>{t("editProfile.cancel")}</Text>
       </TouchableOpacity>
 
       <View style={{ height: 40 }} />

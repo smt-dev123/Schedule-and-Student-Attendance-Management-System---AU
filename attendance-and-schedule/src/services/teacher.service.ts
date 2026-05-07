@@ -86,6 +86,14 @@ export class TeacherService {
     return teacher;
   }
 
+  async findByUserId(userId: string): Promise<Teacher> {
+    const teacher = await this.teacherRepo.findByUserId(userId);
+    if (!teacher) {
+      throw new HTTPException(404, { message: "Teacher not found" });
+    }
+    return teacher;
+  }
+
   async findAll(query: TeacherQueryInput): Promise<{
     data: Teacher[];
     total: number;

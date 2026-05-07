@@ -18,52 +18,68 @@ import {
 import { useTranslation } from "react-i18next";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { signIn } from "@/lib/auth-client";
 
-const REMEMBER_ME_KEY = "remember_user_id";
+const REMEMBER_ME_KEY = "remember_user_email";
 
 export default function Login() {
   const { t } = useTranslation();
   const router = useRouter();
   const { theme } = useUnistyles();
-  
-  const [userId, setUserId] = useState("");
+
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
 
   useEffect(() => {
-    const loadSavedId = async () => {
+    const loadSavedEmail = async () => {
       try {
-        const savedId = await AsyncStorage.getItem(REMEMBER_ME_KEY);
-        if (savedId) {
-          setUserId(savedId);
+        const savedEmail = await AsyncStorage.getItem(REMEMBER_ME_KEY);
+        if (savedEmail) {
+          setEmail(savedEmail);
           setRememberMe(true);
         }
       } catch (err) {
-        console.log("Error loading saved ID", err);
+        console.log("Error loading saved email", err);
       }
     };
-    loadSavedId();
+    loadSavedEmail();
   }, []);
 
   const handleLogin = async () => {
-    if (!userId.trim() || !password.trim()) {
-      setError(t("login.errorEmpty") || "សូមបំពេញអត្តលេខ និង លេខសម្ងាត់");
+    if (!email.trim() || !password.trim()) {
+      setError(t("login.errorEmpty") || "សូមបំពេញអ៊ីមែល និង លេខសម្ងាត់");
       return;
     }
-    
+
     setLoading(true);
+    setError("");
+
     try {
-      // For now, simulate success
+      const { data, error: authError } = await signIn.email({
+        email: email.trim(),
+        password: password,
+        callbackURL: "/dashboard",
+      });
+
+      if (authError) {
+        setError(authError.message || "ការចូលប្រើប្រាស់មិនជោគជ័យ");
+        return;
+      }
+
       if (rememberMe) {
-        await AsyncStorage.setItem(REMEMBER_ME_KEY, userId.trim());
+        await AsyncStorage.setItem(REMEMBER_ME_KEY, email.trim());
       } else {
         await AsyncStorage.removeItem(REMEMBER_ME_KEY);
       }
+
+      // Successful login - navigation is usually handled by better-auth or manually
       router.replace("/(tabs)/dashboard");
     } catch (e) {
-      setError("មានបញ្ហាបច្ចេកទេស");
+      console.error(e);
+      setError("មានបញ្ហាបច្ចេកទេសក្នុងការតភ្ជាប់");
     } finally {
       setLoading(false);
     }
@@ -71,7 +87,11 @@ export default function Login() {
 
   return (
     <View style={stylesheet.container}>
-      <StatusBar barStyle="light-content" />
+      <StatusBar
+        barStyle="light-content"
+        translucent
+        backgroundColor="transparent"
+      />
 
       <ImageBackground
         source={require("@/assets/images/image.png")}
@@ -86,34 +106,49 @@ export default function Login() {
             <ScrollView
               contentContainerStyle={stylesheet.scrollContent}
               showsVerticalScrollIndicator={false}
+              keyboardShouldPersistTaps="handled"
             >
               <View style={stylesheet.header}>
-                <View style={stylesheet.logoWrapper}>
-                  <Image
-                    source={require("@/assets/images/logo.png")}
-                    style={stylesheet.logo}
-                    resizeMode="contain"
-                  />
+                <View style={stylesheet.logoContainer}>
+                  <View style={stylesheet.logoWrapper}>
+                    <Image
+                      source={require("@/assets/images/logo.png")}
+                      style={stylesheet.logo}
+                      resizeMode="contain"
+                    />
+                  </View>
                 </View>
-                <Text style={stylesheet.titleKh}>{t("login.title") || "ចូលប្រើប្រាស់"}</Text>
-                <Text style={stylesheet.titleEn}>USER LOGIN</Text>
+                <Text style={stylesheet.titleKh}>
+                  {t("login.title") || "ចូលប្រើប្រាស់"}
+                </Text>
+                <Text style={stylesheet.titleEn}>
+                  ACADEMIC MANAGEMENT SYSTEM
+                </Text>
               </View>
 
-              <View style={stylesheet.formCard}>
+              <View style={stylesheet.glassCard}>
+                <View style={stylesheet.cardHeader}>
+                  <Text style={stylesheet.cardTitle}>LOGIN</Text>
+                  <View style={stylesheet.cardSubtitleUnderline} />
+                </View>
+
                 <CustomInput
-                  label={t("login.userId") || "អត្តលេខ / User ID"}
-                  placeholder={t("login.idPlaceholder") || "ឧទាហរណ៍: 001"}
-                  value={userId}
+                  label={t("login.email") || "អ៊ីមែល / Email"}
+                  placeholder={
+                    t("login.emailPlaceholder") || "example@email.com"
+                  }
+                  value={email}
                   onChangeText={(text) => {
-                    setUserId(text);
+                    setEmail(text);
                     setError("");
                   }}
-                  autoCapitalize="characters"
+                  keyboardType="email-address"
+                  autoCapitalize="none"
                 />
 
                 <CustomInput
                   label={t("login.password") || "លេខសម្ងាត់ / Password"}
-                  placeholder={t("login.password") || "បញ្ចូលលេខសម្ងាត់"}
+                  placeholder={t("login.passwordPlaceholder") || "••••••••"}
                   secureTextEntry={true}
                   value={password}
                   onChangeText={(text) => {
@@ -124,11 +159,11 @@ export default function Login() {
 
                 {error !== "" && (
                   <View style={stylesheet.errorBox}>
-                    <Text style={stylesheet.errorText}>⚠️ {error}</Text>
+                    <Ionicons name="alert-circle" size={18} color="#FF3B30" />
+                    <Text style={stylesheet.errorText}>{error}</Text>
                   </View>
                 )}
 
-                {/* ✅ បន្ថែមជួរ Remember Me & Forgot Password */}
                 <View style={stylesheet.rowActions}>
                   <TouchableOpacity
                     style={stylesheet.rememberMe}
@@ -154,39 +189,42 @@ export default function Login() {
                   </TouchableOpacity>
 
                   <TouchableOpacity style={stylesheet.forgotPass}>
-                    <Text
-                      style={[stylesheet.forgotText, { color: theme.colors.primary }]}
-                    >
-                      {t("login.forgotPassword")}
+                    <Text style={stylesheet.forgotText}>
+                      {t("login.forgotPassword") || "ភ្លេចលេខសម្ងាត់?"}
                     </Text>
                   </TouchableOpacity>
                 </View>
 
                 <TouchableOpacity
-                  style={[
-                    stylesheet.loginBtn,
-                    { backgroundColor: theme.colors.primary },
-                    loading && { opacity: 0.7 },
-                  ]}
+                  style={[stylesheet.loginBtn, loading && { opacity: 0.8 }]}
                   onPress={handleLogin}
                   disabled={loading}
+                  activeOpacity={0.8}
                 >
                   {loading ? (
                     <ActivityIndicator color="#fff" />
                   ) : (
-                    <Text style={stylesheet.loginBtnText}>
-                      {t("login.loginBtn")}
-                    </Text>
+                    <View style={stylesheet.loginBtnContent}>
+                      <Text style={stylesheet.loginBtnText}>
+                        {t("login.loginBtn") || "ចូលប្រព័ន្ធ"}
+                      </Text>
+                      <Ionicons
+                        name="arrow-forward"
+                        size={20}
+                        color="#fff"
+                        style={{ marginLeft: 8 }}
+                      />
+                    </View>
                   )}
                 </TouchableOpacity>
               </View>
 
-              <TouchableOpacity
-                onPress={() => router.back()}
-                style={stylesheet.backBtn}
-              >
-                <Text style={stylesheet.backText}>{t("login.back")}</Text>
-              </TouchableOpacity>
+              <View style={stylesheet.footer}>
+                <Text style={stylesheet.footerText}>
+                  © {new Date().getFullYear()} Angkore University. All rights
+                  reserved.
+                </Text>
+              </View>
             </ScrollView>
           </KeyboardAvoidingView>
         </View>
@@ -206,85 +244,150 @@ const stylesheet = StyleSheet.create((theme) => ({
   scrollContent: {
     flexGrow: 1,
     paddingHorizontal: 25,
-    paddingVertical: 40,
+    paddingVertical: 60,
     justifyContent: "center",
   },
-  header: { alignItems: "center", marginBottom: 30 },
+  header: { alignItems: "center", marginBottom: 40 },
+  logoContainer: {
+    padding: 10,
+    borderRadius: 70,
+    backgroundColor: "rgba(255, 255, 255, 0.15)",
+    marginBottom: 20,
+  },
   logoWrapper: {
     backgroundColor: "#fff",
     borderRadius: 60,
-    padding: 5,
-    marginBottom: 15,
-    elevation: 5,
+    padding: 10,
+    elevation: 10,
     shadowColor: "#000",
-    shadowOpacity: 0.2,
-    shadowRadius: 5,
+    shadowOpacity: 0.3,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 5 },
   },
-  logo: { width: 100, height: 100 },
-  titleKh: { fontSize: 24, fontWeight: "bold", color: "#fff", marginBottom: 5 },
+  logo: { width: 90, height: 90 },
+  titleKh: {
+    fontSize: 28,
+    fontFamily: "MoulRegular",
+    color: "#fff",
+    marginBottom: 8,
+    textAlign: "center",
+    textShadowColor: "rgba(0, 0, 0, 0.3)",
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 4,
+  },
   titleEn: {
     fontSize: 14,
-    color: "#eee",
+    color: "rgba(255, 255, 255, 0.85)",
     fontWeight: "600",
-    letterSpacing: 1.5,
+    letterSpacing: 2,
+    textAlign: "center",
   },
-  formCard: {
-    backgroundColor: "#fff",
-    borderRadius: 25,
-    padding: 24,
+  glassCard: {
+    backgroundColor: "rgba(255, 255, 255, 0.95)",
+    borderRadius: 30,
+    padding: 30,
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 15,
-    elevation: 8,
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.2,
+    shadowRadius: 20,
+    elevation: 15,
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.3)",
+  },
+  cardHeader: {
+    marginBottom: 25,
+    alignItems: "center",
+  },
+  cardTitle: {
+    fontSize: 22,
+    fontWeight: "800",
+    color: theme.colors.primary,
+    letterSpacing: 1,
+  },
+  cardSubtitleUnderline: {
+    width: 40,
+    height: 4,
+    backgroundColor: theme.colors.secondary,
+    borderRadius: 2,
+    marginTop: 4,
   },
   errorBox: {
+    flexDirection: "row",
+    alignItems: "center",
     backgroundColor: "#FFF0F0",
-    borderRadius: 8,
-    padding: 10,
-    marginBottom: 12,
-    borderLeftWidth: 3,
-    borderLeftColor: "#FF3B30",
+    borderRadius: 12,
+    padding: 12,
+    marginBottom: 20,
+    borderWidth: 1,
+    borderColor: "rgba(255, 59, 48, 0.2)",
   },
-  errorText: { color: "#CC0000", fontSize: 13, textAlign: "center" },
-
+  errorText: {
+    color: "#D00000",
+    fontSize: 14,
+    marginLeft: 8,
+    flex: 1,
+  },
   rowActions: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 20,
-    marginTop: 5,
+    marginBottom: 25,
   },
   rememberMe: {
     flexDirection: "row",
     alignItems: "center",
   },
   checkbox: {
-    width: 18,
-    height: 18,
-    borderRadius: 5,
-    borderWidth: 1.5,
+    width: 20,
+    height: 20,
+    borderRadius: 6,
+    borderWidth: 2,
     borderColor: "#CBD5E1",
-    marginRight: 8,
+    marginRight: 10,
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: "#fff",
   },
   rememberText: {
-    fontSize: 13,
-    color: "#64748B",
+    fontSize: 14,
+    color: "#475569",
     fontWeight: "500",
   },
   forgotPass: { alignSelf: "center" },
-  forgotText: { fontSize: 13, fontWeight: "600" },
-
-  loginBtn: {
-    paddingVertical: 15,
-    borderRadius: 30,
-    alignItems: "center",
-    marginTop: 4,
+  forgotText: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: theme.colors.primary,
   },
-  loginBtnText: { color: "#fff", fontSize: 17, fontWeight: "bold" },
-  backBtn: { marginTop: 20, alignItems: "center" },
-  backText: { color: "#aaaaaa", fontSize: 15, fontWeight: "500" },
+  loginBtn: {
+    backgroundColor: theme.colors.primary,
+    paddingVertical: 16,
+    borderRadius: 18,
+    alignItems: "center",
+    shadowColor: theme.colors.primary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 5,
+  },
+  loginBtnContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  loginBtnText: {
+    color: "#fff",
+    fontSize: 18,
+    fontWeight: "bold",
+    letterSpacing: 0.5,
+  },
+  footer: {
+    marginTop: 40,
+    alignItems: "center",
+  },
+  footerText: {
+    color: "rgba(255, 255, 255, 0.6)",
+    fontSize: 12,
+    textAlign: "center",
+  },
 }));

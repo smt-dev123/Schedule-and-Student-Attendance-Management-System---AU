@@ -41,3 +41,17 @@ export const deleteTeachers = async (id: string) => {
   const res = await api.delete(`/teachers/${id}`)
   return res.data?.data
 }
+
+export const getTeacherMe = async () => {
+  const res = await api.get('/teachers/profile/me')
+  return res.data
+}
+
+export const updateTeacherMe = async (data: FormData) => {
+  const res = await api.put('/teachers/profile/me', data, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  })
+  return res.data
+}

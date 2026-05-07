@@ -13,6 +13,10 @@ import {
 } from "react-native";
 import { useTranslation } from "react-i18next";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
+import { useSession } from "@/lib/auth-client";
+import { getTeacherMe } from "@/api/TeacherAPI";
+import { getStudentMe } from "@/api/StudentAPI";
+import { ActivityIndicator } from "react-native";
 
 const PLACEHOLDER_IMAGE = require("@/assets/icons/user.png");
 
@@ -29,30 +33,84 @@ export default function ProfileScreen() {
   const { t } = useTranslation();
   const router = useRouter();
   const { theme } = useUnistyles();
+  const { data: session, isPending: isSessionLoading } = useSession();
+  const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState({
-    fullName: "Mr. Seung Sreang",
-    phone: "+855 12 345 678",
-    email: "sreang@university.edu",
-    address: "123 University Ave, PP",
-    dob: "March 15, 1985",
+    fullName: "",
+    phone: "",
+    email: "",
+    address: "",
+    dob: "",
     photoUri: null as string | null,
+    role: "",
+    code: "",
+    faculty: "",
+    department: "",
+    academicLevel: "",
   });
 
   useFocusEffect(
     useCallback(() => {
       const loadProfile = async () => {
+        if (isSessionLoading) return;
+        if (!session?.user) {
+          setLoading(false);
+          return;
+        }
+
+        const userRole = (session.user as any).role;
+
         try {
-          const saved = await AsyncStorage.getItem(STORAGE_KEY);
-          if (saved) {
-            const data = JSON.parse(saved);
-            setProfile((prev) => ({ ...prev, ...data }));
+          let data;
+          if (userRole === "teacher") {
+            data = await getTeacherMe();
+            setProfile({
+              fullName: data.name,
+              phone: data.phone,
+              email: data.email,
+              address: data.address || "",
+              dob: "",
+              photoUri: data.image || null,
+              role: t("profile.teacher"),
+              code: data.teacherCode,
+              faculty: data.faculty?.name || "",
+              academicLevel: data.academicLevel?.level || "",
+              department: "",
+            });
+          } else if (userRole === "student") {
+            data = await getStudentMe();
+            setProfile({
+              fullName: data.name,
+              phone: data.phone,
+              email: data.email,
+              address: data.address || "",
+              dob: data.dob ? new Date(data.dob).toLocaleDateString() : "",
+              photoUri: data.image || null,
+              role: t("profile.student"),
+              code: data.studentCode,
+              faculty: data.faculty?.name || "",
+              department: data.department?.name || "",
+              academicLevel: "",
+            });
+          } else {
+            // Admin or other roles
+            const user = session.user as any;
+            setProfile((prev) => ({
+              ...prev,
+              fullName: user.name || "",
+              email: user.email || "",
+              photoUri: user.image || null,
+              role: userRole || "",
+            }));
           }
         } catch (e) {
           console.log("Load error:", e);
+        } finally {
+          setLoading(false);
         }
       };
       loadProfile();
-    }, []),
+    }, [session, isSessionLoading]),
   );
 
   const handleLogout = () => {
@@ -65,6 +123,14 @@ export default function ProfileScreen() {
       },
     ]);
   };
+
+  if (loading || isSessionLoading) {
+    return (
+      <View style={[stylesheet.container, { justifyContent: "center", alignItems: "center" }]}>
+        <ActivityIndicator size="large" color={theme.colors.primary} />
+      </View>
+    );
+  }
 
   return (
     <ScrollView style={stylesheet.container} showsVerticalScrollIndicator={false}>
@@ -87,8 +153,8 @@ export default function ProfileScreen() {
             style={stylesheet.avatar}
           />
         </View>
-        <Text style={stylesheet.userName}>{profile.fullName}</Text>
-        <Text style={stylesheet.userRole}>Associate Professor</Text>
+        <Text style={stylesheet.userName}>{profile.fullName || "N/A"}</Text>
+        <Text style={stylesheet.userRole}>{profile.role || "User"}</Text>
       </View>
 
       {/* Basic Information */}
@@ -97,10 +163,23 @@ export default function ProfileScreen() {
           <Ionicons name="person-circle-outline" size={24} color={theme.colors.primary} />
           <Text style={stylesheet.cardTitle}>{t("profile.basicInfo")}</Text>
         </View>
-        <InfoRow label={t("profile.fullName")} value={profile.fullName} />
-        <InfoRow label={t("profile.dob")} value={profile.dob} />
-        <InfoRow label={t("profile.employeeId")} value="EMP-2023001" />
+        <InfoRow label={t("profile.fullName")} value={profile.fullName || "N/A"} />
+        {profile.dob ? <InfoRow label={t("profile.dob")} value={profile.dob} /> : null}
+        <InfoRow label={profile.role === t("profile.teacher") ? t("profile.teacherCode") : t("profile.studentCode")} value={profile.code || "N/A"} />
       </View>
+
+      {/* Academic Information */}
+      {(profile.faculty || profile.department || profile.academicLevel) && (
+        <View style={stylesheet.card}>
+          <View style={stylesheet.cardHeader}>
+            <Ionicons name="school-outline" size={24} color={theme.colors.primary} />
+            <Text style={stylesheet.cardTitle}>{t("profile.academicInfo")}</Text>
+          </View>
+          {profile.faculty ? <InfoRow label={t("profile.faculty")} value={profile.faculty} /> : null}
+          {profile.department ? <InfoRow label={t("profile.department")} value={profile.department} /> : null}
+          {profile.academicLevel ? <InfoRow label={t("profile.academicLevel")} value={profile.academicLevel} /> : null}
+        </View>
+      )}
 
       {/* Contact Information */}
       <View style={stylesheet.card}>
@@ -108,9 +187,9 @@ export default function ProfileScreen() {
           <Ionicons name="call-outline" size={24} color={theme.colors.primary} />
           <Text style={stylesheet.cardTitle}>{t("profile.contactInfo")}</Text>
         </View>
-        <InfoRow label={t("profile.phone")} value={profile.phone} />
-        <InfoRow label={t("profile.email")} value={profile.email} />
-        <InfoRow label={t("profile.address")} value={profile.address} />
+        <InfoRow label={t("profile.phone")} value={profile.phone || "N/A"} />
+        <InfoRow label={t("profile.email")} value={profile.email || "N/A"} />
+        <InfoRow label={t("profile.address")} value={profile.address || "N/A"} />
       </View>
 
       {/* Buttons */}
