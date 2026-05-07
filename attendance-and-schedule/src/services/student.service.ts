@@ -31,6 +31,8 @@ export class StudentService {
       await tx.insert(studentAcademicYears).values({
         studentId: student.id,
         academicYearId: data.academicYearId,
+        semester: data.semester,
+        year: data.year ?? 1,
       });
       return student;
     });

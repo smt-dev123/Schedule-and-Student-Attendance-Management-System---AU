@@ -37,7 +37,10 @@ export type CreateStudent = {
   isActive: boolean;
   userId: string;
   skillId: number;
+  year?: number;
   image?: string | null;
+  studentCode: string;
+  nameEn: string;
 };
 export type StudentPromoteInput = {
   studentId: number;

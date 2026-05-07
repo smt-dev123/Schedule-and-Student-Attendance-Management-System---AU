@@ -267,13 +267,17 @@ export const studentAcademicYears = pgTable(
     academicYearId: integer("academic_year_id")
       .notNull()
       .references(() => academicYears.id, { onDelete: "cascade" }),
+    semester: integer("semester").notNull().default(1),
+    year: integer("year").notNull().default(1),
     createdAt: timestamp("created_at").defaultNow(),
     updatedAt: timestamp("updated_at").defaultNow(),
   },
   (table) => [
-    uniqueIndex("unique_student_academic_year").on(
+    uniqueIndex("unique_student_enrollment").on(
       table.studentId,
       table.academicYearId,
+      table.semester,
+      table.year,
     ),
   ],
 );

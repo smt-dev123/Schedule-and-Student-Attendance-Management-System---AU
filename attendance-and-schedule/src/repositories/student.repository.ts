@@ -15,7 +15,7 @@ import type {
   StudentQueryInput,
   StudentUpdateInput,
 } from "@/validators/academy";
-import { and, count, eq, ilike, SQL } from "drizzle-orm";
+import { and, count, eq, ilike, SQL, exists } from "drizzle-orm";
 
 export class StudentRepository {
   constructor(private readonly db: DrizzleDb) {}
@@ -31,6 +31,8 @@ export class StudentRepository {
       departmentId,
       academicLevelId,
       academicYearId,
+      semester,
+      year,
       page,
       limit,
       name,
@@ -45,10 +47,41 @@ export class StudentRepository {
       conditions.push(eq(students.facultyId, Number(facultyId)));
     if (departmentId && departmentId !== "all")
       conditions.push(eq(students.departmentId, Number(departmentId)));
-    if (academicYearId && academicYearId !== "all")
-      conditions.push(eq(students.academicYearId, Number(academicYearId)));
     if (academicLevelId && academicLevelId !== "all")
       conditions.push(eq(students.academicLevelId, Number(academicLevelId)));
+
+    // Filter by enrollment history if academicYearId, semester, or year is provided
+    if (
+      (academicYearId && academicYearId !== "all") ||
+      (semester && semester !== "all") ||
+      (year && year !== "all")
+    ) {
+      const enrollmentConditions: SQL[] = [
+        eq(studentAcademicYears.studentId, students.id),
+      ];
+      if (academicYearId && academicYearId !== "all")
+        enrollmentConditions.push(
+          eq(studentAcademicYears.academicYearId, Number(academicYearId)),
+        );
+      if (semester && semester !== "all")
+        enrollmentConditions.push(
+          eq(studentAcademicYears.semester, Number(semester)),
+        );
+      if (year && year !== "all")
+        enrollmentConditions.push(
+          eq(studentAcademicYears.year, Number(year)),
+        );
+
+      conditions.push(
+        exists(
+          this.db
+            .select({ id: studentAcademicYears.studentId })
+            .from(studentAcademicYears)
+            .where(and(...enrollmentConditions))
+            .limit(1),
+        ),
+      );
+    }
 
     const where = conditions.length > 0 ? and(...conditions) : undefined;
 
@@ -87,10 +120,23 @@ export class StudentRepository {
     data: CreateStudent,
     tx: Transaction,
   ): Promise<Student | undefined> {
+    const statusMap: Record<string, any> = {
+      enrolled: "enrolled",
+      graduated: "graduated",
+      transferred: "transferred",
+      "dropped out": "dropped_out",
+    };
+
     const studentId = generateId();
+    const { educationalStatus, ...rest } = data;
+
     const [student] = await tx
       .insert(students)
-      .values({ ...data, id: studentId })
+      .values({
+        ...rest,
+        id: studentId,
+        educationalStatus: statusMap[educationalStatus] || "enrolled",
+      })
       .returning();
     return student;
   }
@@ -217,6 +263,8 @@ export class StudentRepository {
         .values({
           studentId: data.studentId,
           academicYearId: Number(data.academicYearId),
+          semester: Number(data.semester),
+          year: Number(data.year),
         })
         .onConflictDoNothing();
 
