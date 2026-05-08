@@ -1,12 +1,12 @@
 import { type DrizzleDb, type Transaction } from "@/database";
-import { schedules } from "@/database/schemas";
+import { schedules, departments, faculties } from "@/database/schemas";
 import type { Schedule } from "@/types/academy";
 import type {
   ScheduleInput,
   ScheduleUniqueKeyInput,
   ScheduleUpdateInput,
 } from "@/validators/academy";
-import { and, eq } from "drizzle-orm";
+import { and, eq, ilike, or, inArray } from "drizzle-orm";
 
 export class ScheduleRepository {
   constructor(private readonly db: DrizzleDb) {}
@@ -20,12 +20,23 @@ export class ScheduleRepository {
   }
 
   async findAll(query?: {
+    name?: string
     academicYearId?: number
     facultyId?: number
     departmentId?: number
     academicLevelId?: number
   }): Promise<Schedule[]> {
     const conditions: any[] = []
+
+    if (query?.name) {
+      conditions.push(
+        or(
+          ilike(departments.name, `%${query.name}%`),
+          ilike(faculties.name, `%${query.name}%`),
+        ),
+      )
+    }
+
     if (query?.academicYearId) {
       conditions.push(eq(schedules.academicYearId, query.academicYearId))
     }
@@ -41,8 +52,20 @@ export class ScheduleRepository {
 
     const where = conditions.length > 0 ? and(...conditions) : undefined
 
+    // Get the IDs first to handle filtering on joined tables
+    const schedulesWithFilters = await this.db
+      .select({ id: schedules.id })
+      .from(schedules)
+      .leftJoin(departments, eq(schedules.departmentId, departments.id))
+      .leftJoin(faculties, eq(schedules.facultyId, faculties.id))
+      .where(where)
+
+    const ids = schedulesWithFilters.map((s) => s.id)
+
+    if (ids.length === 0) return []
+
     return this.db.query.schedules.findMany({
-      where,
+      where: inArray(schedules.id, ids),
       with: {
         faculty: { columns: { id: true, name: true } },
         department: { columns: { id: true, name: true } },

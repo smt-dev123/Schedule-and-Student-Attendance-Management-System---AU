@@ -1,5 +1,4 @@
 import "@/styles/unistyles";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useFocusEffect, useRouter } from "expo-router";
 import React, { useCallback, useState } from "react";
 import {
@@ -8,10 +7,15 @@ import {
   Text,
   TouchableOpacity,
   View,
+  ActivityIndicator,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useTranslation } from "react-i18next";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
+import { useSession } from "@/lib/auth-client";
+import { getDashboardSummaryMe } from "@/api/DashboardAPI";
+import { getTeacherMe } from "@/api/TeacherAPI";
+import { getStudentMe } from "@/api/StudentAPI";
 
 function getGreeting(t: any) {
   const h = new Date().getHours();
@@ -59,33 +63,38 @@ export default function Dashboard() {
   const { t } = useTranslation();
   const router = useRouter();
   const { theme } = useUnistyles();
-  const [photoUri, setPhotoUri] = useState<string | null>(null);
+  const { data: session, isPending: isSessionLoading } = useSession();
+
+  const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState<any>(null);
+  const [currentClass, setCurrentClass] = useState<any>(null);
+  const [profile, setProfile] = useState<any>(null);
 
   const STATS = [
     {
       label: t("dashboard.totalSubjects"),
-      value: "4",
+      value: stats?.totalSubjects?.toString() || "0",
       icon: STAT_ICONS.subjects,
       color: theme.colors.text,
       bg: theme.colors.card,
     },
     {
       label: t("dashboard.completed"),
-      value: "2",
+      value: stats?.completed?.toString() || "0",
       icon: STAT_ICONS.completed,
       color: theme.colors.text,
       bg: theme.colors.card,
     },
     {
       label: t("dashboard.totalClasses"),
-      value: "12",
+      value: stats?.totalClasses?.toString() || "0",
       icon: STAT_ICONS.classes,
       color: theme.colors.text,
       bg: theme.colors.card,
     },
     {
       label: t("dashboard.todayClasses"),
-      value: "6",
+      value: stats?.todayClasses?.toString() || "0",
       icon: STAT_ICONS.today,
       color: theme.colors.text,
       bg: theme.colors.card,
@@ -94,47 +103,74 @@ export default function Dashboard() {
 
   useFocusEffect(
     useCallback(() => {
-      const load = async () => {
+      const fetchData = async () => {
+        if (isSessionLoading) return;
+        setLoading(true);
         try {
-          const saved = await AsyncStorage.getItem("user_profile");
-          if (saved) {
-            const data = JSON.parse(saved);
-            setPhotoUri(data.photoUri ?? null);
-          } else {
-            const teacherSaved = await AsyncStorage.getItem("teacher_profile");
-            if (teacherSaved) {
-              const data = JSON.parse(teacherSaved);
-              setPhotoUri(data.photoUri ?? null);
-            } else {
-              setPhotoUri(null);
-            }
+          const res = await getDashboardSummaryMe();
+          if (res) {
+            setStats(res.stats);
+            setCurrentClass(res.currentClass);
           }
-        } catch {
-          setPhotoUri(null);
+
+          if (session?.user) {
+            const role = (session.user as any).role;
+            let profileData;
+            if (role === "teacher") {
+              profileData = await getTeacherMe();
+            } else if (role === "student") {
+              profileData = await getStudentMe();
+            }
+            setProfile(profileData);
+          }
+        } catch (error) {
+          console.error("Dashboard fetch error:", error);
+        } finally {
+          setLoading(false);
         }
       };
-      load();
-    }, []),
+      fetchData();
+    }, [session, isSessionLoading]),
   );
+
+  if (loading || isSessionLoading) {
+    return (
+      <SafeAreaView style={stylesheet.safe}>
+        <View
+          style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
+        >
+          <ActivityIndicator size="large" color={theme.colors.primary} />
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={stylesheet.safe}>
-      <ScrollView style={stylesheet.scroll} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        style={stylesheet.scroll}
+        showsVerticalScrollIndicator={false}
+      >
         {/* ── Header ── */}
         <View style={stylesheet.header}>
           <View style={stylesheet.headerLeft}>
             <Text style={stylesheet.greeting}>{getGreeting(t)},</Text>
-            <Text style={stylesheet.userName}>Sourng!</Text>
+            <Text style={stylesheet.userName}>{profile?.name || "User"}!</Text>
             <Text style={stylesheet.date}>{getCurrentDate()}</Text>
           </View>
 
           <View style={stylesheet.headerRight}>
             <TouchableOpacity onPress={() => router.push("/profile")}>
-              {photoUri ? (
-                <Image source={{ uri: photoUri }} style={stylesheet.avatarImg} />
+              {profile?.image ? (
+                <Image
+                  source={{ uri: profile.image }}
+                  style={stylesheet.avatarImg}
+                />
               ) : (
                 <View style={stylesheet.avatar}>
-                  <Text style={{ color: "#fff", fontWeight: "bold" }}>Sg</Text>
+                  <Text style={{ color: "#fff", fontWeight: "bold" }}>
+                    {profile?.name?.substring(0, 2) || "U"}
+                  </Text>
                 </View>
               )}
             </TouchableOpacity>
@@ -144,7 +180,10 @@ export default function Dashboard() {
         {/* ── Stats Grid ── */}
         <View style={stylesheet.statsGrid}>
           {STATS.map((s, i) => (
-            <View key={i} style={[stylesheet.statCard, { backgroundColor: s.bg }]}>
+            <View
+              key={i}
+              style={[stylesheet.statCard, { backgroundColor: s.bg }]}
+            >
               <View style={stylesheet.statTop}>
                 <Text style={stylesheet.statLabel}>{s.label}</Text>
                 <View
@@ -179,22 +218,33 @@ export default function Dashboard() {
               <Text style={stylesheet.currentTitle}>
                 {t("dashboard.currentClass")}
               </Text>
-              <Text style={stylesheet.currentSub}>{t("dashboard.inProgress")}</Text>
+              <Text style={stylesheet.currentSub}>
+                {currentClass ? t("dashboard.inProgress") : t("dashboard.noClass")}
+              </Text>
             </View>
             <View style={stylesheet.currentIconBox}>
               <Text style={stylesheet.currentIcon}>🕐</Text>
             </View>
           </View>
-          <Text style={stylesheet.subjectName}>Mobile App</Text>
-          <Text style={stylesheet.classInfo}>06:00 - 9:15 CS-2026 Lab 01</Text>
-          <TouchableOpacity
-            style={stylesheet.recordBtn}
-            onPress={() => router.push("/attendance")}
-          >
-            <Text style={stylesheet.recordBtnText}>
-              ✓ {t("dashboard.recordAttendance")}
-            </Text>
-          </TouchableOpacity>
+          {currentClass ? (
+            <>
+              <Text style={stylesheet.subjectName}>{currentClass.name}</Text>
+              <Text style={stylesheet.classInfo}>
+                {currentClass.startTime} - {currentClass.endTime}{" "}
+                {currentClass.building} {currentClass.room}
+              </Text>
+              <TouchableOpacity
+                style={stylesheet.recordBtn}
+                onPress={() => router.push("/attendance")}
+              >
+                <Text style={stylesheet.recordBtnText}>
+                  ✓ {t("dashboard.recordAttendance")}
+                </Text>
+              </TouchableOpacity>
+            </>
+          ) : (
+            <Text style={stylesheet.subjectName}>{t("dashboard.freeTime")}</Text>
+          )}
         </View>
 
         <View style={{ height: 30 }} />
@@ -202,6 +252,7 @@ export default function Dashboard() {
     </SafeAreaView>
   );
 }
+
 
 const stylesheet = StyleSheet.create((theme) => ({
   safe: { 

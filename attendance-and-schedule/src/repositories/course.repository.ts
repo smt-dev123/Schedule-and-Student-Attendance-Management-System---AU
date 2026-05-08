@@ -3,7 +3,7 @@ import { type DrizzleDb, type Transaction } from "@/database";
 import { courses, students, schedules } from "@/database/schemas";
 import type { Course } from "@/types/academy";
 import type { CourseInput, CourseUpdateInput, CourseQueryInput } from "@/validators/academy";
-import { and, eq, sql, inArray } from "drizzle-orm";
+import { and, eq, sql, inArray, ilike, or } from "drizzle-orm";
 
 const SESSION_DURATION = 1.5; // hours per session
 
@@ -36,6 +36,7 @@ export class CourseRepository {
     limit: number
   }> {
     const {
+      name,
       academicYearId,
       teacherId,
       studentId,
@@ -50,6 +51,12 @@ export class CourseRepository {
     const offset = (page - 1) * limit
 
     const conditions: any[] = []
+
+    if (name) {
+      conditions.push(
+        or(ilike(courses.name, `%${name}%`), ilike(courses.code, `%${name}%`)),
+      )
+    }
 
     if (academicYearId) {
       conditions.push(eq(courses.academicYearId, academicYearId))

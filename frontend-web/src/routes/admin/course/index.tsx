@@ -22,9 +22,11 @@ import { ManualPagination } from '@/components/ui/ManualPagination'
 import { getFaculties } from '@/api/FacultyAPI'
 import { getDepartments } from '@/api/DepartmentAPI'
 import { getAcademicLevels } from '@/api/AcademicLevelAPI'
-import { IoFilter } from 'react-icons/io5'
+import { IoFilter, IoSearch } from 'react-icons/io5'
+import { TextField } from '@radix-ui/themes'
 
 type CourseSearch = {
+  name?: string
   page?: number
   limit?: number
   facultyId?: string
@@ -35,6 +37,7 @@ type CourseSearch = {
 export const Route = createFileRoute('/admin/course/')({
   validateSearch: (search: Record<string, unknown>): CourseSearch => {
     return {
+      name: (search.name as string) || '',
       page: Number(search.page) || 1,
       limit: Number(search.limit) || 10,
       facultyId: (search.facultyId as string) || 'all',
@@ -49,21 +52,22 @@ function CourseListComponent() {
   const { data: session } = useSessionContext()
   const role = (session?.user as any)?.role
   const { selectedYearId } = useAcademicStore()
-  const { page, limit, facultyId, departmentId, academicLevelId } =
+  const { name, page, limit, facultyId, departmentId, academicLevelId } =
     Route.useSearch()
   const navigate = useNavigate({ from: Route.fullPath })
   const [editingCourse, setEditingCourse] = useState<any>(null)
   const [isUpdateOpen, setIsUpdateOpen] = useState(false)
 
   const [draft, setDraft] = useState<Omit<CourseSearch, 'page' | 'limit'>>({
+    name,
     facultyId,
     departmentId,
     academicLevelId,
   })
 
   useEffect(() => {
-    setDraft({ facultyId, departmentId, academicLevelId })
-  }, [facultyId, departmentId, academicLevelId])
+    setDraft({ name, facultyId, departmentId, academicLevelId })
+  }, [name, facultyId, departmentId, academicLevelId])
 
   const { data: faculties = [] } = useQuery({
     queryKey: ['faculties'],
@@ -86,6 +90,7 @@ function CourseListComponent() {
     queryKey: [
       'courses',
       selectedYearId,
+      name,
       page,
       limit,
       facultyId,
@@ -94,6 +99,7 @@ function CourseListComponent() {
     ],
     queryFn: () =>
       getCourses({
+        name,
         academicYearId: selectedYearId!,
         page,
         limit,
@@ -135,6 +141,7 @@ function CourseListComponent() {
 
   const handleClearFilter = () => {
     const reset = {
+      name: '',
       facultyId: 'all',
       departmentId: 'all',
       academicLevelId: 'all',
@@ -162,87 +169,105 @@ function CourseListComponent() {
         </Flex>
       </Flex>
 
-      <Flex gap="3" mb="6" wrap="wrap" align="end">
-        <Box>
+      <Flex justify="between" align="center" mb="3">
+        <Box flexGrow="1" maxWidth="300px">
           <Text as="div" size="2" mb="1" weight="bold">
-            កម្រិតសិក្សា
+            ស្វែងរក
           </Text>
-          <Select.Root
-            value={draft.academicLevelId}
-            onValueChange={(val) =>
-              setDraft({ ...draft, academicLevelId: val })
-            }
+          <TextField.Root
+            placeholder="ស្វែងរកឈ្មោះ ឬកូដ..."
+            value={draft.name}
+            onChange={(e) => setDraft({ ...draft, name: e.target.value })}
+            onKeyDown={(e) => e.key === 'Enter' && handleApplyFilter()}
           >
-            <Select.Trigger style={{ minWidth: '150px' }} />
-            <Select.Content>
-              <Select.Item value="all">ទាំងអស់</Select.Item>
-              {academicLevels.map((level: any) => (
-                <Select.Item key={level.id} value={String(level.id)}>
-                  {level.level}
-                </Select.Item>
-              ))}
-            </Select.Content>
-          </Select.Root>
+            <TextField.Slot>
+              <IoSearch />
+            </TextField.Slot>
+          </TextField.Root>
         </Box>
 
-        <Box>
-          <Text as="div" size="2" mb="1" weight="bold">
-            មហាវិទ្យាល័យ
-          </Text>
-          <Select.Root
-            value={draft.facultyId}
-            onValueChange={(val) => {
-              setDraft({ ...draft, facultyId: val, departmentId: 'all' })
-            }}
-          >
-            <Select.Trigger style={{ minWidth: '150px' }} />
-            <Select.Content>
-              <Select.Item value="all">ទាំងអស់</Select.Item>
-              {faculties.map((f: any) => (
-                <Select.Item key={f.id} value={String(f.id)}>
-                  {f.name}
-                </Select.Item>
-              ))}
-            </Select.Content>
-          </Select.Root>
-        </Box>
+        <Flex gap="3" wrap="wrap" align="end">
+          <Box>
+            <Text as="div" size="2" mb="1" weight="bold">
+              កម្រិតសិក្សា
+            </Text>
+            <Select.Root
+              value={draft.academicLevelId}
+              onValueChange={(val) =>
+                setDraft({ ...draft, academicLevelId: val })
+              }
+            >
+              <Select.Trigger style={{ minWidth: '150px' }} />
+              <Select.Content>
+                <Select.Item value="all">ទាំងអស់</Select.Item>
+                {academicLevels.map((level: any) => (
+                  <Select.Item key={level.id} value={String(level.id)}>
+                    {level.level}
+                  </Select.Item>
+                ))}
+              </Select.Content>
+            </Select.Root>
+          </Box>
 
-        <Box>
-          <Text as="div" size="2" mb="1" weight="bold">
-            ដេប៉ាតឺម៉ង់
-          </Text>
-          <Select.Root
-            value={draft.departmentId}
-            onValueChange={(val) => setDraft({ ...draft, departmentId: val })}
-            disabled={draft.facultyId === 'all'}
-          >
-            <Select.Trigger style={{ minWidth: '150px' }} />
-            <Select.Content>
-              <Select.Item value="all">ទាំងអស់</Select.Item>
-              {filteredDepartments.map((d: any) => (
-                <Select.Item key={d.id} value={String(d.id)}>
-                  {d.name}
-                </Select.Item>
-              ))}
-            </Select.Content>
-          </Select.Root>
-        </Box>
+          <Box>
+            <Text as="div" size="2" mb="1" weight="bold">
+              មហាវិទ្យាល័យ
+            </Text>
+            <Select.Root
+              value={draft.facultyId}
+              onValueChange={(val) => {
+                setDraft({ ...draft, facultyId: val, departmentId: 'all' })
+              }}
+            >
+              <Select.Trigger style={{ minWidth: '150px' }} />
+              <Select.Content>
+                <Select.Item value="all">ទាំងអស់</Select.Item>
+                {faculties.map((f: any) => (
+                  <Select.Item key={f.id} value={String(f.id)}>
+                    {f.name}
+                  </Select.Item>
+                ))}
+              </Select.Content>
+            </Select.Root>
+          </Box>
 
-        <Button
-          onClick={handleApplyFilter}
-          color="indigo"
-          style={{ cursor: 'pointer' }}
-        >
-          <IoFilter /> ស្វែងរក
-        </Button>
-        <Button
-          variant="soft"
-          color="gray"
-          onClick={handleClearFilter}
-          style={{ cursor: 'pointer' }}
-        >
-          សម្អាត
-        </Button>
+          <Box>
+            <Text as="div" size="2" mb="1" weight="bold">
+              ដេប៉ាតឺម៉ង់
+            </Text>
+            <Select.Root
+              value={draft.departmentId}
+              onValueChange={(val) => setDraft({ ...draft, departmentId: val })}
+              disabled={draft.facultyId === 'all'}
+            >
+              <Select.Trigger style={{ minWidth: '150px' }} />
+              <Select.Content>
+                <Select.Item value="all">ទាំងអស់</Select.Item>
+                {filteredDepartments.map((d: any) => (
+                  <Select.Item key={d.id} value={String(d.id)}>
+                    {d.name}
+                  </Select.Item>
+                ))}
+              </Select.Content>
+            </Select.Root>
+          </Box>
+
+          <Button
+            onClick={handleApplyFilter}
+            color="indigo"
+            style={{ cursor: 'pointer' }}
+          >
+            <IoFilter /> ស្វែងរក
+          </Button>
+          <Button
+            variant="soft"
+            color="gray"
+            onClick={handleClearFilter}
+            style={{ cursor: 'pointer' }}
+          >
+            សម្អាត
+          </Button>
+        </Flex>
       </Flex>
 
       <FetchData isLoading={isLoading} error={error} data={courses}>

@@ -1,10 +1,16 @@
-import { eq, sql, desc, inArray } from "drizzle-orm";
+import { eq, sql, desc, inArray, and } from "drizzle-orm";
 import {
   user,
   students,
   teachers,
   departments,
   attendanceSummaries,
+  courses,
+  schedules,
+  academicYears,
+  sessionTimes,
+  classrooms,
+  buildings,
 } from "../database/schemas";
 import { type DrizzleDb } from "@/database";
 
@@ -90,4 +96,204 @@ export class DashboardRepository {
 
     return res;
   }
+
+  async getStudentStats(studentId: number) {
+    const currentYear = await this.db.query.academicYears.findFirst({
+      where: eq(academicYears.isCurrent, true),
+    });
+
+    if (!currentYear) return null;
+
+    const student = await this.db.query.students.findFirst({
+      where: eq(students.id, studentId),
+    });
+
+    if (!student) return null;
+
+    const res = await this.db
+      .select({
+        id: courses.id,
+        day: courses.day,
+        totalSessionLeft: courses.totalSessionLeft,
+      })
+      .from(courses)
+      .innerJoin(schedules, eq(courses.scheduleId, schedules.id))
+      .where(
+        and(
+          eq(schedules.departmentId, student.departmentId!),
+          eq(schedules.academicLevelId, student.academicLevelId!),
+          eq(schedules.academicYearId, currentYear.id),
+          eq(schedules.semester, student.semester)
+        )
+      );
+
+    const totalSubjects = res.length;
+    const completed = res.filter((c) => Number(c.totalSessionLeft) === 0).length;
+    
+    // Total classes - let's assume total subjects for now as a simplified stat
+    // Or we could count total sessions if we had that data.
+    const totalClasses = totalSubjects * 12; // Example multiplier for semester weeks
+
+    const currentDay = sql`trim(to_char(current_date, 'Day'))`;
+    const todayRes = await this.db
+      .select({ count: sql<number>`count(*)::int` })
+      .from(courses)
+      .innerJoin(schedules, eq(courses.scheduleId, schedules.id))
+      .where(
+        and(
+          eq(schedules.departmentId, student.departmentId!),
+          eq(schedules.academicLevelId, student.academicLevelId!),
+          eq(schedules.academicYearId, currentYear.id),
+          eq(schedules.semester, student.semester),
+          eq(courses.day, currentDay)
+        )
+      );
+
+    return {
+      totalSubjects,
+      completed,
+      totalClasses,
+      todayClasses: todayRes[0]?.count ?? 0,
+    };
+  }
+
+  async getTeacherStats(teacherId: number) {
+    const currentYear = await this.db.query.academicYears.findFirst({
+      where: eq(academicYears.isCurrent, true),
+    });
+
+    if (!currentYear) return null;
+
+    const res = await this.db
+      .select({
+        id: courses.id,
+        day: courses.day,
+        totalSessionLeft: courses.totalSessionLeft,
+      })
+      .from(courses)
+      .where(
+        and(
+          eq(courses.teacherId, teacherId),
+          eq(courses.academicYearId, currentYear.id)
+        )
+      );
+
+    const totalSubjects = res.length;
+    const completed = res.filter((c) => Number(c.totalSessionLeft) === 0).length;
+    const totalClasses = totalSubjects * 12;
+
+    const currentDay = sql`trim(to_char(current_date, 'Day'))`;
+    const todayRes = await this.db
+      .select({ count: sql<number>`count(*)::int` })
+      .from(courses)
+      .where(
+        and(
+          eq(courses.teacherId, teacherId),
+          eq(courses.academicYearId, currentYear.id),
+          eq(courses.day, currentDay)
+        )
+      );
+
+    return {
+      totalSubjects,
+      completed,
+      totalClasses,
+      todayClasses: todayRes[0]?.count ?? 0,
+    };
+  }
+
+  async getCurrentClassForStudent(studentId: number) {
+    const student = await this.db.query.students.findFirst({
+      where: eq(students.id, studentId),
+    });
+    if (!student) return null;
+
+    const currentDay = sql`trim(to_char(current_date, 'Day'))`;
+    const currentTime = sql`to_char(current_timestamp, 'HH24:MI')`;
+
+    const res = await this.db
+      .select({
+        name: courses.name,
+        session: courses.session,
+        startTime1: sessionTimes.firstSessionStartTime,
+        endTime1: sessionTimes.firstSessionEndTime,
+        startTime2: sessionTimes.secondSessionStartTime,
+        endTime2: sessionTimes.secondSessionEndTime,
+        room: classrooms.name,
+        building: buildings.name,
+      })
+      .from(courses)
+      .innerJoin(schedules, eq(courses.scheduleId, schedules.id))
+      .innerJoin(sessionTimes, eq(schedules.sessionTimeId, sessionTimes.id))
+      .innerJoin(classrooms, eq(schedules.classroomId, classrooms.id))
+      .innerJoin(buildings, eq(classrooms.buildingId, buildings.id))
+      .where(
+        and(
+          eq(schedules.departmentId, student.departmentId!),
+          eq(schedules.academicLevelId, student.academicLevelId!),
+          eq(courses.day, currentDay),
+          sql`${currentTime} BETWEEN 
+            CASE WHEN ${courses.session} = 1 THEN ${sessionTimes.firstSessionStartTime} ELSE ${sessionTimes.secondSessionStartTime} END 
+            AND 
+            CASE WHEN ${courses.session} = 1 THEN ${sessionTimes.firstSessionEndTime} ELSE ${sessionTimes.secondSessionEndTime} END`
+        )
+      )
+      .limit(1);
+
+    if (res.length === 0) return null;
+
+    const item = res[0];
+    return {
+      name: item.name,
+      startTime: item.session === 1 ? item.startTime1 : item.startTime2,
+      endTime: item.session === 1 ? item.endTime1 : item.endTime2,
+      room: item.room,
+      building: item.building,
+    };
+  }
+
+  async getCurrentClassForTeacher(teacherId: number) {
+    const currentDay = sql`trim(to_char(current_date, 'Day'))`;
+    const currentTime = sql`to_char(current_timestamp, 'HH24:MI')`;
+
+    const res = await this.db
+      .select({
+        name: courses.name,
+        session: courses.session,
+        startTime1: sessionTimes.firstSessionStartTime,
+        endTime1: sessionTimes.firstSessionEndTime,
+        startTime2: sessionTimes.secondSessionStartTime,
+        endTime2: sessionTimes.secondSessionEndTime,
+        room: classrooms.name,
+        building: buildings.name,
+      })
+      .from(courses)
+      .innerJoin(schedules, eq(courses.scheduleId, schedules.id))
+      .innerJoin(sessionTimes, eq(schedules.sessionTimeId, sessionTimes.id))
+      .innerJoin(classrooms, eq(schedules.classroomId, classrooms.id))
+      .innerJoin(buildings, eq(classrooms.buildingId, buildings.id))
+      .where(
+        and(
+          eq(courses.teacherId, teacherId),
+          eq(courses.day, currentDay),
+          sql`${currentTime} BETWEEN 
+            CASE WHEN ${courses.session} = 1 THEN ${sessionTimes.firstSessionStartTime} ELSE ${sessionTimes.secondSessionStartTime} END 
+            AND 
+            CASE WHEN ${courses.session} = 1 THEN ${sessionTimes.firstSessionEndTime} ELSE ${sessionTimes.secondSessionEndTime} END`
+        )
+      )
+      .limit(1);
+
+    if (res.length === 0) return null;
+
+    const item = res[0];
+    return {
+      name: item.name,
+      startTime: item.session === 1 ? item.startTime1 : item.startTime2,
+      endTime: item.session === 1 ? item.endTime1 : item.endTime2,
+      room: item.room,
+      building: item.building,
+    };
+  }
 }
+

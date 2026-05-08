@@ -152,7 +152,12 @@ const academicYearService = new AcademicYearService(db, academicYearRepository);
 const courseService = new CourseService(courseRepository);
 const skillService = new SkillService(skillRepository);
 const scheduleOverrideService = new ScheduleOverrideService(scheduleOverrideRepository, db);
-const dashboardService = new DashboardService(dashboardRepository);
+const dashboardService = new DashboardService(
+  dashboardRepository,
+  studentRepository,
+  teacherRepository,
+);
+
 const userService = new UserService(userRepository);
 
 export const container: ICradle = {

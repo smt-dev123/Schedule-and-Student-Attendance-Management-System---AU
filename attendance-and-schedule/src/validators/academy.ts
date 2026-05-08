@@ -165,6 +165,7 @@ export const courseSchema = z.object({
 });
 export const courseUpdateSchema = courseSchema.partial();
 export const courseQuerySchema = z.object({
+  name: z.string().optional(),
   academicYearId: z.coerce.number().optional(),
   teacherId: z.coerce.number().optional(),
   studentId: z.coerce.number().optional(),
@@ -229,6 +230,7 @@ export const scheduleUniqueKeySchema = z.object({
 });
 export const scheduleUpdateSchema = scheduleSchema.partial();
 export const scheduleQuerySchema = z.object({
+  name: z.string().optional(),
   academicYearId: z.coerce.number().optional(),
   facultyId: z.coerce.number().optional(),
   departmentId: z.coerce.number().optional(),

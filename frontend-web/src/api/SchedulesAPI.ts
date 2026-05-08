@@ -3,6 +3,7 @@ import api from '@/lib/axios'
 const ENDPOINT = '/schedules'
 
 export const getSchedules = async (params?: {
+  name?: string
   facultyId?: number
   departmentId?: number
   academicYearId?: number | null

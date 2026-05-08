@@ -10,6 +10,7 @@ import {
 } from '@radix-ui/themes'
 import type { UseFormRegister, FieldErrors } from 'react-hook-form'
 import type { RefObject } from 'react'
+import { FormInput } from '@/components/ui/forms/Input'
 
 interface AccountTabProps {
   user: any
@@ -22,7 +23,7 @@ interface AccountTabProps {
   onFileChange: (e: React.ChangeEvent<HTMLInputElement>) => void
 }
 
-export function AccountTab({
+export const AccountTab = ({
   user,
   register,
   errors,
@@ -31,7 +32,7 @@ export function AccountTab({
   isUploading,
   fileInputRef,
   onFileChange,
-}: AccountTabProps) {
+}: AccountTabProps) => {
   return (
     <Flex direction="column" gap="4">
       <Card variant="surface">
@@ -80,7 +81,7 @@ export function AccountTab({
           </Text>
           <Separator size="4" my="3" />
           <Flex gap="4" direction={{ initial: 'column', sm: 'row' }} mb="4">
-            <Box className="grow">
+            {/* <Box className="grow">
               <Text as="div" size="2" mb="1" weight="bold">
                 ឈ្មោះ <span className="text-red-500">*</span>
               </Text>
@@ -93,7 +94,16 @@ export function AccountTab({
                   {errors.name.message as string}
                 </Text>
               )}
-            </Box>
+            </Box> */}
+            <FormInput
+              name="name"
+              register={register}
+              // error={errors}
+              label="ឈ្មោះ"
+              rules={{ required: 'សូមបញ្ចូលឈ្មោះ' }}
+              type="text"
+            />
+
             <Box className="grow">
               <Text as="div" size="2" mb="1" weight="bold">
                 អ៊ីមែល

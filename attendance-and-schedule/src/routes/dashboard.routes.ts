@@ -16,4 +16,15 @@ router.get(
   },
 );
 
+router.get("/summary-me", authentication, async (c) => {
+  const user = c.get("user");
+  const { dashboardService } = c.var.container;
+  const summary = await dashboardService.getDashboardSummaryMe(
+    user.id,
+    user.role,
+  );
+  return c.json(summary);
+});
+
+
 export default router;

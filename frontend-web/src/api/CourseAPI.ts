@@ -4,6 +4,7 @@ import type { CoursesType } from '@/types'
 const ENDPOINT = '/courses'
 
 export const getCourses = async (params: {
+  name?: string
   academicYearId?: number
   page?: number
   limit?: number
