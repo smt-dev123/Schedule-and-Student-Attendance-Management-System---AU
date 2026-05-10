@@ -5,6 +5,8 @@ import { FaArrowLeft, FaFileAlt, FaSave } from 'react-icons/fa'
 interface AttendanceHeaderProps {
   selectedDate: string
   setSelectedDate: (date: string) => void
+  selectedSession: number
+  setSelectedSession: (session: number) => void
   canChangeDate: boolean
   isEditing: boolean
   setIsEditing: (isEditing: boolean) => void
@@ -17,6 +19,8 @@ interface AttendanceHeaderProps {
 export const AttendanceHeader = ({
   selectedDate,
   setSelectedDate,
+  selectedSession,
+  setSelectedSession,
   canChangeDate,
   isEditing,
   setIsEditing,
@@ -52,25 +56,34 @@ export const AttendanceHeader = ({
       </Flex>
 
       <Flex gap="3" align="center">
-        {(role === 'admin' || role === 'manager') && (
-          <Flex align="center" gap="3">
-            <Text size="2" weight="bold">
-              កាលបរិច្ឆេទ៖
-            </Text>
-            <input
-              type="date"
-              value={selectedDate}
-              onChange={(e) => setSelectedDate(e.target.value)}
-              disabled={!canChangeDate}
-              className={`p-1 border rounded-md text-sm outline-none focus:ring-1 focus:ring-blue-500 ${!canChangeDate ? 'bg-gray-100 cursor-not-allowed opacity-70' : 'bg-white cursor-pointer'}`}
-            />
-            {!canChangeDate && (
-              <Badge color="yellow" variant="soft" size="1">
-                ស្វ័យប្រវត្តិ
-              </Badge>
-            )}
-          </Flex>
-        )}
+        <Flex align="center" gap="3">
+          <Text size="2" weight="bold">
+            កាលបរិច្ឆេទ៖
+          </Text>
+          <input
+            type="date"
+            value={selectedDate}
+            onChange={(e) => setSelectedDate(e.target.value)}
+            disabled={!canChangeDate}
+            className={`p-1 border rounded-md text-sm outline-none focus:ring-1 focus:ring-blue-500 ${!canChangeDate ? 'bg-gray-100 cursor-not-allowed opacity-70' : 'bg-white cursor-pointer'}`}
+          />
+          <Text size="2" weight="bold">
+            Session:
+          </Text>
+          <select
+            value={selectedSession}
+            onChange={(e) => setSelectedSession(Number(e.target.value))}
+            className={`p-1 border rounded-md text-sm outline-none focus:ring-1 focus:ring-blue-500 bg-white cursor-pointer`}
+          >
+            <option value={1}>Session 1</option>
+            <option value={2}>Session 2</option>
+          </select>
+          {!canChangeDate && (
+            <Badge color="yellow" variant="soft" size="1">
+              ស្វ័យប្រវត្តិ
+            </Badge>
+          )}
+        </Flex>
         {(role === 'admin' || role === 'manager') && (
           <Button
             variant="surface"

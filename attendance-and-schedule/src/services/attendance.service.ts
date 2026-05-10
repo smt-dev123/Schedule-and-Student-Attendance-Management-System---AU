@@ -42,7 +42,9 @@ export class AttendanceService {
         });
 
         if (!teacher) {
-          throw new HTTPException(404, { message: "Teacher profile not found" });
+          throw new HTTPException(404, {
+            message: "Teacher profile not found",
+          });
         }
         recordedBy = teacher.id;
 
@@ -73,10 +75,13 @@ export class AttendanceService {
             const currentMinutes = now.getMinutes();
             const currentTimeInMinutes = currentHours * 60 + currentMinutes;
 
-            // If more than 15 minutes late
-            if (currentTimeInMinutes > startTimeInMinutes + 15) {
+            // If not within the [startTime, startTime + 15] window
+            if (
+              currentTimeInMinutes < startTimeInMinutes ||
+              currentTimeInMinutes > startTimeInMinutes + 15
+            ) {
               throw new HTTPException(403, {
-                message: `គ្រូត្រូវតែស្រង់វត្តមានក្នុងរយៈពេល ១៥ នាទីបន្ទាប់ពីម៉ោងចាប់ផ្តើម (${startTimeStr})។ ខណៈពេលនេះហួសពេលកំណត់ហើយ។`,
+                message: `គ្រូអាចស្រង់វត្តមានបានតែក្នុងចន្លោះ ១៥ នាទីចាប់ពីម៉ោងចាប់ផ្តើម (${startTimeStr}) ប៉ុណ្ណោះ។`,
               });
             }
           }
@@ -233,10 +238,12 @@ export class AttendanceService {
   async getAttendanceByCourseIdAndDate(
     courseId: number,
     date: string,
+    session?: number,
   ): Promise<AttendanceRecord[]> {
     return this.attendanceRepository.getAttendanceByCourseIdAndDate(
       courseId,
       date,
+      session,
     );
   }
 

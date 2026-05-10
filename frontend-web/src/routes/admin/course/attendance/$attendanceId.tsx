@@ -31,6 +31,7 @@ function RouteComponent() {
   const canChangeDate = role === 'admin' || role === 'manager'
 
   const [selectedDate, setSelectedDate] = useState(today)
+  const [selectedSession, setSelectedSession] = useState<number>(1)
 
   // Fetch Students for the course
   const { data: studentsData, isLoading: isLoadStudents } = useQuery({
@@ -53,8 +54,8 @@ function RouteComponent() {
 
   // Fetch existing attendance for the selected date
   const { data: existingRecordsData, isLoading: isLoadAttendance } = useQuery({
-    queryKey: ['course_attendance', courseId, selectedDate],
-    queryFn: () => getCourseAttendance(courseId, selectedDate),
+    queryKey: ['course_attendance', courseId, selectedDate, selectedSession],
+    queryFn: () => getCourseAttendance(courseId, selectedDate, selectedSession),
   })
   const existingRecords = existingRecordsData || []
 
@@ -119,7 +120,7 @@ function RouteComponent() {
     onSuccess: () => {
       toast.success('រក្សាទុកវត្តមានបានជោគជ័យ!')
       queryClient.invalidateQueries({
-        queryKey: ['course_attendance', courseId, selectedDate],
+        queryKey: ['course_attendance', courseId, selectedDate, selectedSession],
       })
       setIsEditing(false)
     },
@@ -172,12 +173,7 @@ function RouteComponent() {
     const payload = {
       courseId: courseId,
       date: selectedDate,
-      session:
-        course?.schedule?.sessionTime?.shift === 'morning'
-          ? 1
-          : course?.schedule?.sessionTime?.shift === 'evening'
-            ? 2
-            : 3,
+      session: selectedSession,
       academicYearId: course?.academicYearId,
       facultyId: course?.schedule?.faculty?.id,
       departmentId: course?.schedule?.department?.id,
@@ -196,6 +192,8 @@ function RouteComponent() {
       <AttendanceHeader
         selectedDate={selectedDate}
         setSelectedDate={setSelectedDate}
+        selectedSession={selectedSession}
+        setSelectedSession={setSelectedSession}
         canChangeDate={canChangeDate}
         isEditing={isEditing && accessCheck.canEdit}
         setIsEditing={(val) => {

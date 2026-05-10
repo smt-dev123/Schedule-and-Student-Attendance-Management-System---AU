@@ -1,7 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-
-import { useRouter } from "expo-router";
+import { useRouter, useLocalSearchParams } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
@@ -11,119 +9,111 @@ import {
   Text,
   TextInput,
   View,
+  ActivityIndicator,
 } from "react-native";
 import { ScreenHeader } from "@/components/ui/ScreenHeader";
-
-type Status = "present" | "absent" | "late" | null;
-
-interface AttendanceStudent {
-  id: string;
-  name: string;
-  class: string;
-  status: Status;
-}
-
-interface AttendanceSession {
-  id: string;
-  date: string;
-  time: string;
-  students: AttendanceStudent[];
-}
-
-const ATTENDANCE_HISTORY_KEY = "teacher_attendance_history";
+import { getCourseAttendanceReport } from "@/api/AttendanceAPI";
 
 export default function AttendanceHistory() {
   const router = useRouter();
-  const { t, i18n } = useTranslation();
-  const currentLang = i18n.language;
+  const { courseId } = useLocalSearchParams();
+  const { t } = useTranslation();
 
-  const [history, setHistory] = useState<AttendanceSession[]>([]);
+  const [students, setStudents] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
 
   useEffect(() => {
-    const loadHistory = async () => {
+    const fetchReport = async () => {
+      if (!courseId) return;
       try {
-        const stored = await AsyncStorage.getItem(ATTENDANCE_HISTORY_KEY);
-        const parsed = stored ? JSON.parse(stored) : [];
-        setHistory(parsed);
+        const data = await getCourseAttendanceReport(Number(courseId));
+        setStudents(data);
       } catch (error) {
-        console.error("Load attendance history", error);
+        console.error("Fetch report error", error);
+      } finally {
+        setLoading(false);
       }
     };
-    loadHistory();
-  }, []);
+    fetchReport();
+  }, [courseId]);
 
-  const statusColor = (status: Status) => {
-    if (status === "present") return "#4CAF50";
-    if (status === "absent") return "#E24B4A";
-    if (status === "late") return "#FF9800";
-    return "#999";
-  };
+  const searchQuery = (search || "").trim().toLowerCase();
 
-  const searchQuery = search.trim().toLowerCase();
+  const filteredStudents = searchQuery
+    ? students.filter((s) => (s.name?.toLowerCase() || "").includes(searchQuery))
+    : students;
 
-  const filteredHistory = searchQuery
-    ? history.filter((session) =>
-        session.students.some((s) =>
-          s.name.toLowerCase().includes(searchQuery),
-        ),
-      )
-    : history;
+  const totalStudents = students.length;
+  const totalAbsent = students.reduce((acc, s) => acc + Number(s.absent || 0), 0);
+  const totalLeave = students.reduce((acc, s) => acc + Number(s.leave || 0), 0);
 
-  const filteredStudents = history.flatMap((session) =>
-    session.students.filter(
-      (s) => searchQuery === "" || s.name.toLowerCase().includes(searchQuery),
-    ),
-  );
+  const renderStudentReport = ({ item, index }: { item: any; index: number }) => {
+    const absent = Number(item.absent || 0);
+    const leave = Number(item.leave || 0);
+    const totalAbsentScore = leave + absent;
+    const statusStr = String(item.status || "").toLowerCase();
+    const attendanceRate =
+      statusStr === "dropped out"
+        ? "0%"
+        : `${Math.max(0, 100 - totalAbsentScore * 5)}%`;
 
-  const presentCount = filteredStudents.filter(
-    (s) => s.status === "present",
-  ).length;
-  const absentCount = filteredStudents.filter(
-    (s) => s.status === "absent",
-  ).length;
-  const lateCount = filteredStudents.filter((s) => s.status === "late").length;
-
-  const renderSession = ({ item }: { item: AttendanceSession }) => (
-    <View style={styles.sessionCard}>
-      <View style={styles.sessionHeader}>
-        <Text style={styles.sessionDate}>{item.date}</Text>
-        <Text style={styles.sessionTime}>{item.time}</Text>
-      </View>
-      {item.students.map((student) => (
-        <View key={student.id} style={styles.studentRow}>
+    return (
+      <View style={styles.sessionCard}>
+        <View style={styles.studentRow}>
           <View style={styles.studentInfo}>
-            <Text style={styles.studentName}>{student.name}</Text>
-            {/* កែប្រែពី Class មកជា Year */}
-            <Text style={styles.studentClass}>Year: {student.class}</Text>
-          </View>
-          <View
-            style={[
-              styles.statusBadge,
-              { backgroundColor: statusColor(student.status) + "20" },
-            ]}
-          >
+            <Text style={styles.studentName}>
+              {index + 1}. {item.name}
+            </Text>
+            <Text style={styles.studentClass}>
+              Gender: {item.gender === "male" ? "Male" : item.gender === "female" ? "Female" : item.gender} | Phone: {item.phone || "N/A"}
+            </Text>
             <Text
               style={[
-                styles.statusText,
-                { color: statusColor(student.status) },
+                styles.studentClass,
+                { color: statusStr === "enrolled" ? "#4CAF50" : "#E24B4A", fontWeight: "600", marginTop: 4 }
               ]}
             >
-              {student.status ? student.status.toUpperCase() : "NOT MARKED"}
+              Status: {item.status}
             </Text>
           </View>
+          <View style={styles.scoreBadge}>
+            <Text style={styles.scoreLabel}>Score</Text>
+            <Text style={styles.scoreText}>{item.score}</Text>
+          </View>
         </View>
-      ))}
-    </View>
-  );
+
+        <View style={styles.statsDivider} />
+
+        <View style={styles.miniStatsRow}>
+          <View style={styles.miniStat}>
+            <Text style={styles.miniStatLabel}>Leave</Text>
+            <Text style={[styles.miniStatValue, { color: "#FF9800" }]}>{leave}</Text>
+          </View>
+          <View style={styles.miniStat}>
+            <Text style={styles.miniStatLabel}>Absent</Text>
+            <Text style={[styles.miniStatValue, { color: "#E24B4A" }]}>{absent}</Text>
+          </View>
+          <View style={styles.miniStat}>
+            <Text style={styles.miniStatLabel}>Total</Text>
+            <Text style={[styles.miniStatValue, { fontWeight: "700" }]}>{totalAbsentScore}</Text>
+          </View>
+          <View style={styles.miniStat}>
+            <Text style={styles.miniStatLabel}>Rate</Text>
+            <Text style={[styles.miniStatValue, { color: "#4CAF50" }]}>{attendanceRate}</Text>
+          </View>
+        </View>
+      </View>
+    );
+  };
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "#fff" }}>
       <View style={styles.container}>
         <ScreenHeader
-          title={t("attendance.history", "Attendance History")}
+          title={t("attendance.history", "Attendance Report")}
           showBack
-          onBack={() => router.push("/(tabs)/attendance")}
+          onBack={() => router.back()}
         />
 
         {/* Search */}
@@ -145,51 +135,44 @@ export default function AttendanceHistory() {
 
         {/* Stats */}
         <View style={styles.statsRow}>
-          {[
-            {
-              label: t("attendance.present", "Present"),
-              count: presentCount,
-              color: "#4CAF50",
-            },
-            {
-              label: t("attendance.absent", "Absent"),
-              count: absentCount,
-              color: "#E24B4A",
-            },
-            {
-              label: t("attendance.late", "Late"),
-              count: lateCount,
-              color: "#FF9800",
-            },
-          ].map((s, i) => (
-            <View key={i} style={styles.statsCard}>
-              <Text style={styles.statsLabel}>{s.label}</Text>
-              <Text style={[styles.statsCount, { color: s.color }]}>
-                {s.count}
-              </Text>
-            </View>
-          ))}
+          <View style={styles.statsCard}>
+            <Text style={styles.statsLabel}>Total Students</Text>
+            <Text style={[styles.statsCount, { color: "#111" }]}>{totalStudents}</Text>
+          </View>
+          <View style={styles.statsCard}>
+            <Text style={styles.statsLabel}>Total Leave</Text>
+            <Text style={[styles.statsCount, { color: "#FF9800" }]}>{totalLeave}</Text>
+          </View>
+          <View style={styles.statsCard}>
+            <Text style={styles.statsLabel}>Total Absent</Text>
+            <Text style={[styles.statsCount, { color: "#E24B4A" }]}>{totalAbsent}</Text>
+          </View>
         </View>
 
         {/* List */}
-        {history.length === 0 ? (
+        {loading ? (
+          <View style={styles.emptyState}>
+            <ActivityIndicator size="large" color="#007AFF" />
+            <Text style={styles.emptyText}>Loading report...</Text>
+          </View>
+        ) : students.length === 0 ? (
           <View style={styles.emptyState}>
             <Ionicons name="document-text-outline" size={60} color="#ddd" />
             <Text style={styles.emptyText}>
-              {t("attendance.noHistory", "No attendance history yet.")}
+              No attendance data found.
             </Text>
           </View>
-        ) : filteredHistory.length === 0 ? (
+        ) : filteredStudents.length === 0 ? (
           <View style={styles.emptyState}>
             <Text style={styles.emptyText}>
-              {t("attendance.noResults", "No records found for")} "{search}"
+              No records found for "{search}"
             </Text>
           </View>
         ) : (
           <FlatList
-            data={filteredHistory}
-            renderItem={renderSession}
-            keyExtractor={(item) => item.id}
+            data={filteredStudents}
+            renderItem={renderStudentReport}
+            keyExtractor={(item, index) => item.id?.toString() || index.toString()}
             contentContainerStyle={styles.listContent}
           />
         )}
@@ -232,7 +215,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.05,
     shadowRadius: 5,
   },
-  statsLabel: { fontSize: 12, color: "#666", marginBottom: 6 },
+  statsLabel: { fontSize: 11, color: "#666", marginBottom: 6, textAlign: "center" },
   statsCount: { fontSize: 18, fontWeight: "700" },
   sessionCard: {
     backgroundColor: "#fff",
@@ -244,42 +227,48 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.05,
     shadowRadius: 5,
   },
-  sessionHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 12,
-  },
-  sessionDate: { fontSize: 13, color: "#888" },
-  sessionTime: { fontSize: 13, color: "#555", fontWeight: "600" },
   studentRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "center",
-    paddingVertical: 10,
-    borderTopWidth: 1,
-    borderTopColor: "#F3F4F6",
+    alignItems: "flex-start",
   },
   studentInfo: { flex: 1, paddingRight: 12 },
-  studentName: { fontSize: 14, fontWeight: "700", color: "#111" },
+  studentName: { fontSize: 15, fontWeight: "700", color: "#111" },
   studentClass: { fontSize: 12, color: "#666", marginTop: 2 },
-  statusBadge: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 20,
-    minWidth: 90,
+  scoreBadge: {
     alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#E3F2FD",
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 10,
+    minWidth: 60,
   },
-  statusText: { fontSize: 12, fontWeight: "bold" },
-  localeButton: {
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: 12,
-    backgroundColor: "rgba(255,255,255,0.25)",
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.4)",
+  scoreLabel: { fontSize: 10, color: "#1976D2", fontWeight: "600", marginBottom: 2 },
+  scoreText: { fontSize: 16, fontWeight: "bold", color: "#1976D2" },
+  statsDivider: {
+    height: 1,
+    backgroundColor: "#F3F4F6",
+    marginVertical: 12,
   },
-  localeText: { color: "#fff", fontWeight: "700", fontSize: 13 },
+  miniStatsRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  miniStat: {
+    alignItems: "center",
+    flex: 1,
+  },
+  miniStatLabel: {
+    fontSize: 11,
+    color: "#888",
+    marginBottom: 4,
+  },
+  miniStatValue: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#333",
+  },
   emptyState: {
     flex: 1,
     alignItems: "center",

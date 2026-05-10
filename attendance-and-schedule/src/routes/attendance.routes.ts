@@ -46,6 +46,7 @@ router.get(
   async (c) => {
     const courseId = Number(c.req.param("courseId"));
     const date = c.req.query("date");
+    const sessionStr = c.req.query("session");
 
     if (!date) {
       return c.json({ message: "Date is required" }, 400);
@@ -55,6 +56,7 @@ router.get(
     const records = await attendanceService.getAttendanceByCourseIdAndDate(
       courseId,
       date,
+      sessionStr ? Number(sessionStr) : undefined
     );
     return c.json(records);
   },

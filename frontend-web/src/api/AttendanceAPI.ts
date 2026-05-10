@@ -23,8 +23,10 @@ export const deleteAttendance = async (id: number) => {
     return res.data.data
 }
 
-export const getCourseAttendance = async (courseId: number, date: string) => {
-    const res = await api.get(`/attendance/course/${courseId}?date=${date}`)
+export const getCourseAttendance = async (courseId: number, date: string, session?: number) => {
+    let url = `/attendance/course/${courseId}?date=${date}`
+    if (session) url += `&session=${session}`
+    const res = await api.get(url)
     return res.data
 }
 

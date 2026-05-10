@@ -57,12 +57,15 @@ export class AttendanceRepository {
     });
   }
 
-  async getAttendanceByCourseIdAndDate(courseId: number, date: string) {
+  async getAttendanceByCourseIdAndDate(courseId: number, date: string, session?: number) {
+    const conditions = [
+      eq(attendanceRecords.courseId, courseId),
+      eq(attendanceRecords.date, date),
+    ];
+    if (session) conditions.push(eq(attendanceRecords.session, session));
+
     return this.db.query.attendanceRecords.findMany({
-      where: and(
-        eq(attendanceRecords.courseId, courseId),
-        eq(attendanceRecords.date, date),
-      ),
+      where: and(...conditions),
     });
   }
 

@@ -2,8 +2,8 @@ import "@/styles/unistyles";
 import { ScreenHeader } from "@/components/ui/ScreenHeader";
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useRouter } from "expo-router";
-import React, { useMemo, useState } from "react";
+import { useFocusEffect, useRouter } from "expo-router";
+import React, { useMemo, useState, useCallback } from "react";
 import {
   SafeAreaView,
   ScrollView,
@@ -12,51 +12,136 @@ import {
   TextInput,
   TouchableOpacity,
   View,
+  ActivityIndicator,
+  Alert,
+  Modal,
+  FlatList,
 } from "react-native";
 import { useTranslation } from "react-i18next";
-import { StyleSheet, useUnistyles } from "react-native-unistyles";
-
-type Status = "present" | "absent" | "late" | null;
-
-interface Student {
-  id: string;
-  name: string;
-  class: string;
-  status: Status;
-}
-
-const ATTENDANCE_HISTORY_KEY = "teacher_attendance_history";
-
-const initialStudents: Student[] = [
-  { id: "STU001", name: "Emma Wilson", class: "Year 4", status: null },
-  { id: "STU002", name: "Michael Chen", class: "Year 4", status: null },
-  { id: "STU003", name: "Sara Nguyen", class: "Year 4", status: null },
-  { id: "STU004", name: "James Park", class: "Year 4", status: null },
-  { id: "STU005", name: "Lily Pham", class: "Year 4", status: null },
-  { id: "STU006", name: "David Kim", class: "Year 4", status: null },
-  { id: "STU007", name: "Anna Sok", class: "Year 4", status: null },
-  { id: "STU008", name: "Tom Rath", class: "Year 4", status: null },
-];
+import { useUnistyles } from "react-native-unistyles";
+import { stylesheet } from "./attendance.style";
+import { useSession } from "@/lib/auth-client";
+import { getCourses, getCourseStudents } from "@/api/CourseAPI";
+import { markBulkAttendance, getCourseAttendance } from "@/api/AttendanceAPI";
+import type { AttendanceStatusEnum } from "@/types";
+import { checkAttendanceAccess } from "@/lib/attendance";
 
 export default function AttendanceScreen() {
   const { t } = useTranslation();
-  const [students, setStudents] = useState<Student[]>(initialStudents);
-  const [search, setSearch] = useState("");
-  const [saved, setSaved] = useState(false);
   const router = useRouter();
   const { theme } = useUnistyles();
+  const { data: session } = useSession();
 
-  const filtered = useMemo(
+  const [courses, setCourses] = useState<any[]>([]);
+  const [selectedCourse, setSelectedCourse] = useState<any>(null);
+  const [courseModalVisible, setCourseModalVisible] = useState(false);
+  const [selectedSession, setSelectedSession] = useState<number>(1);
+
+  const [students, setStudents] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [search, setSearch] = useState("");
+  const [saved, setSaved] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+
+  // Access check
+  const role = (session?.user as any)?.role || "";
+  const accessCheck = useMemo(
     () =>
-      students.filter(
-        (s) =>
-          s.name.toLowerCase().includes(search.toLowerCase()) ||
-          s.id.toLowerCase().includes(search.toLowerCase()),
+      checkAttendanceAccess(
+        selectedCourse,
+        new Date().toISOString().split("T")[0],
+        role,
       ),
-    [search, students],
+    [selectedCourse, role],
   );
 
-  const setStatus = (id: string, status: Status) => {
+  // Fetch courses on focus
+  useFocusEffect(
+    useCallback(() => {
+      const fetchCourses = async () => {
+        try {
+          const res = await getCourses();
+          if (res?.data) {
+            setCourses(res.data);
+            if (res.data.length > 0 && !selectedCourse) {
+              // setSelectedCourse(res.data[0]); // Optional: auto-select first course
+            }
+          }
+        } catch (error) {
+          console.error("Fetch courses error:", error);
+        }
+      };
+      fetchCourses();
+    }, []),
+  );
+
+  // Fetch students when course or session changes
+  useFocusEffect(
+    useCallback(() => {
+      if (!selectedCourse) return;
+
+      const fetchData = async () => {
+        setLoading(true);
+        try {
+          const today = new Date().toISOString().split("T")[0];
+          const [studentsRes, attendanceRes] = await Promise.all([
+            getCourseStudents(selectedCourse.id),
+            getCourseAttendance(selectedCourse.id, today),
+          ]);
+
+          const activeStudents = (studentsRes || []).filter(
+            (s: any) => s.isActive && s.educationalStatus === "enrolled",
+          );
+
+          // Merge students with existing attendance records for the selected session
+          const attendanceMap = new Map();
+          const sessionRecords = Array.isArray(attendanceRes)
+            ? attendanceRes.filter((r: any) => r.session === selectedSession)
+            : [];
+
+          sessionRecords.forEach((r: any) => attendanceMap.set(r.studentId, r));
+
+          if (sessionRecords.length > 0) {
+            setIsEditing(false);
+            const mergedStudents = activeStudents.map((s: any) => ({
+              ...s,
+              status: attendanceMap.get(s.id)?.status || "absent",
+              notes: attendanceMap.get(s.id)?.notes || "",
+            }));
+            setStudents(mergedStudents);
+          } else {
+            setIsEditing(accessCheck.canEdit);
+            const mergedStudents = activeStudents.map((s: any) => ({
+              ...s,
+              status: "absent",
+              notes: "",
+            }));
+            setStudents(mergedStudents);
+          }
+          setSaved(false);
+        } catch (error) {
+          console.error("Fetch data error:", error);
+          Alert.alert("Error", "Failed to fetch students or attendance.");
+        } finally {
+          setLoading(false);
+        }
+      };
+      fetchData();
+    }, [selectedCourse, selectedSession, accessCheck.canEdit]),
+  );
+
+  const filtered = useMemo(() => {
+    const searchLower = (search || "").toLowerCase();
+    return students.filter(
+      (s) =>
+        (s.name?.toLowerCase() || "").includes(searchLower) ||
+        (s.studentCode?.toLowerCase() || "").includes(searchLower),
+    );
+  }, [search, students]);
+
+  const setStatus = (id: string, status: AttendanceStatusEnum) => {
+    if (!isEditing) return;
     setStudents((prev) =>
       prev.map((s) =>
         s.id === id ? { ...s, status: s.status === status ? null : status } : s,
@@ -65,43 +150,81 @@ export default function AttendanceScreen() {
     setSaved(false);
   };
 
+  const setNotes = (id: string, notes: string) => {
+    if (!isEditing) return;
+    setStudents((prev) =>
+      prev.map((s) => (s.id === id ? { ...s, notes } : s)),
+    );
+    setSaved(false);
+  };
+
   const markAllPresent = () => {
+    if (!isEditing) return;
     setStudents((prev) => prev.map((s) => ({ ...s, status: "present" })));
     setSaved(false);
   };
 
   const clearAll = () => {
-    setStudents((prev) => prev.map((s) => ({ ...s, status: null })));
+    if (!isEditing) return;
+    setStudents((prev) => prev.map((s) => ({ ...s, status: "absent" })));
     setSaved(false);
   };
 
   const handleSaveAttendance = async () => {
-    const now = new Date();
-    const session = {
-      id: `session-${now.getTime()}`,
-      date: now.toLocaleDateString("en-US", {
-        weekday: "long",
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      }),
-      time: now.toLocaleTimeString("en-US", {
-        hour: "2-digit",
-        minute: "2-digit",
-      }),
-      students: students.map((s) => ({ ...s })),
-    };
+    if (!selectedCourse) {
+      Alert.alert("Wait", "Please select a course first.");
+      return;
+    }
 
-    try {
-      const existing = await AsyncStorage.getItem(ATTENDANCE_HISTORY_KEY);
-      const history = existing ? JSON.parse(existing) : [];
-      await AsyncStorage.setItem(
-        ATTENDANCE_HISTORY_KEY,
-        JSON.stringify([session, ...history]),
+    if (!accessCheck.canEdit) {
+      Alert.alert("Access Denied", accessCheck.reason);
+      return;
+    }
+
+    const unMarkedCount = students.filter((s) => !s.status).length;
+    if (unMarkedCount > 0) {
+      Alert.alert(
+        "Incomplete",
+        `There are ${unMarkedCount} students not marked. Do you want to continue?`,
+        [
+          { text: "Cancel", style: "cancel" },
+          { text: "Continue", onPress: () => submitAttendance() },
+        ],
       );
+    } else {
+      submitAttendance();
+    }
+  };
+
+  const submitAttendance = async () => {
+    setSubmitting(true);
+    try {
+      const payload = {
+        courseId: selectedCourse.id,
+        date: new Date().toISOString().split("T")[0],
+        session: selectedSession,
+        academicYearId: selectedCourse.academicYearId,
+        facultyId: selectedCourse.schedule?.facultyId,
+        departmentId: selectedCourse.schedule?.departmentId,
+        mark: students
+          .filter((s) => s.status) // Only send students with a status
+          .map((s) => ({
+            studentId: s.id,
+            status: s.status,
+            notes: s.notes || "",
+          })),
+      };
+
+      await markBulkAttendance(payload);
       setSaved(true);
-    } catch (error) {
-      console.error("Failed to save attendance history", error);
+      Alert.alert("Success", "Attendance has been saved successfully.");
+    } catch (error: any) {
+      console.error("Save attendance error:", error);
+      const message =
+        error.response?.data?.message || "Failed to save attendance.";
+      Alert.alert("Error", message);
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -126,21 +249,85 @@ export default function AttendanceScreen() {
   return (
     <SafeAreaView style={stylesheet.safe}>
       <StatusBar barStyle="dark-content" />
-      <ScreenHeader title={t("attendance.recordTitle") || "Attendance"} showBack />
-      <ScrollView style={stylesheet.container} showsVerticalScrollIndicator={false}>
+      <ScreenHeader
+        title={t("attendance.recordTitle") || "Attendance"}
+        showBack
+      />
+      <ScrollView
+        style={stylesheet.container}
+        showsVerticalScrollIndicator={false}
+      >
         <View style={stylesheet.header}>
-          <View style={stylesheet.headerTop}>
+          <TouchableOpacity
+            style={stylesheet.courseSelector}
+            onPress={() => setCourseModalVisible(true)}
+          >
             <View style={{ flex: 1 }}>
               <Text style={stylesheet.className}>
-                Mobile App Development - Year 4
+                {selectedCourse
+                  ? `${selectedCourse.name} - ${selectedCourse.code}`
+                  : "Select Course..."}
+              </Text>
+              <Text style={stylesheet.classSub}>
+                {selectedCourse
+                  ? `${selectedCourse.schedule?.faculty?.name} • Year ${selectedCourse.schedule?.year}`
+                  : "Choose a subject to start recording"}
               </Text>
             </View>
+            <Ionicons
+              name="chevron-down"
+              size={20}
+              color={theme.colors.primary}
+            />
+          </TouchableOpacity>
+
+          <View style={stylesheet.sessionRow}>
+            <TouchableOpacity
+              style={[
+                stylesheet.sessionBtn,
+                selectedSession === 1 && stylesheet.sessionBtnActive,
+              ]}
+              onPress={() => setSelectedSession(1)}
+            >
+              <Text
+                style={[
+                  stylesheet.sessionBtnText,
+                  selectedSession === 1 && stylesheet.sessionBtnTextActive,
+                ]}
+              >
+                Session 1
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[
+                stylesheet.sessionBtn,
+                selectedSession === 2 && stylesheet.sessionBtnActive,
+              ]}
+              onPress={() => setSelectedSession(2)}
+            >
+              <Text
+                style={[
+                  stylesheet.sessionBtnText,
+                  selectedSession === 2 && stylesheet.sessionBtnTextActive,
+                ]}
+              >
+                Session 2
+              </Text>
+            </TouchableOpacity>
           </View>
+
           <View style={stylesheet.headerDateRow}>
-            <Text style={stylesheet.dateText}>Record attendance for {dateStr}</Text>
+            <Text style={stylesheet.dateText}>Record for {dateStr}</Text>
             <Text style={stylesheet.timeText}>{timeStr}</Text>
           </View>
         </View>
+
+        {!accessCheck.canEdit && selectedCourse && (
+          <View style={stylesheet.calloutBox}>
+            <Ionicons name="information-circle" size={20} color={theme.colors.error} />
+            <Text style={stylesheet.calloutText}>{accessCheck.reason}</Text>
+          </View>
+        )}
 
         <View style={stylesheet.searchBox}>
           <Ionicons
@@ -158,12 +345,20 @@ export default function AttendanceScreen() {
           />
         </View>
 
-        <View style={stylesheet.actionRow}>
-          <TouchableOpacity style={stylesheet.btnPresent} onPress={markAllPresent}>
+        <View style={[stylesheet.actionRow, !isEditing && { opacity: 0.5 }]}>
+          <TouchableOpacity
+            style={stylesheet.btnPresent}
+            onPress={markAllPresent}
+            disabled={!isEditing}
+          >
             <Ionicons name="checkmark" size={16} color={theme.colors.success} />
             <Text style={stylesheet.btnPresentText}>Mark All Present</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={stylesheet.btnClear} onPress={clearAll}>
+          <TouchableOpacity
+            style={stylesheet.btnClear}
+            onPress={clearAll}
+            disabled={!isEditing}
+          >
             <Ionicons name="close" size={16} color={theme.colors.error} />
             <Text style={stylesheet.btnClearText}>Clear All</Text>
           </TouchableOpacity>
@@ -171,7 +366,25 @@ export default function AttendanceScreen() {
 
         <View style={stylesheet.card}>
           <Text style={stylesheet.cardTitle}>Student List</Text>
-          {filtered.length === 0 ? (
+          {loading ? (
+            <View style={stylesheet.noResult}>
+              <ActivityIndicator size="small" color={theme.colors.primary} />
+              <Text style={[stylesheet.noResultText, { marginTop: 10 }]}>
+                Loading students...
+              </Text>
+            </View>
+          ) : !selectedCourse ? (
+            <View style={stylesheet.noResult}>
+              <Ionicons
+                name="school-outline"
+                size={40}
+                color={theme.colors.border}
+              />
+              <Text style={[stylesheet.noResultText, { marginTop: 10 }]}>
+                Please select a course to see students.
+              </Text>
+            </View>
+          ) : filtered.length === 0 ? (
             <View style={stylesheet.noResult}>
               <Text style={stylesheet.noResultText}>
                 No students matched your search.
@@ -185,44 +398,58 @@ export default function AttendanceScreen() {
                   <View style={{ flex: 1 }}>
                     <Text style={stylesheet.studentName}>{student.name}</Text>
                     <Text style={stylesheet.studentMeta}>
-                      ID: {student.id} Year: {student.class}
+                      ID: {student.studentCode} • Gender: {student.gender}
                     </Text>
                     <View style={stylesheet.statusRow}>
-                      {(["present", "absent", "late"] as Status[]).map((s) => (
-                        <TouchableOpacity
-                          key={s as string}
-                          style={stylesheet.checkItem}
-                          onPress={() => setStatus(student.id, s)}
-                        >
-                          <View
-                            style={[
-                              stylesheet.checkbox,
-                              student.status === s &&
-                                (s === "present"
-                                  ? stylesheet.checkPresent
-                                  : s === "absent"
-                                    ? stylesheet.checkAbsent
-                                    : stylesheet.checkLate),
-                            ]}
+                      {(["present", "absent", "late", "excused"] as any[]).map(
+                        (s) => (
+                          <TouchableOpacity
+                            key={s as string}
+                            style={stylesheet.checkItem}
+                            onPress={() => setStatus(student.id, s)}
                           >
-                            {student.status === s && (
-                              <Ionicons
-                                name="checkmark"
-                                size={11}
-                                color="white"
-                              />
-                            )}
-                          </View>
-                          <Text style={stylesheet.checkLabel}>
-                            {s === "present"
-                              ? "Present"
-                              : s === "absent"
-                                ? "Absent"
-                                : "Late"}
-                          </Text>
-                        </TouchableOpacity>
-                      ))}
+                            <View
+                              style={[
+                                stylesheet.checkbox,
+                                student.status === s &&
+                                  (s === "present"
+                                    ? stylesheet.checkPresent
+                                    : s === "absent"
+                                      ? stylesheet.checkAbsent
+                                      : s === "late"
+                                        ? stylesheet.checkLate
+                                        : stylesheet.checkExcused),
+                              ]}
+                            >
+                              {student.status === s && (
+                                <Ionicons
+                                  name="checkmark"
+                                  size={11}
+                                  color="white"
+                                />
+                              )}
+                            </View>
+                            <Text style={stylesheet.checkLabel}>
+                              {s === "present"
+                                ? "Present"
+                                : s === "absent"
+                                  ? "Absent"
+                                  : s === "late"
+                                    ? "Late"
+                                    : "Excused"}
+                            </Text>
+                          </TouchableOpacity>
+                        ),
+                      )}
                     </View>
+                    <TextInput
+                      style={stylesheet.notesInput}
+                      placeholder="Add a note..."
+                      placeholderTextColor={theme.colors.textSecondary}
+                      value={student.notes}
+                      onChangeText={(text) => setNotes(student.id, text)}
+                      editable={isEditing}
+                    />
                   </View>
                 </View>
               </View>
@@ -234,25 +461,33 @@ export default function AttendanceScreen() {
           <Text style={stylesheet.cardTitle}>Attendance Summary</Text>
           <View style={stylesheet.summaryGrid}>
             <View style={stylesheet.summaryItem}>
-              <Text style={[stylesheet.summaryNum, { color: theme.colors.primary }]}>
+              <Text
+                style={[stylesheet.summaryNum, { color: theme.colors.primary }]}
+              >
                 {total}
               </Text>
               <Text style={stylesheet.summaryLabel}>Total Students</Text>
             </View>
             <View style={stylesheet.summaryItem}>
-              <Text style={[stylesheet.summaryNum, { color: theme.colors.success }]}>
+              <Text
+                style={[stylesheet.summaryNum, { color: theme.colors.success }]}
+              >
                 {present}
               </Text>
               <Text style={stylesheet.summaryLabel}>Present</Text>
             </View>
             <View style={stylesheet.summaryItem}>
-              <Text style={[stylesheet.summaryNum, { color: theme.colors.error }]}>
+              <Text
+                style={[stylesheet.summaryNum, { color: theme.colors.error }]}
+              >
                 {absent}
               </Text>
               <Text style={stylesheet.summaryLabel}>Absent</Text>
             </View>
             <View style={stylesheet.summaryItem}>
-              <Text style={[stylesheet.summaryNum, { color: theme.colors.warning }]}>
+              <Text
+                style={[stylesheet.summaryNum, { color: theme.colors.warning }]}
+              >
                 {late}
               </Text>
               <Text style={stylesheet.summaryLabel}>Late</Text>
@@ -264,7 +499,9 @@ export default function AttendanceScreen() {
             <Text
               style={[
                 stylesheet.rateValue,
-                { color: rate >= 80 ? theme.colors.success : theme.colors.error },
+                {
+                  color: rate >= 80 ? theme.colors.success : theme.colors.error,
+                },
               ]}
             >
               {rate}%
@@ -273,284 +510,120 @@ export default function AttendanceScreen() {
         </View>
 
         <TouchableOpacity
-          style={stylesheet.historyBtn}
-          onPress={() => router.push("/(tabs)/attendance/attendance-history")}
+          style={[stylesheet.historyBtn, !selectedCourse && { opacity: 0.5 }]}
+          onPress={() => {
+            if (!selectedCourse) {
+              Alert.alert("Wait", "Please select a course to view its report.");
+              return;
+            }
+            router.push({
+              pathname: "/(tabs)/attendance/attendance-history",
+              params: { courseId: selectedCourse.id },
+            });
+          }}
+          disabled={!selectedCourse}
         >
-          <Text style={stylesheet.historyBtnText}>Record History</Text>
-          <Ionicons name="chevron-forward" size={18} color={theme.colors.primary} />
+          <Text style={stylesheet.historyBtnText}>Attendance Report</Text>
+          <Ionicons
+            name="chevron-forward"
+            size={18}
+            color={theme.colors.primary}
+          />
         </TouchableOpacity>
 
-        <TouchableOpacity
-          style={[stylesheet.saveBtn, saved && stylesheet.saveBtnDone]}
-          onPress={handleSaveAttendance}
+        {!isEditing && accessCheck.canEdit && selectedCourse && students.length > 0 ? (
+          <TouchableOpacity
+            style={stylesheet.editBtn}
+            onPress={() => setIsEditing(true)}
+          >
+            <Ionicons name="create-outline" size={18} color="white" />
+            <Text style={stylesheet.editBtnText}>Edit Attendance</Text>
+          </TouchableOpacity>
+        ) : isEditing ? (
+          <TouchableOpacity
+            style={[
+              stylesheet.saveBtn,
+              saved && stylesheet.saveBtnDone,
+              submitting && { opacity: 0.7 },
+            ]}
+            onPress={handleSaveAttendance}
+            disabled={submitting}
+          >
+            {submitting ? (
+              <ActivityIndicator color="white" size="small" />
+            ) : (
+              <Ionicons
+                name={saved ? "checkmark-circle" : "checkmark-circle-outline"}
+                size={18}
+                color="white"
+              />
+            )}
+            <Text style={stylesheet.saveBtnText}>
+              {submitting
+                ? "Saving..."
+                : saved
+                  ? "Attendance Saved!"
+                  : "Save Attendance"}
+            </Text>
+          </TouchableOpacity>
+        ) : null}
+
+        {/* Course Selection Modal */}
+        <Modal
+          animationType="slide"
+          transparent={true}
+          visible={courseModalVisible}
+          onRequestClose={() => setCourseModalVisible(false)}
         >
-          <Ionicons
-            name={saved ? "checkmark-circle" : "checkmark-circle-outline"}
-            size={18}
-            color="white"
-          />
-          <Text style={stylesheet.saveBtnText}>
-            {saved ? "Attendance Saved!" : "Save Attendance"}
-          </Text>
-        </TouchableOpacity>
+          <View style={stylesheet.modalOverlay}>
+            <View style={stylesheet.modalContent}>
+              <View style={stylesheet.modalHeader}>
+                <Text style={stylesheet.modalTitle}>Select Course</Text>
+                <TouchableOpacity onPress={() => setCourseModalVisible(false)}>
+                  <Ionicons name="close" size={24} color={theme.colors.text} />
+                </TouchableOpacity>
+              </View>
+              <FlatList
+                data={courses}
+                keyExtractor={(item) => item.id.toString()}
+                renderItem={({ item }) => (
+                  <TouchableOpacity
+                    style={[
+                      stylesheet.courseItem,
+                      selectedCourse?.id === item.id &&
+                        stylesheet.courseItemActive,
+                    ]}
+                    onPress={() => {
+                      setSelectedCourse(item);
+                      setCourseModalVisible(false);
+                    }}
+                  >
+                    <Text
+                      style={[
+                        stylesheet.courseItemName,
+                        selectedCourse?.id === item.id &&
+                          stylesheet.courseItemNameActive,
+                      ]}
+                    >
+                      {item.name}
+                    </Text>
+                    <Text style={stylesheet.courseItemCode}>{item.code}</Text>
+                  </TouchableOpacity>
+                )}
+                ListEmptyComponent={
+                  <View style={stylesheet.emptyCourses}>
+                    <Text style={stylesheet.emptyCoursesText}>
+                      No courses assigned to you.
+                    </Text>
+                  </View>
+                }
+              />
+            </View>
+          </View>
+        </Modal>
         <View style={{ height: 32 }} />
       </ScrollView>
     </SafeAreaView>
   );
 }
 
-const stylesheet = StyleSheet.create((theme) => ({
-  safe: { 
-    flex: 1, 
-    backgroundColor: theme.colors.background 
-  },
-  container: { 
-    flex: 1 
-  },
-  header: {
-    backgroundColor: theme.colors.card,
-    padding: 16,
-    borderBottomWidth: 0.5,
-    borderBottomColor: theme.colors.border,
-  },
-  headerTop: { 
-    flexDirection: "row", 
-    alignItems: "center", 
-    marginBottom: 8 
-  },
-  className: { 
-    fontSize: 18, 
-    fontWeight: "700", 
-    color: theme.colors.text 
-  },
-  headerDateRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-  },
-  dateText: { 
-    fontSize: 12, 
-    color: theme.colors.textSecondary, 
-    flex: 1 
-  },
-  timeText: {
-    fontSize: 12,
-    fontWeight: "600",
-    color: theme.colors.error,
-    marginLeft: 8,
-  },
-  searchBox: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: theme.colors.card,
-    margin: 12,
-    borderRadius: 10,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    borderWidth: 0.5,
-    borderColor: theme.colors.border,
-  },
-  searchInput: { 
-    flex: 1, 
-    fontSize: 14, 
-    color: theme.colors.text 
-  },
-  actionRow: {
-    flexDirection: "row",
-    gap: 10,
-    paddingHorizontal: 12,
-    marginBottom: 10,
-  },
-  btnPresent: {
-    flex: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 6,
-    backgroundColor: theme.colors.success + "22",
-    borderRadius: 10,
-    paddingVertical: 11,
-    borderWidth: 0.5,
-    borderColor: theme.colors.success + "55",
-  },
-  btnPresentText: { 
-    fontSize: 13, 
-    fontWeight: "600", 
-    color: theme.colors.success 
-  },
-  btnClear: {
-    flex: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 6,
-    backgroundColor: theme.colors.error + "22",
-    borderRadius: 10,
-    paddingVertical: 11,
-    borderWidth: 0.5,
-    borderColor: theme.colors.error + "55",
-  },
-  btnClearText: { 
-    fontSize: 13, 
-    fontWeight: "600", 
-    color: theme.colors.error 
-  },
-  card: {
-    backgroundColor: theme.colors.card,
-    marginHorizontal: 12,
-    marginBottom: 10,
-    borderRadius: 12,
-    padding: 14,
-    borderWidth: 0.5,
-    borderColor: theme.colors.border,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 5,
-  },
-  cardTitle: {
-    fontSize: 14,
-    fontWeight: "700",
-    color: theme.colors.text,
-    marginBottom: 12,
-  },
-  divider: { 
-    height: 0.5, 
-    backgroundColor: theme.colors.border, 
-    marginVertical: 10 
-  },
-  noResult: { 
-    paddingVertical: 24, 
-    alignItems: "center" 
-  },
-  noResultText: { 
-    color: theme.colors.textSecondary, 
-    fontSize: 13 
-  },
-  studentRow: { 
-    flexDirection: "row" 
-  },
-  studentName: { 
-    fontSize: 15, 
-    fontWeight: "600", 
-    color: theme.colors.text 
-  },
-  studentMeta: { 
-    fontSize: 11, 
-    color: theme.colors.textSecondary, 
-    marginTop: 2 
-  },
-  statusRow: {
-    flexDirection: "row",
-    gap: 14,
-    marginTop: 8,
-    alignItems: "center",
-  },
-  checkItem: { 
-    flexDirection: "row", 
-    alignItems: "center", 
-    gap: 5 
-  },
-  checkbox: {
-    width: 17,
-    height: 17,
-    borderRadius: 4,
-    borderWidth: 1.5,
-    borderColor: theme.colors.border,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  checkPresent: { 
-    backgroundColor: theme.colors.success, 
-    borderColor: theme.colors.success 
-  },
-  checkAbsent: { 
-    backgroundColor: theme.colors.error, 
-    borderColor: theme.colors.error 
-  },
-  checkLate: { 
-    backgroundColor: theme.colors.warning, 
-    borderColor: theme.colors.warning 
-  },
-  checkLabel: { 
-    fontSize: 12, 
-    color: theme.colors.text 
-  },
-  summaryGrid: { 
-    flexDirection: "row", 
-    flexWrap: "wrap", 
-    gap: 8 
-  },
-  summaryItem: {
-    flex: 1,
-    minWidth: "40%",
-    backgroundColor: theme.colors.background,
-    borderRadius: 10,
-    padding: 12,
-    alignItems: "center",
-  },
-  summaryNum: { 
-    fontSize: 28, 
-    fontWeight: "700" 
-  },
-  summaryLabel: { 
-    fontSize: 11, 
-    color: theme.colors.textSecondary, 
-    marginTop: 2 
-  },
-  rateDivider: { 
-    height: 0.5, 
-    backgroundColor: theme.colors.border, 
-    marginVertical: 12 
-  },
-  rateRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  rateLabel: { 
-    fontSize: 13, 
-    color: theme.colors.textSecondary 
-  },
-  rateValue: { 
-    fontSize: 15, 
-    fontWeight: "700" 
-  },
-  saveBtn: {
-    marginHorizontal: 12,
-    backgroundColor: theme.colors.primary,
-    borderRadius: 12,
-    paddingVertical: 15,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 8,
-  },
-  saveBtnDone: { 
-    backgroundColor: theme.colors.success 
-  },
-  saveBtnText: { 
-    color: "white", 
-    fontSize: 15, 
-    fontWeight: "700" 
-  },
-  historyBtn: {
-    marginHorizontal: 12,
-    marginBottom: 10,
-    backgroundColor: theme.colors.card,
-    borderRadius: 12,
-    paddingVertical: 14,
-    paddingHorizontal: 16,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    borderWidth: 1,
-    borderColor: theme.colors.primary,
-  },
-  historyBtnText: {
-    flex: 1,
-    color: theme.colors.primary,
-    fontSize: 14,
-    fontWeight: "600",
-  },
-}));
