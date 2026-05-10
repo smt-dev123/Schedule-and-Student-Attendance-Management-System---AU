@@ -52,7 +52,6 @@ export class ScheduleRepository {
 
     const where = conditions.length > 0 ? and(...conditions) : undefined
 
-    // Get the IDs first to handle filtering on joined tables
     const schedulesWithFilters = await this.db
       .select({ id: schedules.id })
       .from(schedules)
@@ -64,7 +63,7 @@ export class ScheduleRepository {
 
     if (ids.length === 0) return []
 
-    return this.db.query.schedules.findMany({
+    const results = await this.db.query.schedules.findMany({
       where: inArray(schedules.id, ids),
       with: {
         faculty: { columns: { id: true, name: true } },
@@ -88,11 +87,29 @@ export class ScheduleRepository {
         },
         courses: {
           with: {
-            teacher: { columns: { id: true, name: true, phone: true } },
+            teacher: {
+              columns: { id: true },
+              with: {
+                user: { columns: { name: true, phone: true } }
+              }
+            },
           },
         },
       },
     })
+
+    // Map the results to flatten user data into teacher if needed by the frontend
+    return results.map((s: any) => ({
+      ...s,
+      courses: s.courses.map((c: any) => ({
+        ...c,
+        teacher: c.teacher ? {
+          ...c.teacher,
+          name: c.teacher.user?.name,
+          phone: c.teacher.user?.phone,
+        } : null
+      }))
+    })) as any;
   }
 
   async findById(id: number): Promise<Schedule | null> {
@@ -120,12 +137,30 @@ export class ScheduleRepository {
         },
         courses: {
           with: {
-            teacher: { columns: { id: true, name: true, phone: true } },
+            teacher: {
+              columns: { id: true },
+              with: {
+                user: { columns: { name: true, phone: true } }
+              }
+            },
           },
         },
       },
     });
-    return schedule ?? null;
+
+    if (!schedule) return null;
+
+    return {
+      ...schedule,
+      courses: schedule.courses.map((c: any) => ({
+        ...c,
+        teacher: c.teacher ? {
+          ...c.teacher,
+          name: c.teacher.user?.name,
+          phone: c.teacher.user?.phone,
+        } : null
+      }))
+    } as any;
   }
 
   async findByUniqueKey(
@@ -159,12 +194,30 @@ export class ScheduleRepository {
         },
         courses: {
           with: {
-            teacher: { columns: { id: true, name: true, phone: true } },
+            teacher: {
+              columns: { id: true },
+              with: {
+                user: { columns: { name: true, phone: true } }
+              }
+            },
           },
         },
       },
     });
-    return schedule ?? null;
+
+    if (!schedule) return null;
+
+    return {
+      ...schedule,
+      courses: schedule.courses.map((c: any) => ({
+        ...c,
+        teacher: c.teacher ? {
+          ...c.teacher,
+          name: c.teacher.user?.name,
+          phone: c.teacher.user?.phone,
+        } : null
+      }))
+    } as any;
   }
 
   async update(

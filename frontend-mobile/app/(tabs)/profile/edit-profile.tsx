@@ -3,7 +3,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as ImagePicker from "expo-image-picker";
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
-import { useSession } from "@/lib/auth-client";
+import { useSession, authClient } from "@/lib/auth-client";
 import { getTeacherMe, updateTeacherMe } from "@/api/TeacherAPI";
 import { getStudentMe, updateStudentMe } from "@/api/StudentAPI";
 import { useTranslation } from "react-i18next";
@@ -20,8 +20,6 @@ import {
   Platform,
 } from "react-native";
 
-// const STORAGE_KEY = "teacher_profile";
-
 export default function EditProfileScreen() {
   const router = useRouter();
   const { t } = useTranslation();
@@ -32,6 +30,7 @@ export default function EditProfileScreen() {
   const [email, setEmail] = useState("");
   const [address, setAddress] = useState("");
   const [dob, setDob] = useState("");
+  const [gender, setGender] = useState("");
   const [photoUri, setPhotoUri] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [loadingData, setLoadingData] = useState(true);
@@ -57,6 +56,7 @@ export default function EditProfileScreen() {
           setPhone(data.phone || "");
           setEmail(data.email || "");
           setAddress(data.address || "");
+          setGender(data.gender || "");
           if (data.dob) {
             const date = new Date(data.dob);
             if (!isNaN(date.getTime())) {
@@ -66,7 +66,16 @@ export default function EditProfileScreen() {
           setPhotoUri(data.image || null);
         } else {
           setFullName(session.user.name || "");
+          setPhone((session.user as any).phone || "");
           setEmail(session.user.email || "");
+          setAddress((session.user as any).address || "");
+          setGender((session.user as any).gender || "");
+          if ((session.user as any).dob) {
+            const date = new Date((session.user as any).dob);
+            if (!isNaN(date.getTime())) {
+              setDob(date.toISOString().split("T")[0]);
+            }
+          }
           setPhotoUri(session.user.image || null);
         }
       } catch (e) {
@@ -139,6 +148,7 @@ export default function EditProfileScreen() {
       formData.append("phone", phone);
       formData.append("email", email);
       formData.append("address", address);
+      formData.append("gender", gender);
       if (dob) formData.append("dob", dob);
 
       if (photoUri && !photoUri.startsWith("http")) {
@@ -157,9 +167,16 @@ export default function EditProfileScreen() {
         await updateTeacherMe(formData);
       } else if (userRole === "student") {
         await updateStudentMe(formData);
-      } else {
-        throw new Error("Unsupported user role: " + userRole);
       }
+
+      // Always update the base user profile via better-auth for consistency
+      await authClient.updateUser({
+        name: fullName,
+        phone: phone,
+        address: address,
+        gender: gender as any,
+        dob: dob,
+      });
 
       Alert.alert("✅ " + t("common.ok"), t("editProfile.successMsg"), [
         { text: "OK", onPress: () => router.back() },
@@ -233,6 +250,24 @@ export default function EditProfileScreen() {
             placeholder="Enter full name"
             placeholderTextColor="#bbb"
           />
+        </View>
+
+        <View style={styles.fieldGroup}>
+          <Text style={styles.fieldLabel}>{t("profile.gender")}</Text>
+          <View style={styles.genderContainer}>
+            <TouchableOpacity 
+              style={[styles.genderBtn, gender === 'male' && styles.genderBtnActive]}
+              onPress={() => setGender('male')}
+            >
+              <Text style={[styles.genderBtnText, gender === 'male' && styles.genderBtnTextActive]}>{t("common.male")}</Text>
+            </TouchableOpacity>
+            <TouchableOpacity 
+              style={[styles.genderBtn, gender === 'female' && styles.genderBtnActive]}
+              onPress={() => setGender('female')}
+            >
+              <Text style={[styles.genderBtnText, gender === 'female' && styles.genderBtnTextActive]}>{t("common.female")}</Text>
+            </TouchableOpacity>
+          </View>
         </View>
 
         <View style={styles.fieldGroup}>
@@ -412,6 +447,22 @@ const styles = StyleSheet.create({
     backgroundColor: "#FAFAFA",
   },
   inputMultiline: { height: 80, textAlignVertical: "top" },
+  genderContainer: { flexDirection: 'row', gap: 10 },
+  genderBtn: {
+    flex: 1,
+    padding: 12,
+    borderRadius: 10,
+    borderWidth: 1.5,
+    borderColor: '#E0E0E0',
+    alignItems: 'center',
+    backgroundColor: '#FAFAFA'
+  },
+  genderBtnActive: {
+    borderColor: '#00529B',
+    backgroundColor: '#E3F2FD'
+  },
+  genderBtnText: { color: '#666', fontWeight: '600' },
+  genderBtnTextActive: { color: '#00529B' },
   saveBtn: {
     backgroundColor: "#00529B",
     marginHorizontal: 20,

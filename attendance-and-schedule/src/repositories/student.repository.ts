@@ -1,9 +1,14 @@
 import { type DrizzleDb, type Transaction } from "@/database";
 import {
+  academicLevels,
   academicYears,
+  departments,
+  faculties,
   schedules,
+  skills,
   studentAcademicYears,
   students,
+  user,
 } from "@/database/schemas";
 import type {
   CreateStudent,
@@ -15,13 +20,13 @@ import type {
   StudentQueryInput,
   StudentUpdateInput,
 } from "@/validators/academy";
-import { and, count, eq, ilike, SQL, exists } from "drizzle-orm";
+import { and, count, eq, ilike, SQL, exists, desc, getTableColumns } from "drizzle-orm";
 
 export class StudentRepository {
   constructor(private readonly db: DrizzleDb) {}
 
   async findAll(query: StudentQueryInput): Promise<{
-    data: Student[];
+    data: any[];
     total: number;
     page: number;
     limit: number;
@@ -42,7 +47,7 @@ export class StudentRepository {
     const safeLimit = Math.min(100, Math.max(1, Math.floor(limit)));
 
     const conditions: SQL[] = [];
-    if (name?.trim()) conditions.push(ilike(students.name, `%${name.trim()}%`));
+    if (name?.trim()) conditions.push(ilike(user.name, `%${name.trim()}%`));
     if (facultyId && facultyId !== "all")
       conditions.push(eq(students.facultyId, Number(facultyId)));
     if (departmentId && departmentId !== "all")
@@ -50,7 +55,6 @@ export class StudentRepository {
     if (academicLevelId && academicLevelId !== "all")
       conditions.push(eq(students.academicLevelId, Number(academicLevelId)));
 
-    // Filter by enrollment history if academicYearId, semester, or year is provided
     if (
       (academicYearId && academicYearId !== "all") ||
       (semester && semester !== "all") ||
@@ -68,9 +72,7 @@ export class StudentRepository {
           eq(studentAcademicYears.semester, Number(semester)),
         );
       if (year && year !== "all")
-        enrollmentConditions.push(
-          eq(studentAcademicYears.year, Number(year)),
-        );
+        enrollmentConditions.push(eq(studentAcademicYears.year, Number(year)));
 
       conditions.push(
         exists(
@@ -86,17 +88,38 @@ export class StudentRepository {
     const where = conditions.length > 0 ? and(...conditions) : undefined;
 
     const [data, countResult] = await Promise.all([
-      this.db.query.students.findMany({
-        where,
-        limit: safeLimit,
-        offset: (safePage - 1) * safeLimit,
-        orderBy: (students, { desc }) => [desc(students.createdAt)],
-        with: {
-          faculty: true,
-          department: true,
-        },
-      }),
-      this.db.select({ total: count() }).from(students).where(where),
+      this.db
+        .select({
+          ...getTableColumns(students),
+          name: user.name,
+          email: user.email,
+          phone: user.phone,
+          address: user.address,
+          image: user.image,
+          gender: user.gender,
+          dob: user.dob,
+          faculty: faculties,
+          department: departments,
+          academicLevel: academicLevels,
+          academicYear: academicYears,
+          skill: skills,
+        })
+        .from(students)
+        .innerJoin(user, eq(students.userId, user.id))
+        .leftJoin(faculties, eq(students.facultyId, faculties.id))
+        .leftJoin(departments, eq(students.departmentId, departments.id))
+        .leftJoin(academicLevels, eq(students.academicLevelId, academicLevels.id))
+        .leftJoin(academicYears, eq(students.academicYearId, academicYears.id))
+        .leftJoin(skills, eq(students.skillId, skills.id))
+        .where(where)
+        .limit(safeLimit)
+        .offset((safePage - 1) * safeLimit)
+        .orderBy(desc(students.createdAt)),
+      this.db
+        .select({ total: count() })
+        .from(students)
+        .innerJoin(user, eq(students.userId, user.id))
+        .where(where),
     ]);
 
     const total = countResult[0]?.total ?? 0;
@@ -104,51 +127,77 @@ export class StudentRepository {
     return { data, total, page: safePage, limit: safeLimit };
   }
 
-  async findById(id: number): Promise<Student | undefined> {
-    return this.db.query.students.findFirst({
-      where: eq(students.id, id),
-    });
+  async findById(id: number): Promise<any | undefined> {
+    const [result] = await this.db
+      .select({
+        ...getTableColumns(students),
+        name: user.name,
+        email: user.email,
+        phone: user.phone,
+        address: user.address,
+        image: user.image,
+        gender: user.gender,
+        dob: user.dob,
+        faculty: faculties,
+        department: departments,
+        academicLevel: academicLevels,
+        academicYear: academicYears,
+        skill: skills,
+      })
+      .from(students)
+      .innerJoin(user, eq(students.userId, user.id))
+      .leftJoin(faculties, eq(students.facultyId, faculties.id))
+      .leftJoin(departments, eq(students.departmentId, departments.id))
+      .leftJoin(academicLevels, eq(students.academicLevelId, academicLevels.id))
+      .leftJoin(academicYears, eq(students.academicYearId, academicYears.id))
+      .leftJoin(skills, eq(students.skillId, skills.id))
+      .where(eq(students.id, id))
+      .limit(1);
+    return result;
   }
 
-  async findByUserId(id: string): Promise<Student | undefined> {
-    return this.db.query.students.findFirst({
-      where: eq(students.userId, id),
-      with: {
-        faculty: true,
-        department: true,
-      },
-    });
+  async findByUserId(id: string): Promise<any | undefined> {
+    const [result] = await this.db
+      .select({
+        ...getTableColumns(students),
+        name: user.name,
+        email: user.email,
+        phone: user.phone,
+        address: user.address,
+        image: user.image,
+        gender: user.gender,
+        dob: user.dob,
+        faculty: faculties,
+        department: departments,
+        academicLevel: academicLevels,
+        academicYear: academicYears,
+        skill: skills,
+      })
+      .from(students)
+      .innerJoin(user, eq(students.userId, user.id))
+      .leftJoin(faculties, eq(students.facultyId, faculties.id))
+      .leftJoin(departments, eq(students.departmentId, departments.id))
+      .leftJoin(academicLevels, eq(students.academicLevelId, academicLevels.id))
+      .leftJoin(academicYears, eq(students.academicYearId, academicYears.id))
+      .leftJoin(skills, eq(students.skillId, skills.id))
+      .where(eq(students.userId, id))
+      .limit(1);
+    return result;
   }
 
-  async create(
-    data: CreateStudent,
-    tx: Transaction,
-  ): Promise<Student | undefined> {
-    const statusMap: Record<string, any> = {
-      enrolled: "enrolled",
-      graduated: "graduated",
-      transferred: "transferred",
-      "dropped out": "dropped_out",
-    };
-
+  async create(data: any, tx: Transaction): Promise<any | undefined> {
     const studentId = generateId();
-    const { educationalStatus, ...rest } = data;
-
     const [student] = await tx
       .insert(students)
       .values({
-        ...rest,
+        ...data,
         id: studentId,
-        educationalStatus: statusMap[educationalStatus] || "enrolled",
       })
       .returning();
     return student;
   }
 
-  async update(
-    id: number,
-    data: StudentUpdateInput,
-  ): Promise<Student | undefined> {
+  async update(id: number, data: any): Promise<any | undefined> {
     const [student] = await this.db
       .update(students)
       .set({ ...data, updatedAt: new Date() })
@@ -157,7 +206,7 @@ export class StudentRepository {
     return student;
   }
 
-  async delete(id: number): Promise<Student | undefined> {
+  async delete(id: number): Promise<any | undefined> {
     const [student] = await this.db
       .delete(students)
       .where(eq(students.id, id))
@@ -169,7 +218,7 @@ export class StudentRepository {
     facultyId?: number;
     departmentId?: number;
     generation?: number;
-  }): Promise<Student[]> {
+  }): Promise<any[]> {
     const conditions: SQL[] = [];
     if (data.facultyId) conditions.push(eq(students.facultyId, data.facultyId));
     if (data.departmentId)
@@ -177,9 +226,14 @@ export class StudentRepository {
     if (data.generation)
       conditions.push(eq(students.generation, data.generation));
 
-    return this.db.query.students.findMany({
-      where: conditions.length > 0 ? and(...conditions) : undefined,
-    });
+    return this.db
+      .select({
+        id: students.id,
+        name: user.name,
+      })
+      .from(students)
+      .innerJoin(user, eq(students.userId, user.id))
+      .where(conditions.length > 0 ? and(...conditions) : undefined);
   }
 
   async updateStudentAcademicYear(
@@ -219,7 +273,7 @@ export class StudentRepository {
     if (!student || !currentYear) return null;
     if (!student.academicLevelId || !student.departmentId) return null;
 
-    return this.db.query.schedules.findMany({
+    const results = await this.db.query.schedules.findMany({
       where: and(
         eq(schedules.departmentId, student.departmentId),
         eq(schedules.academicLevelId, student.academicLevelId),
@@ -253,14 +307,33 @@ export class StudentRepository {
             hours: true,
           },
           with: {
-            teacher: { columns: { name: true, phone: true } },
+            teacher: {
+              columns: { id: true },
+              with: {
+                user: { columns: { name: true, phone: true } },
+              },
+            },
           },
         },
       },
     });
+
+    return results.map((s: any) => ({
+      ...s,
+      courses: s.courses.map((c: any) => ({
+        ...c,
+        teacher: c.teacher
+          ? {
+              ...c.teacher,
+              name: c.teacher.user?.name,
+              phone: c.teacher.user?.phone,
+            }
+          : null,
+      })),
+    })) as any;
   }
 
-  async promote(data: StudentPromoteInput): Promise<Student | undefined> {
+  async promote(data: StudentPromoteInput): Promise<any | undefined> {
     return await this.db.transaction(async (tx) => {
       await tx
         .insert(studentAcademicYears)

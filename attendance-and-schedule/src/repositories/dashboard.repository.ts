@@ -80,13 +80,14 @@ export class DashboardRepository {
   async getTopAttendance() {
     const res = await this.db
       .select({
-        name: students.name,
-        gender: students.gender,
+        name: user.name,
+        gender: user.gender,
         department: departments.name,
         percentage: attendanceSummaries.presentPercentage,
       })
       .from(attendanceSummaries)
       .innerJoin(students, eq(attendanceSummaries.studentId, students.id))
+      .innerJoin(user, eq(students.userId, user.id))
       .innerJoin(
         departments,
         eq(attendanceSummaries.departmentId, departments.id),
@@ -296,4 +297,3 @@ export class DashboardRepository {
     };
   }
 }
-

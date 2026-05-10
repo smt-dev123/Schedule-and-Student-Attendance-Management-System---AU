@@ -53,9 +53,27 @@ router.put(
       if (!teacher) {
         return c.json({ message: "Teacher not found" }, 404);
       }
+
+      // Update User info
+      await auth.api.updateUser({
+        body: {
+          name: data.name,
+          email: data.email,
+          image: image?.url,
+          phone: data.phone,
+          address: data.address,
+          gender: data.gender,
+        },
+        query: {
+          userId: user.id,
+        },
+      });
+
+      // Update Teacher specific info
+      const { name, email, phone, address, gender, ...teacherData } = data;
       const updated = await teacherService.update(
         teacher.id,
-        data,
+        teacherData,
         image?.url,
         image?.filename,
       );
@@ -86,20 +104,19 @@ router.post(
           email: data.email,
           password: data.password,
           role: "teacher",
+          image: image?.url,
+          phone: data.phone,
+          address: data.address,
+          gender: data.gender,
         },
       });
+
       const teacher = await teacherService.create({
-        name: data.name,
-        email: data.email,
-        phone: data.phone,
-        gender: data.gender,
+        teacherCode: data.teacherCode,
         academicLevelId: data.academicLevelId,
         facultyId: data.facultyId,
         isActive: data.isActive,
         userId: (user as any).id,
-        image: image?.url,
-        teacherCode: data.teacherCode,
-        address: data.address,
       });
       return c.json(teacher);
     } catch (error) {
@@ -124,13 +141,35 @@ router.put(
     const image = c.get("upload");
     const { teacherService } = c.var.container;
     try {
-      const teacher = await teacherService.update(
+      const teacher = await teacherService.findById(id);
+      if (!teacher) {
+        return c.json({ message: "Teacher not found" }, 404);
+      }
+
+      // Update User info
+      await auth.api.updateUser({
+        body: {
+          name: data.name,
+          email: data.email,
+          image: image?.url,
+          phone: data.phone,
+          address: data.address,
+          gender: data.gender,
+        },
+        query: {
+          userId: teacher.userId,
+        },
+      });
+
+      // Update Teacher specific info
+      const { name, email, phone, address, gender, ...teacherData } = data;
+      const updated = await teacherService.update(
         id,
-        data,
+        teacherData,
         image?.url,
         image?.filename,
       );
-      return c.json(teacher);
+      return c.json(updated);
     } catch (error) {
       if (image?.filename) {
         await deleteFile(image.filename).catch(() => {});
@@ -147,9 +186,15 @@ router.delete(
   zValidator("param", teacherIdParamSchema),
   async (c) => {
     const id = c.req.valid("param").id;
-    const { teacherService } = c.var.container;
-    const teacher = await teacherService.delete(id);
-    return c.json(teacher);
+    const { teacherService, userService } = c.var.container;
+    const teacher = await teacherService.findById(id);
+    if (!teacher) {
+      return c.json({ message: "Teacher not found" }, 404);
+    }
+
+    // Deleting the user will cascade delete the teacher record due to schema definition
+    await userService.deleteUser(teacher.userId);
+    return c.json({ message: "Teacher and associated user deleted" });
   },
 );
 

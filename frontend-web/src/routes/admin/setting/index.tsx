@@ -1,17 +1,5 @@
 import { useTitle } from '@/hooks/useTitle'
-import {
-  Avatar,
-  Box,
-  Button,
-  Card,
-  Flex,
-  Select,
-  Separator,
-  Switch,
-  Tabs,
-  Text,
-  TextField,
-} from '@radix-ui/themes'
+import { Box, Card, Flex, Tabs, Text } from '@radix-ui/themes'
 import { createFileRoute } from '@tanstack/react-router'
 import { useAuth } from '@/stores/auth'
 import { useForm } from 'react-hook-form'
@@ -41,6 +29,8 @@ function RouteComponent() {
     defaultValues: {
       name: '',
       email: '',
+      phone: '',
+      address: '',
     },
   })
 
@@ -51,6 +41,8 @@ function RouteComponent() {
       resetProfile({
         name: user.name,
         email: user.email,
+        phone: (user as any).phone || '',
+        address: (user as any).address || '',
       })
     }
   }, [user, resetProfile])
@@ -60,6 +52,8 @@ function RouteComponent() {
     try {
       const { error } = await authClient.updateUser({
         name: data.name,
+        phone: data.phone,
+        address: data.address,
       })
       if (error) {
         toast.error(error.message || 'បរាជ័យក្នុងការធ្វើបច្ចុប្បន្នភាព')

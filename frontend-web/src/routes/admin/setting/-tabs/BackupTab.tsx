@@ -7,7 +7,7 @@ import {
   Separator,
   Switch,
   Text,
-  AlertDialog, // បន្ថែម AlertDialog
+  AlertDialog,
 } from '@radix-ui/themes'
 import toast from 'react-hot-toast'
 import api from '@/lib/axios'

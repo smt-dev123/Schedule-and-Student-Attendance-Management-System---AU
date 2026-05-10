@@ -1,10 +1,10 @@
+import StudentDetail from '@/routes/admin/student/-actions/ShowDetail'
 import StudentDelete from '@/routes/admin/student/-actions/Delete'
 import StudentPromote from '@/routes/admin/student/-actions/StudentPromote'
 import StudentUpdate from '@/routes/admin/student/-actions/Update'
 import type { StudentsType } from '@/types'
-import { Avatar, Badge, Flex, IconButton, Text } from '@radix-ui/themes'
+import { Avatar, Badge, Flex, Text } from '@radix-ui/themes'
 import type { ColumnDef } from '@tanstack/react-table'
-import { FaRegEye } from 'react-icons/fa'
 import { useSessionContext } from '@/providers/AuthProvider'
 
 const getStatusColor = (status: StudentsType['educationalStatus']) => {
@@ -101,15 +101,7 @@ function StudentActions({ row }: { row: any }) {
       {['admin', 'manager', 'staff'].includes(role) && (
         <StudentPromote student={row.original} />
       )}
-      <IconButton
-        size="1"
-        color="cyan"
-        variant="surface"
-        style={{ cursor: 'pointer' }}
-        onClick={() => console.log('Edit student:', row.original.id)}
-      >
-        <FaRegEye />
-      </IconButton>
+      <StudentDetail data={row.original} />
       {['admin', 'manager', 'staff'].includes(role) && (
         <StudentUpdate data={row.original} />
       )}

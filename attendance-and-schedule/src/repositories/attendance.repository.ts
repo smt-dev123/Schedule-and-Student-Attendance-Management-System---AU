@@ -4,13 +4,14 @@ import {
   attendanceSummaries,
   courses,
   students,
+  user,
 } from "@/database/schemas";
 import type {
   AttendanceInput,
   AttendanceRecord,
   AttendanceReportQuery,
 } from "@/types/attendance";
-import { and, asc, eq, SQL, sql } from "drizzle-orm";
+import { and, asc, eq, SQL, sql, inArray } from "drizzle-orm";
 
 export class AttendanceRepository {
   constructor(private readonly db: DrizzleDb) {}
@@ -113,25 +114,39 @@ export class AttendanceRepository {
     academicYearId: number,
     generation: number,
   ) {
-    return this.db.query.students.findMany({
+    const res = await this.db
+      .select({
+        id: students.id,
+        name: user.name,
+      })
+      .from(students)
+      .innerJoin(user, eq(students.userId, user.id))
+      .where(
+        and(
+          eq(students.facultyId, facultyId),
+          eq(students.departmentId, departmentId),
+          eq(students.academicYearId, academicYearId),
+          eq(students.generation, generation),
+        ),
+      );
+
+    const studentIds = res.map((s) => s.id);
+    if (studentIds.length === 0) return [];
+
+    const records = await this.db.query.attendanceRecords.findMany({
       where: and(
-        eq(students.facultyId, facultyId),
-        eq(students.departmentId, departmentId),
-        eq(students.academicYearId, academicYearId),
-        eq(students.generation, generation),
+        inArray(attendanceRecords.studentId, studentIds),
+        eq(attendanceRecords.courseId, courseId),
+        eq(attendanceRecords.date, date.toISOString()),
+        eq(attendanceRecords.academicYearId, academicYearId),
       ),
-      columns: { id: true, name: true },
-      with: {
-        attendanceRecords: {
-          where: and(
-            eq(attendanceRecords.courseId, courseId),
-            eq(attendanceRecords.date, date.toISOString()),
-            eq(attendanceRecords.academicYearId, academicYearId),
-          ),
-          columns: { date: true, session: true, status: true },
-        },
-      },
+      columns: { studentId: true, date: true, session: true, status: true },
     });
+
+    return res.map((s) => ({
+      ...s,
+      attendanceRecords: records.filter((r) => r.studentId === s.id),
+    }));
   }
 
   async getAttendanceSummaryByCourseAndCohort(query: AttendanceReportQuery) {
@@ -162,9 +177,9 @@ export class AttendanceRepository {
       this.db
         .select({
           studentId: attendanceSummaries.studentId,
-          name: students.name,
-          gender: students.gender,
-          phone: students.phone,
+          name: user.name,
+          gender: user.gender,
+          phone: user.phone,
           status: students.educationalStatus,
           total: attendanceSummaries.totalAttendance,
           present: attendanceSummaries.presentAttendance,
@@ -178,13 +193,14 @@ export class AttendanceRepository {
           withdrawFromExam: attendanceSummaries.withdrawFromExam,
           makeUpClass: attendanceSummaries.makeUpClass,
           courseName: courses.name,
-          score: sql<number>`GREATEST(0, 10 - (${attendanceSummaries.absentAttendance} * 0.5 + ${attendanceSummaries.excusedAttendance} * 0.25))`, // Mock score logic, adjust if needed
+          score: sql<number>`GREATEST(0, 10 - (${attendanceSummaries.absentAttendance} * 0.5 + ${attendanceSummaries.excusedAttendance} * 0.25))`,
         })
         .from(attendanceSummaries)
         .innerJoin(students, eq(students.id, attendanceSummaries.studentId))
+        .innerJoin(user, eq(students.userId, user.id))
         .innerJoin(courses, eq(courses.id, attendanceSummaries.courseId))
         .where(whereClause)
-        .orderBy(asc(students.name))
+        .orderBy(asc(user.name))
         .limit(safeLimit)
         .offset((safePage - 1) * safeLimit),
 
@@ -249,7 +265,7 @@ export class AttendanceRepository {
           absentAttendance: sql`${attendanceSummaries.absentAttendance}  + ${status === "absent" ? 1 : 0}`,
           lateAttendance: sql`${attendanceSummaries.lateAttendance}    + ${status === "late" ? 1 : 0}`,
           excusedAttendance: sql`${attendanceSummaries.excusedAttendance} + ${status === "excused" ? 1 : 0}`,
-          sessionsRemaining: sql`${attendanceSummaries.sessionsRemaining} - 1`, // ← decrement on each mark
+          sessionsRemaining: sql`${attendanceSummaries.sessionsRemaining} - 1`,
           updatedAt: new Date(),
         },
       });
@@ -288,7 +304,6 @@ export class AttendanceRepository {
       );
   }
 
-  // Called when updating a status — reverses old, applies new
   async adjustAttendanceSummary(
     studentId: number,
     courseId: number,

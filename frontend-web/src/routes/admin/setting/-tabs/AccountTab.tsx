@@ -26,7 +26,6 @@ interface AccountTabProps {
 export const AccountTab = ({
   user,
   register,
-  errors,
   onSubmit,
   isUpdating,
   isUploading,
@@ -81,24 +80,9 @@ export const AccountTab = ({
           </Text>
           <Separator size="4" my="3" />
           <Flex gap="4" direction={{ initial: 'column', sm: 'row' }} mb="4">
-            {/* <Box className="grow">
-              <Text as="div" size="2" mb="1" weight="bold">
-                ឈ្មោះ <span className="text-red-500">*</span>
-              </Text>
-              <TextField.Root
-                {...register('name', { required: 'សូមបញ្ចូលឈ្មោះ' })}
-                placeholder="បញ្ចូលឈ្មោះ"
-              />
-              {errors.name && (
-                <Text size="1" color="red">
-                  {errors.name.message as string}
-                </Text>
-              )}
-            </Box> */}
             <FormInput
               name="name"
               register={register}
-              // error={errors}
               label="ឈ្មោះ"
               rules={{ required: 'សូមបញ្ចូលឈ្មោះ' }}
               type="text"
@@ -116,6 +100,25 @@ export const AccountTab = ({
               />
             </Box>
           </Flex>
+
+          <Flex gap="4" direction={{ initial: 'column', sm: 'row' }} mb="4">
+            <FormInput
+              name="phone"
+              register={register}
+              label="លេខទូរស័ព្ទ"
+              type="text"
+              placeholder="បញ្ចូលលេខទូរស័ព្ទ"
+            />
+
+            <FormInput
+              name="address"
+              register={register}
+              label="អាសយដ្ឋាន"
+              type="text"
+              placeholder="បញ្ចូលអាសយដ្ឋាន"
+            />
+          </Flex>
+
           <Button
             type="submit"
             loading={isUpdating}

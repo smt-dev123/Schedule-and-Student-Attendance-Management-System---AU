@@ -21,6 +21,22 @@ export const auth = betterAuth({
   email: {
     enabled: true,
   },
+  user: {
+    additionalFields: {
+      phone: {
+        type: "string",
+      },
+      address: {
+        type: "string",
+      },
+      gender: {
+        type: "string",
+      },
+      dob: {
+        type: "string",
+      },
+    },
+  },
   plugins: [
     twoFactor(),
     adminPlugin({

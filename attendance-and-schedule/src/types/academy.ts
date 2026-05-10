@@ -21,16 +21,21 @@ import type {
 export type Student = Omit<
   typeof students.$inferSelect,
   "createdAt" | "updatedAt" | "userId"
->;
-export type CreateStudent = {
+> & {
   name: string;
-  phone: string;
   email: string;
+  phone?: string | null;
+  address?: string | null;
+  image?: string | null;
+  gender: "male" | "female";
+  dob?: Date | string | null;
+};
+
+export type CreateStudent = {
   facultyId: number;
   departmentId: number;
   academicLevelId: number;
   educationalStatus: "enrolled" | "graduated" | "dropped out" | "transferred";
-  gender: "male" | "female";
   generation: number;
   semester: number;
   academicYearId: number;
@@ -38,10 +43,10 @@ export type CreateStudent = {
   userId: string;
   skillId: number;
   year?: number;
-  image?: string | null;
   studentCode: string;
   nameEn: string;
 };
+
 export type StudentPromoteInput = {
   studentId: number;
   academicYearId: number;
@@ -50,32 +55,25 @@ export type StudentPromoteInput = {
 };
 
 /* Teacher */
-export type Teacher = typeof teachers.$inferSelect;
-export type CreateTeacher = {
+export type Teacher = typeof teachers.$inferSelect & {
   name: string;
-  phone: string;
   email: string;
+  phone?: string | null;
+  address?: string | null;
+  image?: string | null;
   gender: "male" | "female";
+};
+
+export type CreateTeacher = {
+  teacherCode: string;
   academicLevelId: number;
   facultyId: number;
   isActive: boolean;
   userId: string;
-  image?: string | null;
-  teacherCode: string;
-  address?: string | null;
 };
-export type UpdateTeacher = {
-  name?: string;
-  phone?: string;
-  email?: string;
-  gender?: "male" | "female";
-  academicLevelId?: number;
-  facultyId?: number;
-  isActive?: boolean;
-  image?: string | null;
-  teacherCode?: string;
-  address?: string | null;
-};
+
+export type UpdateTeacher = Partial<CreateTeacher>;
+
 export type TeacherQueryInput = {
   page: number;
   limit: number;

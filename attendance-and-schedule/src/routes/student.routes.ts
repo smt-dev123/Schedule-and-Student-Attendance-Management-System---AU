@@ -57,9 +57,28 @@ router.put(
       if (!student) {
         return c.json({ message: "Student not found" }, 404);
       }
+
+      // Update User info
+      await auth.api.updateUser({
+        body: {
+          name: data.name,
+          email: data.email,
+          image: image?.url,
+          phone: data.phone,
+          address: data.address,
+          gender: data.gender,
+          dob: data.dob ? new Date(data.dob).toISOString() : undefined,
+        },
+        query: {
+          userId: user.id,
+        },
+      });
+
+      // Update Student specific info
+      const { name, email, phone, address, gender, dob, ...studentData } = data;
       const updated = await studentService.update(
         student.id,
-        data,
+        studentData,
         image?.url,
         image?.filename,
       );
@@ -97,13 +116,18 @@ router.post(
           email: data.email,
           password: data.password,
           role: "student",
+          image: image?.url,
+          phone: data.phone,
+          address: data.address,
+          gender: data.gender,
+          dob: data.dob ? new Date(data.dob).toISOString() : undefined,
         },
       });
       const { studentService } = c.var.container;
+      const { name, email, password, phone, address, gender, dob, ...studentData } = data;
       const student = await studentService.create({
-        ...data,
+        ...studentData,
         userId: user.id as string,
-        image: image?.url ?? "",
       });
       return c.json(student);
     } catch (error) {
@@ -127,13 +151,36 @@ router.put(
     const image = c.get("upload");
     const { studentService } = c.var.container;
     try {
-      const student = await studentService.update(
+      const student = await studentService.findById(id);
+      if (!student) {
+        return c.json({ message: "Student not found" }, 404);
+      }
+
+      // Update User info
+      await auth.api.updateUser({
+        body: {
+          name: data.name,
+          email: data.email,
+          image: image?.url,
+          phone: data.phone,
+          address: data.address,
+          gender: data.gender,
+          dob: data.dob ? new Date(data.dob).toISOString() : undefined,
+        },
+        query: {
+          userId: student.userId,
+        },
+      });
+
+      // Update Student specific info
+      const { name, email, phone, address, gender, dob, ...studentData } = data;
+      const updated = await studentService.update(
         id,
-        data,
+        studentData,
         image?.url,
         image?.filename,
       );
-      return c.json(student);
+      return c.json(updated);
     } catch (error) {
       if (image?.filename) {
         await deleteFile(image.filename).catch(() => {});
@@ -149,9 +196,15 @@ router.delete(
   requirePermission("student", "delete"),
   async (c) => {
     const id = c.req.param("id") as unknown as number;
-    const { studentService } = c.var.container;
-    const student = await studentService.delete(id);
-    return c.json(student);
+    const { studentService, userService } = c.var.container;
+    const student = await studentService.findById(id);
+    if (!student) {
+      return c.json({ message: "Student not found" }, 404);
+    }
+
+    // Deleting the user will cascade delete the student record
+    await userService.deleteUser(student.userId);
+    return c.json({ message: "Student and associated user deleted" });
   },
 );
 

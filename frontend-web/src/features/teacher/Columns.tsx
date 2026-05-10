@@ -1,9 +1,9 @@
+import TeacherDetail from '@/routes/admin/teacher/-actions/ShowDetail'
 import TeacherDelete from '@/routes/admin/teacher/-actions/Delete'
 import TeacherUpdate from '@/routes/admin/teacher/-actions/Update'
 import type { TeachersType } from '@/types'
-import { Avatar, Badge, Flex, IconButton } from '@radix-ui/themes'
+import { Avatar, Badge, Flex } from '@radix-ui/themes'
 import type { ColumnDef } from '@tanstack/react-table'
-import { FaRegEye } from 'react-icons/fa'
 import { useSessionContext } from '@/providers/AuthProvider'
 
 const handleViewImage = (imageUrl: string) => {
@@ -69,14 +69,7 @@ function TeacherActions({ row }: { row: any }) {
 
   return (
     <Flex gap="2">
-      <IconButton
-        size="1"
-        color="blue"
-        variant="surface"
-        style={{ cursor: 'pointer' }}
-      >
-        <FaRegEye />
-      </IconButton>
+      <TeacherDetail data={row.original} />
 
       {['admin', 'manager', 'staff'].includes(role) && (
         <>
