@@ -10,16 +10,17 @@ A comprehensive full-stack application built with modern technologies including 
 - **PostgreSQL** - Database (specify your choice)
 - **JWT** - Authentication
 - **Bcrypt** - Password hashing
-- **Multer** - File uploads
+- **Bun Uploads** - File uploads
 - **Cors** - Cross-origin resource sharing
 
 ### Frontend Web
 
-- **React.js** - React library with App Router
+- **React.js** - React library
 - **TypeScript** - Type safety
 - **Tailwind CSS** - Styling
 - **Axios** - HTTP client
 - **Tanstack Table** - Table
+- **Tanstack Router** - Routing
 - **Zustand** - State management
 
 ### Frontend Mobile
@@ -34,28 +35,28 @@ A comprehensive full-stack application built with modern technologies including 
 
 ```
 project-root/
-├── attendance-and-schedule/                 # Hono.js API server
+├── backend/               # Hono.js API server
 │   ├── src/
-│   │   ├── controllers/    # Route controllers
+│   │   ├── controllers/   # Route controllers
 │   │   ├── models/        # Database models
 │   │   ├── routes/        # API routes
 │   │   ├── middleware/    # Custom middleware
 │   │   └── utils/         # Utility functions
 │   ├── uploads/           # File uploads
 │   └── package.json
-├── frontend-web/           # React.js web application
+├── admin/                 # React.js web application
 │   ├── src/
-│   │   ├── pages/          # App Router pages
-│   │   ├── components/   # Reusable components
-│   │   ├── lib/          # Utilities and configurations
-│   │   └── types/        # TypeScript type definitions
+│   │   ├── pages/         # pages
+│   │   ├── components/    # components
+│   │   ├── lib/           # Utilities and configurations
+│   │   └── types/         # types
 │   └── package.json
-├── frontend-mobile/        # Expo React Native app
+├── mobile/                # Expo React Native app
 │   ├── app/
-│   │   ├── (taps)/       # Tab screens
-│   │   ├── components/   # Reusable components
-│   │   ├── navigation/   # Navigation configuration
-│   │   └── utils/        # Utility functions
+│   │   ├── (taps)/        # Tab screens
+│   │   ├── components/    # components
+│   │   ├── navigation/    # Navigation configuration
+│   │   └── utils/         # Utility functions
 │   └── package.json
 └── README.md
 ```
@@ -102,7 +103,7 @@ npm install
 Create `.env.local` file:
 
 ```env
-NEXT_PUBLIC_API_URL=http://localhost:5000/api
+VITE_API_BASE_URL=http://localhost:3000/api
 ```
 
 Start the development server:
@@ -121,7 +122,7 @@ npm install
 Create `.env` file:
 
 ```env
-EXPO_PUBLIC_API_URL=http://localhost:5000/api
+EXPO_PUBLIC_API_URL=http://localhost:3000/api
 ```
 
 Start the Expo development server:
@@ -133,16 +134,16 @@ npx expo start
 ## 🚦 Running the Application
 
 1. **Start Backend**: `cd backend && npm run dev`
-2. **Start Web Frontend**: `cd frontend-web && npm run dev`
-3. **Start Mobile App**: `cd frontend-mobile && npx expo start`
+2. **Start Web Frontend**: `cd admin && bun dev`
+3. **Start Mobile App**: `cd mobile && npx expo start`
 
 ### Access Points
 
-- **API Server**: http://localhost:5000
-- **Web Application**: http://localhost:3000
+- **API Server**: http://localhost:3000
+- **Web Application**: http://localhost:5173
 - **Mobile App**: Use Expo Go app to scan QR code
 
-## 📱 Features
+## Features
 
 ### Core Features
 
@@ -153,60 +154,15 @@ npx expo start
 - Responsive design
 - Cross-platform mobile support
 
-### API Endpoints
-
-#### Authentication Endpoints
-
-```
-POST   /api/auth/register    # User registration
-POST   /api/auth/login       # User login
-GET    /api/auth/profile     # Get user profile
-PUT    /api/auth/profile     # Update user profile
-```
-
-**Detailed Explanation:**
-
-**GET /api/auth/profile**
-
-- **Purpose**: Retrieve current
-
-## 🧪 Testing
-
-### Backend Testing
-
-```bash
-cd backend
-npm run test
-```
-
-### Frontend Web Testing
-
-```bash
-cd frontend-web
-npm run test
-```
-
-### Mobile Testing
-
-```bash
-cd frontend-mobile
-npm run test
-```
-
 ## 📦 Deployment
 
 ### Backend Deployment
 
-- **Heroku**: `git push heroku main`
-- **Railway**: Connect GitHub repository
-- **DigitalOcean**: Use App Platform
-- **AWS**: Use Elastic Beanstalk or EC2
+- **Docker**: Dockerfile
 
 ### Frontend Web Deployment
 
-- **Vercel**: `vercel --prod`
-- **Netlify**: Connect GitHub repository
-- **Railway**: Connect GitHub repository
+- **Docker**: Dockerfile
 
 ### Mobile App Deployment
 
@@ -245,26 +201,3 @@ npx expo build       # Build app
 eas build            # Build with EAS
 eas submit           # Submit to app stores
 ```
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 👥 Team
-
-- **Backend Developer** - API development and database management
-- **Frontend Web Developer** - Web application development
-- **Mobile Developer** - Mobile application development
-- **DevOps Engineer** - Deployment and infrastructure
-
----
-
-**Happy Coding! 🎉**
