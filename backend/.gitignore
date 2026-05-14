@@ -35,7 +35,11 @@ report.[0-9]_.[0-9]_.[0-9]_.[0-9]_.json
 drizzle
 tests
 
-src/database/seeds
-src/validators/user.ts
-
-uploads/*
+uploads/* 
+.bun 
+.bun/temp
+.bun/install
+.bun/build
+.bun/daemon
+.bun/buildinfo
+.bun/cache
