@@ -103,6 +103,7 @@ const TeacherUpdate = ({ data }: Props) => {
   const onSubmit = (formData: TeachersType) => {
     const payload = new FormData()
     payload.append('name', formData.name)
+    payload.append('nameEn', formData.nameEn)
     payload.append('gender', formData.gender)
     payload.append('email', formData.email)
     payload.append('phone', formData.phone || '')
@@ -193,6 +194,23 @@ const TeacherUpdate = ({ data }: Props) => {
                   required: 'ត្រូវបញ្ចូលឈ្មោះ',
                 }}
                 error={errors.name}
+                isRequired
+              />
+
+              <FormInput
+                label="ឈ្មោះអង់គ្លេស"
+                placeholder="Teacher Name"
+                name="nameEn"
+                control={control}
+                register={register}
+                error={errors.nameEn}
+                rules={{
+                  required: 'ត្រូវបញ្ចូលឈ្មោះអង់គ្លេស',
+                  pattern: {
+                    value: /^[a-zA-Z ]+$/,
+                    message: 'ឈ្មោះអង់គ្លេសត្រូវមានតែអក្សរ a-z A-Z និង space',
+                  },
+                }}
                 isRequired
               />
 

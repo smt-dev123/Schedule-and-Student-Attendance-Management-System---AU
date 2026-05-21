@@ -92,12 +92,8 @@ export class StudentRepository {
         .select({
           ...getTableColumns(students),
           name: user.name,
+          nameEn: user.nameEn,
           email: user.email,
-          phone: user.phone,
-          address: user.address,
-          image: user.image,
-          gender: user.gender,
-          dob: user.dob,
           faculty: faculties,
           department: departments,
           academicLevel: academicLevels,
@@ -132,12 +128,8 @@ export class StudentRepository {
       .select({
         ...getTableColumns(students),
         name: user.name,
+        nameEn: user.nameEn,
         email: user.email,
-        phone: user.phone,
-        address: user.address,
-        image: user.image,
-        gender: user.gender,
-        dob: user.dob,
         faculty: faculties,
         department: departments,
         academicLevel: academicLevels,
@@ -161,12 +153,8 @@ export class StudentRepository {
       .select({
         ...getTableColumns(students),
         name: user.name,
+        nameEn: user.nameEn,
         email: user.email,
-        phone: user.phone,
-        address: user.address,
-        image: user.image,
-        gender: user.gender,
-        dob: user.dob,
         faculty: faculties,
         department: departments,
         academicLevel: academicLevels,
@@ -308,9 +296,9 @@ export class StudentRepository {
           },
           with: {
             teacher: {
-              columns: { id: true },
+              columns: { id: true, phone: true },
               with: {
-                user: { columns: { name: true, phone: true } },
+                user: { columns: { name: true } },
               },
             },
           },
@@ -326,7 +314,7 @@ export class StudentRepository {
           ? {
               ...c.teacher,
               name: c.teacher.user?.name,
-              phone: c.teacher.user?.phone,
+              phone: c.teacher.phone,
             }
           : null,
       })),

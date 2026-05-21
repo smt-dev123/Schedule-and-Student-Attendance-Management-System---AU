@@ -1,0 +1,1 @@
+ALTER TABLE "teachers" ADD COLUMN "name_en" varchar NOT NULL;

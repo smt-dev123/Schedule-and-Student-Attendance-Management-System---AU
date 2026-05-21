@@ -23,17 +23,9 @@ export const auth = betterAuth({
   },
   user: {
     additionalFields: {
-      phone: {
+      nameEn: {
         type: "string",
-      },
-      address: {
-        type: "string",
-      },
-      gender: {
-        type: "string",
-      },
-      dob: {
-        type: "string",
+        required: false,
       },
     },
   },

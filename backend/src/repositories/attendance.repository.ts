@@ -181,8 +181,8 @@ export class AttendanceRepository {
         .select({
           studentId: attendanceSummaries.studentId,
           name: user.name,
-          gender: user.gender,
-          phone: user.phone,
+          gender: students.gender,
+          phone: students.phone,
           status: students.educationalStatus,
           total: attendanceSummaries.totalAttendance,
           present: attendanceSummaries.presentAttendance,

@@ -111,11 +111,13 @@ export interface TeachersType {
   id?: string
   teacherCode: string
   name: string
+  nameEn: string
   gender: GenderEnum
   email: string
   phone: string
   password: string
   address?: string
+  dob?: string | Date
   image?: string
   academicLevelId: number
   facultyId: number
@@ -226,6 +228,7 @@ export interface TranslationType {
 export interface UsersType {
   id: string
   name: string
+  nameEn?: string
   email: string
   emailVerified?: boolean
   password?: string

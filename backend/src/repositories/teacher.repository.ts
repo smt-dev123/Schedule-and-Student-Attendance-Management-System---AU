@@ -35,12 +35,8 @@ export class TeacherRepository {
         .select({
           ...getTableColumns(teachers),
           name: user.name,
+          nameEn: user.nameEn,
           email: user.email,
-          phone: user.phone,
-          address: user.address,
-          image: user.image,
-          gender: user.gender,
-          dob: user.dob,
           faculty: faculties,
           academicLevel: academicLevels,
         })
@@ -77,12 +73,8 @@ export class TeacherRepository {
       .select({
         ...getTableColumns(teachers),
         name: user.name,
+        nameEn: user.nameEn,
         email: user.email,
-        phone: user.phone,
-        address: user.address,
-        image: user.image,
-        gender: user.gender,
-        dob: user.dob,
         faculty: faculties,
         academicLevel: academicLevels,
       })
@@ -100,12 +92,8 @@ export class TeacherRepository {
       .select({
         ...getTableColumns(teachers),
         name: user.name,
+        nameEn: user.nameEn,
         email: user.email,
-        phone: user.phone,
-        address: user.address,
-        image: user.image,
-        gender: user.gender,
-        dob: user.dob,
         faculty: faculties,
         academicLevel: academicLevels,
       })

@@ -1,5 +1,5 @@
 import { UserRepository } from "@/repositories/user.repository";
-import { CreateUser, UpdateUser, UserQueryInput } from "@/types/user";
+import type { CreateUser, UpdateUser, UserQueryInput } from "@/types/user";
 import { auth } from "@/lib/auth";
 
 export class UserService {

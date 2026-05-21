@@ -167,7 +167,7 @@ const TeacherDetail = ({ data }: Props) => {
                   label="ភេទ"
                   value={data.gender === 'male' ? 'ប្រុស' : 'ស្រី'}
                 />
-                <InfoItem
+                {/* <InfoItem
                   icon={FaCalendarAlt}
                   label="ថ្ងៃខែឆ្នាំកំណើត"
                   value={
@@ -175,7 +175,7 @@ const TeacherDetail = ({ data }: Props) => {
                       ? new Date(data.dob).toLocaleDateString('km-KH')
                       : '---'
                   }
-                />
+                /> */}
                 <InfoItem
                   icon={FaEnvelope}
                   label="អ៊ីម៉ែល"

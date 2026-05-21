@@ -35,7 +35,7 @@ export type CreateStudent = {
   facultyId: number;
   departmentId: number;
   academicLevelId: number;
-  educationalStatus: "enrolled" | "graduated" | "dropped out" | "transferred";
+  educationalStatus: "enrolled" | "suspended" | "graduated" | "dropped_out" | "transferred";
   generation: number;
   semester: number;
   academicYearId: number;
@@ -44,7 +44,11 @@ export type CreateStudent = {
   skillId: number;
   year?: number;
   studentCode: string;
-  nameEn: string;
+  phone?: string | null;
+  address?: string | null;
+  image?: string | null;
+  gender?: "male" | "female";
+  dob?: Date | string | null;
 };
 
 export type StudentPromoteInput = {
@@ -58,10 +62,6 @@ export type StudentPromoteInput = {
 export type Teacher = typeof teachers.$inferSelect & {
   name: string;
   email: string;
-  phone?: string | null;
-  address?: string | null;
-  image?: string | null;
-  gender: "male" | "female";
 };
 
 export type CreateTeacher = {
@@ -70,6 +70,11 @@ export type CreateTeacher = {
   facultyId: number;
   isActive: boolean;
   userId: string;
+  phone?: string | null;
+  address?: string | null;
+  image?: string | null;
+  gender?: "male" | "female";
+  dob?: Date | string | null;
 };
 
 export type UpdateTeacher = Partial<CreateTeacher>;

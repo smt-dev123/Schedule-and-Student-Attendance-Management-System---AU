@@ -51,31 +51,22 @@ router.put(
     const user = c.get("user");
     const data = c.req.valid("form");
     const image = c.get("upload");
-    const { studentService } = c.var.container;
+    const { studentService, userService } = c.var.container;
     try {
       const student = await studentService.findByUserId(user.id);
       if (!student) {
         return c.json({ message: "Student not found" }, 404);
       }
 
-      // Update User info
-      await auth.api.updateUser({
-        body: {
-          name: data.name,
-          email: data.email,
-          image: image?.url,
-          phone: data.phone,
-          address: data.address,
-          gender: data.gender,
-          dob: data.dob ? new Date(data.dob).toISOString() : undefined,
-        },
-        query: {
-          userId: user.id,
-        },
+      await userService.updateUser(user.id, {
+        name: data.name,
+        nameEn: data.nameEn,
+        email: data.email,
+        image: image?.url,
       });
 
       // Update Student specific info
-      const { name, email, phone, address, gender, dob, ...studentData } = data;
+      const { name, nameEn, email, ...studentData } = data;
       const updated = await studentService.update(
         student.id,
         studentData,
@@ -113,21 +104,19 @@ router.post(
       const { user } = await auth.api.createUser({
         body: {
           name: data.name,
+          nameEn: data.nameEn,
           email: data.email,
           password: data.password,
           role: "student",
           image: image?.url,
-          phone: data.phone,
-          address: data.address,
-          gender: data.gender,
-          dob: data.dob ? new Date(data.dob).toISOString() : undefined,
-        },
+        } as any,
       });
       const { studentService } = c.var.container;
-      const { name, email, password, phone, address, gender, dob, ...studentData } = data;
+      const { name, nameEn, email, password, ...studentData } = data;
       const student = await studentService.create({
         ...studentData,
         userId: user.id as string,
+        image: image?.url,
       });
       return c.json(student);
     } catch (error) {
@@ -149,7 +138,7 @@ router.put(
     const id = c.req.param("id") as unknown as number;
     const data = c.req.valid("form");
     const image = c.get("upload");
-    const { studentService } = c.var.container;
+    const { studentService, userService } = c.var.container;
     try {
       const student = await studentService.findById(id);
       if (!student) {
@@ -157,23 +146,15 @@ router.put(
       }
 
       // Update User info
-      await auth.api.updateUser({
-        body: {
-          name: data.name,
-          email: data.email,
-          image: image?.url,
-          phone: data.phone,
-          address: data.address,
-          gender: data.gender,
-          dob: data.dob ? new Date(data.dob).toISOString() : undefined,
-        },
-        query: {
-          userId: student.userId,
-        },
+      await userService.updateUser((student as any).userId, {
+        name: data.name,
+        nameEn: data.nameEn,
+        email: data.email,
+        image: image?.url,
       });
 
       // Update Student specific info
-      const { name, email, phone, address, gender, dob, ...studentData } = data;
+      const { name, nameEn, email, ...studentData } = data;
       const updated = await studentService.update(
         id,
         studentData,
@@ -203,7 +184,7 @@ router.delete(
     }
 
     // Deleting the user will cascade delete the student record
-    await userService.deleteUser(student.userId);
+    await userService.deleteUser((student as any).userId);
     return c.json({ message: "Student and associated user deleted" });
   },
 );

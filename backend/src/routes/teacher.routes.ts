@@ -47,7 +47,7 @@ router.put(
     const user = c.get("user");
     const data = c.req.valid("form");
     const image = c.get("upload");
-    const { teacherService } = c.var.container;
+    const { teacherService, userService } = c.var.container;
     try {
       const teacher = await teacherService.findByUserId(user.id);
       if (!teacher) {
@@ -55,22 +55,15 @@ router.put(
       }
 
       // Update User info
-      await auth.api.updateUser({
-        body: {
-          name: data.name,
-          email: data.email,
-          image: image?.url,
-          phone: data.phone,
-          address: data.address,
-          gender: data.gender,
-        },
-        query: {
-          userId: user.id,
-        },
+      await userService.updateUser(user.id, {
+        name: data.name,
+        nameEn: data.nameEn,
+        email: data.email,
+        image: image?.url,
       });
 
       // Update Teacher specific info
-      const { name, email, phone, address, gender, ...teacherData } = data;
+      const { name, nameEn, email, ...teacherData } = data;
       const updated = await teacherService.update(
         teacher.id,
         teacherData,
@@ -101,22 +94,19 @@ router.post(
       const { user } = await auth.api.createUser({
         body: {
           name: data.name,
+          nameEn: data.nameEn,
           email: data.email,
           password: data.password,
           role: "teacher",
           image: image?.url,
-          phone: data.phone,
-          address: data.address,
-          gender: data.gender,
-        },
+        } as any,
       });
 
+      const { name, nameEn, email, password, ...teacherData } = data;
       const teacher = await teacherService.create({
-        teacherCode: data.teacherCode,
-        academicLevelId: data.academicLevelId,
-        facultyId: data.facultyId,
-        isActive: data.isActive,
+        ...teacherData,
         userId: (user as any).id,
+        image: image?.url,
       });
       return c.json(teacher);
     } catch (error) {
@@ -139,7 +129,7 @@ router.put(
     const id = c.req.valid("param").id;
     const data = c.req.valid("form");
     const image = c.get("upload");
-    const { teacherService } = c.var.container;
+    const { teacherService, userService } = c.var.container;
     try {
       const teacher = await teacherService.findById(id);
       if (!teacher) {
@@ -147,22 +137,15 @@ router.put(
       }
 
       // Update User info
-      await auth.api.updateUser({
-        body: {
-          name: data.name,
-          email: data.email,
-          image: image?.url,
-          phone: data.phone,
-          address: data.address,
-          gender: data.gender,
-        },
-        query: {
-          userId: teacher.userId,
-        },
+      await userService.updateUser(teacher.userId, {
+        name: data.name,
+        nameEn: data.nameEn,
+        email: data.email,
+        image: image?.url,
       });
 
       // Update Teacher specific info
-      const { name, email, phone, address, gender, ...teacherData } = data;
+      const { name, nameEn, email, ...teacherData } = data;
       const updated = await teacherService.update(
         id,
         teacherData,

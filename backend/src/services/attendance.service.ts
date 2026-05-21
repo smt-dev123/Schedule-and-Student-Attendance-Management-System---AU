@@ -27,7 +27,7 @@ export class AttendanceService {
     user: { id: string; role: string },
   ): Promise<AttendanceRecord[]> {
     return this.db.transaction(async (tx) => {
-      const course = await this.courseRepository.findOne(input.courseId, tx);
+      const course = await this.courseRepository.findOne(input.courseId, tx) as any;
 
       if (!course) {
         throw new HTTPException(404, { message: "Course not found" });

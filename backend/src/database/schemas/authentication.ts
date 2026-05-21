@@ -8,11 +8,11 @@ import {
   integer,
   index,
 } from "drizzle-orm/pg-core";
-import { gender } from "./enums";
 
 export const user = pgTable("user", {
   id: text("id").primaryKey(),
   name: text("name").notNull(),
+  nameEn: text("name_en"),
   email: text("email").notNull().unique(),
   emailVerified: boolean("email_verified").default(false).notNull(),
   image: text("image"),
@@ -26,10 +26,6 @@ export const user = pgTable("user", {
   banned: boolean("banned").default(false),
   banReason: text("ban_reason"),
   banExpires: timestamp("ban_expires"),
-  phone: text("phone"),
-  address: text("address"),
-  gender: gender("gender"),
-  dob: timestamp("dob"),
 });
 
 export const session = pgTable(

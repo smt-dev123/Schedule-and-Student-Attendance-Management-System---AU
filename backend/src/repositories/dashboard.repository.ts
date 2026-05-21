@@ -81,7 +81,7 @@ export class DashboardRepository {
     const res = await this.db
       .select({
         name: user.name,
-        gender: user.gender,
+        gender: students.gender,
         department: departments.name,
         percentage: attendanceSummaries.presentPercentage,
       })
@@ -243,7 +243,7 @@ export class DashboardRepository {
 
     if (res.length === 0) return null;
 
-    const item = res[0];
+    const item = res[0]!;
     return {
       name: item.name,
       startTime: item.session === 1 ? item.startTime1 : item.startTime2,
@@ -287,7 +287,7 @@ export class DashboardRepository {
 
     if (res.length === 0) return null;
 
-    const item = res[0];
+    const item = res[0]!;
     return {
       name: item.name,
       startTime: item.session === 1 ? item.startTime1 : item.startTime2,

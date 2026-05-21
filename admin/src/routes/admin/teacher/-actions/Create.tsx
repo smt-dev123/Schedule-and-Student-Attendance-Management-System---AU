@@ -29,6 +29,8 @@ const TeacherCreate = () => {
     formState: { errors },
   } = useForm<TeachersType>({
     defaultValues: {
+      name: '',
+      nameEn: '',
       gender: 'male',
       academicLevelId: undefined,
       facultyId: undefined,
@@ -210,6 +212,23 @@ const TeacherCreate = () => {
                   required: 'ត្រូវបញ្ចូលឈ្មោះ',
                 }}
                 error={errors.name}
+                isRequired
+              />
+
+              <FormInput
+                label="ឈ្មោះអង់គ្លេស"
+                placeholder="Teacher Name"
+                name="nameEn"
+                control={control}
+                register={register}
+                error={errors.nameEn}
+                rules={{
+                  required: 'ត្រូវបញ្ចូលឈ្មោះអង់គ្លេស',
+                  pattern: {
+                    value: /^[a-zA-Z ]+$/,
+                    message: 'ឈ្មោះអង់គ្លេសត្រូវមានតែអក្សរ a-z A-Z និង space',
+                  },
+                }}
                 isRequired
               />
 

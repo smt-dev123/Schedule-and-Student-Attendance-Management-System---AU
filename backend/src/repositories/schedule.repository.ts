@@ -88,9 +88,9 @@ export class ScheduleRepository {
         courses: {
           with: {
             teacher: {
-              columns: { id: true },
+              columns: { id: true, phone: true },
               with: {
-                user: { columns: { name: true, phone: true } }
+                user: { columns: { name: true } }
               }
             },
           },
@@ -106,7 +106,7 @@ export class ScheduleRepository {
         teacher: c.teacher ? {
           ...c.teacher,
           name: c.teacher.user?.name,
-          phone: c.teacher.user?.phone,
+          phone: c.teacher.phone,
         } : null
       }))
     })) as any;
@@ -138,9 +138,9 @@ export class ScheduleRepository {
         courses: {
           with: {
             teacher: {
-              columns: { id: true },
+              columns: { id: true, phone: true },
               with: {
-                user: { columns: { name: true, phone: true } }
+                user: { columns: { name: true } }
               }
             },
           },
@@ -157,7 +157,7 @@ export class ScheduleRepository {
         teacher: c.teacher ? {
           ...c.teacher,
           name: c.teacher.user?.name,
-          phone: c.teacher.user?.phone,
+          phone: c.teacher.phone,
         } : null
       }))
     } as any;
@@ -195,9 +195,9 @@ export class ScheduleRepository {
         courses: {
           with: {
             teacher: {
-              columns: { id: true },
+              columns: { id: true, phone: true },
               with: {
-                user: { columns: { name: true, phone: true } }
+                user: { columns: { name: true } }
               }
             },
           },
@@ -214,7 +214,7 @@ export class ScheduleRepository {
         teacher: c.teacher ? {
           ...c.teacher,
           name: c.teacher.user?.name,
-          phone: c.teacher.user?.phone,
+          phone: c.teacher.phone,
         } : null
       }))
     } as any;

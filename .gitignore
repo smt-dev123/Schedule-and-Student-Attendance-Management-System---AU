@@ -2,37 +2,37 @@
 example/
 
 # Backend (Hono.js)
-attendance-and-schedule/node_modules/
-attendance-and-schedule/dist/
-attendance-and-schedule/build/
-attendance-and-schedule/.env
-# attendance-and-schedule/.env.*
-attendance-and-schedule/uploads/
-attendance-and-schedule/logs/
-attendance-and-schedule/coverage/
-attendance-and-schedule/.nyc_output/
+backend/node_modules/
+backend/dist/
+backend/build/
+backend/.env
+# backend/.env.*
+backend/uploads/
+backend/logs/
+backend/coverage/
+backend/.nyc_output/
 
 # Frontend Web (React.js)
-frontend-web/. DS_Store
-frontend-web/out/
-frontend-web/node_modules/
-frontend-web/dist/
-frontend-web/dist-ssr
-frontend-web/build/
-frontend-web/.env
-# frontend-web/.env.*
-frontend-web/*.local/
-frontend-web/.vscode
+admin/. DS_Store
+admin/out/
+admin/node_modules/
+admin/dist/
+admin/dist-ssr
+admin/build/
+admin/.env
+# admin/.env.*
+admin/*.local/
+admin/.vscode
 
 # Frontend Mobile (Expo React Native)
-frontend-mobile/.expo/
-frontend-mobile/node_modules/
-frontend-mobile/dist/
-frontend-mobile/build/
-frontend-mobile/.env
-# frontend-mobile/.env.*
-frontend-mobile/web-build/
-frontend-mobile/dist/
+mobile/.expo/
+mobile/node_modules/
+mobile/dist/
+mobile/build/
+mobile/.env
+# mobile/.env.*
+mobile/web-build/
+mobile/dist/
 
 # Expo specific
 .expo/

@@ -21,7 +21,7 @@ router.get("/summary-me", authentication, async (c) => {
   const { dashboardService } = c.var.container;
   const summary = await dashboardService.getDashboardSummaryMe(
     user.id,
-    user.role,
+    user.role ?? "",
   );
   return c.json(summary);
 });

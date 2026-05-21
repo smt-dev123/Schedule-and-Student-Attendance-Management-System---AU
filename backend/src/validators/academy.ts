@@ -124,20 +124,23 @@ export const studentPromoteSchema = z.object({
 export type StudentUpdateInput = z.infer<typeof studentUpdateSchema>;
 export type StudentQueryInput = z.infer<typeof studentQuerySchema>;
 
-/* Teacher Schemas */
 export const teacherCreateSchema = z.object({
   teacherCode: z.string().min(1, "Teacher code is required"),
   name: z.string().min(1, "Teacher name is required"),
+  nameEn: z.string().min(1, "English name is required"),
   phone: z.string().min(10).max(15),
   email: z.email("Invalid email format"),
   password: z.string().min(6, "Password must be at least 6 characters"),
   gender: genderEnum,
   address: z.string().optional(),
+  dob: z.coerce.date().optional(),
   academicLevelId: z.coerce.number().positive(),
   facultyId: z.coerce.number().positive(),
   isActive: zBoolean.default(true),
 });
-export const teacherUpdateSchema = teacherCreateSchema.partial();
+export const teacherUpdateSchema = teacherCreateSchema.partial().omit({
+  password: true,
+});
 export const teacherQuerySchema = z.object({
   name: z.string().optional(),
   teacherCode: z.string().optional(),

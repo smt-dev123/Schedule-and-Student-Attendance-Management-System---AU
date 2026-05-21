@@ -36,6 +36,27 @@
       "when": 1778486524624,
       "tag": "0004_worried_krista_starr",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1779376803829,
+      "tag": "0005_lethal_chimera",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1779377429097,
+      "tag": "0006_natural_lady_vermin",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1779377993200,
+      "tag": "0007_eminent_monster_badoon",
+      "breakpoints": true
     }
   ]
 }
