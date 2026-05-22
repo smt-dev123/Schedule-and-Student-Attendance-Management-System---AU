@@ -108,7 +108,8 @@ export interface SubjectsType {
 }
 
 export interface TeachersType {
-  id?: string
+  id?: string | number
+  userId?: string
   teacherCode: string
   name: string
   nameEn: string
@@ -127,7 +128,8 @@ export interface TeachersType {
 }
 
 export interface StudentsType {
-  id?: string
+  id?: string | number
+  userId?: string
   studentCode: string
   name: string
   nameEn: string

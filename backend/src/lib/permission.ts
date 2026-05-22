@@ -24,7 +24,7 @@ const statement = {
   teacher: ["create", "read", "update", "delete", "update-own"],
   attendance: ["create", "read", "update", "delete"],
   notification: ["create", "read", "update", "delete", "read-own"],
-  user: ["create", "read", "update", "delete"],
+  user: ["create", "read", "update", "delete", "set-password"],
   system: ["manage"],
 } as const;
 
@@ -56,7 +56,7 @@ const admin = ac.newRole({
   teacher: ["create", "read", "update", "delete"],
   attendance: ["create", "read", "update", "delete"],
   notification: ["create", "read", "update", "delete", "read-own"],
-  user: ["create", "read", "update", "delete"],
+  user: ["create", "read", "update", "delete", "set-password"],
   system: ["manage"],
 });
 
@@ -75,7 +75,7 @@ const manager = ac.newRole({
   student: ["create", "read", "update", "delete", "promote"],
   teacher: ["create", "read", "update", "delete"],
   attendance: ["create", "read", "update", "delete"],
-  user: ["create", "read", "update", "delete"],
+  user: ["create", "read", "update", "delete", "set-password"],
   system: ["manage"],
 });
 

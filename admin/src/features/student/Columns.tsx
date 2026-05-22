@@ -2,6 +2,7 @@ import StudentDetail from '@/routes/admin/student/-actions/ShowDetail'
 import StudentDelete from '@/routes/admin/student/-actions/Delete'
 import StudentPromote from '@/routes/admin/student/-actions/StudentPromote'
 import StudentUpdate from '@/routes/admin/student/-actions/Update'
+import ChangePassword from '@/routes/admin/user/-actions/ChangePassword'
 import type { StudentsType } from '@/types'
 import { Avatar, Badge, Flex, Text } from '@radix-ui/themes'
 import type { ColumnDef } from '@tanstack/react-table'
@@ -102,6 +103,10 @@ function StudentActions({ row }: { row: any }) {
         <StudentPromote student={row.original} />
       )}
       <StudentDetail data={row.original} />
+      
+      {['admin', 'manager'].includes(role) && row.original.userId && (
+        <ChangePassword user={{ id: row.original.userId, name: row.original.name } as any} />
+      )}
       {['admin', 'manager', 'staff'].includes(role) && (
         <StudentUpdate data={row.original} />
       )}

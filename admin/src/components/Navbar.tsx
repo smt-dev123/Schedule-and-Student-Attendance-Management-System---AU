@@ -63,13 +63,15 @@ const Navbar = () => {
 
         {/* User */}
         <DropdownMenu.Root>
-          <DropdownMenu.Trigger style={{ cursor: 'pointer' }}>
-            <Avatar
-              size="2"
-              src={user?.image || "https://ui-avatars.com/api/?name=" + encodeURIComponent(user?.name || 'User')}
-              fallback={user?.name?.[0]?.toUpperCase() || "U"}
-              radius="full"
-            />
+          <DropdownMenu.Trigger>
+            <button className="outline-none focus:outline-none border-none bg-transparent cursor-pointer rounded-full hover:opacity-80 transition-opacity">
+              <Avatar
+                size="2"
+                src={user?.image || "https://ui-avatars.com/api/?name=" + encodeURIComponent(user?.name || 'User')}
+                fallback={user?.name?.[0]?.toUpperCase() || "U"}
+                radius="full"
+              />
+            </button>
           </DropdownMenu.Trigger>
           <DropdownMenu.Content>
             <DropdownMenu.Item>

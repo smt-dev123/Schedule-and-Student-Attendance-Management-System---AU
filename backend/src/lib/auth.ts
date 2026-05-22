@@ -1,7 +1,7 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { db } from "@/database";
-import { twoFactor } from "better-auth/plugins";
+import { twoFactor, bearer } from "better-auth/plugins";
 import { admin as adminPlugin } from "better-auth/plugins/admin";
 import { ac, admin, manager, staff, student, teacher } from "./permission";
 
@@ -41,5 +41,6 @@ export const auth = betterAuth({
         manager,
       },
     }),
+    bearer(),
   ],
 });

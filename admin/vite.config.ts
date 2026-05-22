@@ -33,19 +33,19 @@ export default defineConfig({
     ],
     port: 4000,
     strictPort: true,
-    hmr: {
-      protocol: 'ws',
-      host: 'localhost',
-      clientPort: 80,
-    },
+    // hmr: {
+    //   protocol: 'ws',
+    //   host: 'localhost',
+    //   clientPort: 80,
+    // },
     proxy: {
       '/api/notifications/ws': {
-        target: 'ws://localhost:3000',
+        target: process.env.VITE_API_BASE_URL === '/api' ? 'ws://backend_ssams_au:3000' : 'ws://localhost:3000',
         ws: true,
         changeOrigin: true,
       },
       '/api': {
-        target: 'http://localhost:3000',
+        target: process.env.VITE_API_BASE_URL === '/api' ? 'http://backend_ssams_au:3000' : 'http://localhost:3000',
         changeOrigin: true,
       },
     },

@@ -9,6 +9,8 @@ const authentication = createMiddleware(async (c, next) => {
     if (queryToken) {
       const headers = new Headers(c.req.raw.headers);
       headers.set("Authorization", `Bearer ${queryToken}`);
+      headers.delete("Connection");
+      headers.delete("Upgrade");
       const mockRequest = new Request(c.req.raw.url, {
         headers,
       });

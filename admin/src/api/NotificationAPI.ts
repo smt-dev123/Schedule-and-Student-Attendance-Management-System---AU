@@ -19,8 +19,8 @@ export const getNotifications = async () => {
   return res.data
 }
 
-export const getMyNotifications = async (studentId: string) => {
-  const res = await api.get(`/notifications/my?studentId=${studentId}`)
+export const getMyNotifications = async () => {
+  const res = await api.get('/notifications/my-notifications')
   return res.data
 }
 

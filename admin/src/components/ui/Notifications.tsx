@@ -4,6 +4,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { getNotifications, getMyNotifications, markNotificationAsRead } from '@/api/NotificationAPI'
 import { useAuth } from '@/stores/auth'
 import { Link } from '@tanstack/react-router'
+import { useState } from 'react'
 
 export function Notifications() {
   const { user } = useAuth()
@@ -14,7 +15,7 @@ export function Notifications() {
     queryFn: () => {
       const role = (user as any)?.role
       if (role === 'student') {
-        return getMyNotifications(user?.id || '')
+        return getMyNotifications()
       } else {
         return getNotifications()
       }
@@ -32,14 +33,33 @@ export function Notifications() {
     }
   })
 
-  const unreadCount = (user as any)?.role === 'student'
-    ? notifications.filter((n: any) => !n.readAt).length
-    : notifications.length
+  // --- Badge Logic (Hide when viewed) ---
+  const [lastSeenId, setLastSeenId] = useState<number | null>(() => {
+    const saved = localStorage.getItem(`lastSeenNotif_${user?.id}`)
+    return saved ? parseInt(saved, 10) : null
+  })
+
+  // Re-calculate if notifications change, but badge will be based on lastSeenId
+  let unreadCount = 0;
+  if (lastSeenId) {
+    unreadCount = notifications.filter((n: any) => n.id > lastSeenId).length
+  } else {
+    unreadCount = notifications.length
+  }
+
+  const handleOpenChange = (open: boolean) => {
+    if (open && notifications.length > 0) {
+      // Find the maximum ID among all notifications
+      const maxId = Math.max(...notifications.map((n: any) => n.id))
+      localStorage.setItem(`lastSeenNotif_${user?.id}`, maxId.toString())
+      setLastSeenId(maxId)
+    }
+  }
 
   return (
-    <Popover.Root>
+    <Popover.Root onOpenChange={handleOpenChange}>
       <Popover.Trigger>
-        <Box style={{ position: 'relative', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', padding: '0 8px' }}>
+        <button className="relative cursor-pointer flex items-center justify-center h-full px-2 border-none bg-transparent outline-none">
           <IoNotificationsOutline size="24" className="text-gray-600 dark:text-gray-200 hover:text-sky-600 transition-colors" />
           {unreadCount > 0 && (
             <Box
@@ -61,7 +81,7 @@ export function Notifications() {
               {unreadCount}
             </Box>
           )}
-        </Box>
+        </button>
       </Popover.Trigger>
 
       <Popover.Content

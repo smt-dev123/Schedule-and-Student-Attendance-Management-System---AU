@@ -11,6 +11,7 @@ backend/uploads/
 backend/logs/
 backend/coverage/
 backend/.nyc_output/
+backend/src/database/migrations/
 
 # Frontend Web (React.js)
 admin/. DS_Store

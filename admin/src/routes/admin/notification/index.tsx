@@ -14,6 +14,7 @@ import { getGeneration } from '@/api/GenerationAPI'
 import { getNotifications, broadcastNotification } from '@/api/NotificationAPI'
 import type { FacultiesType, GenerationsType } from '@/types'
 import toast from 'react-hot-toast'
+import { useSessionContext } from '@/providers/AuthProvider'
 
 export const Route = createFileRoute('/admin/notification/')({
   component: RouteComponent,
@@ -66,12 +67,25 @@ function RouteComponent() {
   const [selectedFaculty, setSelectedFaculty] = useState<number | ''>('')
   const [message, setMessage] = useState('')
 
+  const { data: sessionData } = useSessionContext()
+  const sessionToken = sessionData?.session?.token
+
   // --- 2. WebSocket Setup ---
   useEffect(() => {
-    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:'
-    const socket = new WebSocket(
-      `${protocol}//localhost:3000/api/notifications/ws`,
-    )
+    if (!sessionToken) return
+
+    let wsURL = ''
+    const baseURL = import.meta.env.VITE_API_BASE_URL || '/api'
+    
+    if (baseURL.startsWith('http')) {
+      wsURL = baseURL.replace(/^http/, 'ws') + `/notifications/ws?token=${sessionToken}`
+    } else {
+      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:'
+      const host = window.location.host
+      wsURL = `${protocol}//${host}${baseURL}/notifications/ws?token=${sessionToken}`
+    }
+    
+    const socket = new WebSocket(wsURL)
 
     socket.onmessage = (event) => {
       const payload = JSON.parse(event.data)
@@ -88,7 +102,7 @@ function RouteComponent() {
     }
 
     return () => socket.close()
-  }, [queryClient])
+  }, [queryClient, sessionToken])
 
   // --- 3. Selection Logic ---
   useEffect(() => {

@@ -5,6 +5,7 @@ import { FaRegEye } from 'react-icons/fa'
 
 import UserUpdate from '@/routes/admin/user/-actions/Update'
 import UserDelete from '@/routes/admin/user/-actions/Delete'
+import ChangePassword from '@/routes/admin/user/-actions/ChangePassword'
 
 const handleViewImage = (imageUrl: string) => {
   window.open(imageUrl, '_blank')
@@ -78,6 +79,7 @@ export const getUserColumns = (userRole: string): ColumnDef<UsersType>[] => {
             <FaRegEye />
           </IconButton>
 
+          <ChangePassword user={row.original} />
           <UserUpdate user={row.original} />
 
           <UserDelete userId={row.original.id} userName={row.original.name} />

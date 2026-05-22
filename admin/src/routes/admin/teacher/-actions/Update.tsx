@@ -91,7 +91,7 @@ const TeacherUpdate = ({ data }: Props) => {
   }
 
   const mutation = useMutation({
-    mutationFn: (formData: any) => updateTeachers(data.id!, formData),
+    mutationFn: (formData: any) => updateTeachers(String(data.id!), formData),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['teachers'] })
       toast.success('កែប្រែជោគជ័យ')
