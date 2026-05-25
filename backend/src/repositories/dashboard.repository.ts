@@ -135,7 +135,7 @@ export class DashboardRepository {
     // Or we could count total sessions if we had that data.
     const totalClasses = totalSubjects * 12; // Example multiplier for semester weeks
 
-    const currentDay = sql`trim(to_char(current_date, 'Day'))`;
+    const currentDay = sql`trim(to_char(current_date, 'Day'))::day`;
     const todayRes = await this.db
       .select({ count: sql<number>`count(*)::int` })
       .from(courses)
@@ -183,7 +183,7 @@ export class DashboardRepository {
     const completed = res.filter((c) => Number(c.totalSessionLeft) === 0).length;
     const totalClasses = totalSubjects * 12;
 
-    const currentDay = sql`trim(to_char(current_date, 'Day'))`;
+    const currentDay = sql`trim(to_char(current_date, 'Day'))::day`;
     const todayRes = await this.db
       .select({ count: sql<number>`count(*)::int` })
       .from(courses)
@@ -209,7 +209,7 @@ export class DashboardRepository {
     });
     if (!student) return null;
 
-    const currentDay = sql`trim(to_char(current_date, 'Day'))`;
+    const currentDay = sql`trim(to_char(current_date, 'Day'))::day`;
     const currentTime = sql`to_char(current_timestamp, 'HH24:MI')`;
 
     const res = await this.db
@@ -254,7 +254,7 @@ export class DashboardRepository {
   }
 
   async getCurrentClassForTeacher(teacherId: number) {
-    const currentDay = sql`trim(to_char(current_date, 'Day'))`;
+    const currentDay = sql`trim(to_char(current_date, 'Day'))::day`;
     const currentTime = sql`to_char(current_timestamp, 'HH24:MI')`;
 
     const res = await this.db
