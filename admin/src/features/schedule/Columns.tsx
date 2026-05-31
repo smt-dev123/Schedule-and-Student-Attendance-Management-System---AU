@@ -1,9 +1,10 @@
 import type { ScheduleType } from '@/types'
 import { Badge, Flex, IconButton } from '@radix-ui/themes'
 import type { ColumnDef } from '@tanstack/react-table'
-import { FaRegEdit, FaRegEye, FaRegTrashAlt } from 'react-icons/fa'
+import { FaRegEdit, FaRegEye } from 'react-icons/fa'
 import { Link } from '@tanstack/react-router'
 import { useSessionContext } from '@/providers/AuthProvider'
+import ScheduleDelete from '@/routes/admin/schedule/-actions/Delete'
 
 export const ScheduleColumns: ColumnDef<ScheduleType>[] = [
   { accessorKey: 'id', header: 'ល.រ' },
@@ -84,19 +85,7 @@ function ScheduleActions({ row }: { row: any }) {
       )}
 
       {['admin', 'manager', 'staff'].includes(role) && (
-        <IconButton
-          size="1"
-          color="red"
-          variant="surface"
-          style={{ cursor: 'pointer' }}
-          onClick={() => {
-            if (window.confirm('តើអ្នកពិតជាចង់លុបកាលវិភាគនេះមែនទេ?')) {
-              s.onDelete?.(s.id)
-            }
-          }}
-        >
-          <FaRegTrashAlt />
-        </IconButton>
+        <ScheduleDelete data={row.original} />
       )}
     </Flex>
   )
