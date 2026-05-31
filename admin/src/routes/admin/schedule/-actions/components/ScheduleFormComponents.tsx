@@ -23,8 +23,24 @@ export const CourseItem = ({
     ?.map((c: any) => c?.day)
     .filter((day: any) => day !== undefined && day !== null)
 
-  const selectedTeachers = allCourses
-    ?.map((c: any) => String(c?.teacherId))
+  const currentCourseName = allCourses?.[index]?.name?.trim().toLowerCase()
+
+  const disabledTeachers = allCourses
+    ?.filter((c: any, i: number) => {
+      if (i === index) return false
+      if (!c?.teacherId) return false
+      
+      const otherCourseName = c?.name?.trim().toLowerCase()
+      
+      // Allow selecting the same teacher if the subject name is exactly the same (meaning multiple days a week)
+      if (currentCourseName && otherCourseName === currentCourseName) {
+        return false
+      }
+      
+      // Otherwise, the teacher is teaching a different subject, so disable them
+      return true
+    })
+    .map((c: any) => String(c?.teacherId))
     .filter((id: any) => id !== 'undefined' && id !== 'null')
 
   return (
@@ -82,7 +98,7 @@ export const CourseItem = ({
             label="គ្រូបង្រៀន"
             name={`courses.${index}.teacherId`}
             control={control}
-            disabledOptions={selectedTeachers}
+            disabledOptions={disabledTeachers}
             options={teachers}
             error={courseErrors?.teacherId}
             isRequired={true}
