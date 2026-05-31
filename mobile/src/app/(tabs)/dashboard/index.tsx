@@ -4,7 +4,7 @@ import { getTeacherMe } from "@/api/TeacherAPI";
 import { useSession } from "@/lib/auth-client";
 import { useFocusEffect, useRouter } from "expo-router";
 import { useCallback, useState } from "react";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "../../../../node_modules/react-i18next";
 import {
   ActivityIndicator,
   Image,

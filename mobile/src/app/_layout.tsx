@@ -5,7 +5,7 @@ import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
 import i18n from "i18next";
 import { useEffect, useState } from "react";
-import { initReactI18next } from "react-i18next";
+import { initReactI18next } from "../../node_modules/react-i18next";
 import { ActivityIndicator, View } from "react-native";
 
 const LANG_KEY = "app_language";

@@ -2,6 +2,7 @@ import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { Box, Flex, Text, Select, Button, TextField } from '@radix-ui/themes'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { getSchedules, deleteSchedule, getMySchedule } from '@/api/SchedulesAPI'
+import { getCourses } from '@/api/CourseAPI'
 import { useAcademicStore } from '@/stores/useAcademicStore'
 import FetchData from '@/components/FetchData'
 import { ScheduleTable } from '@/features/schedule/ScheduleTable'
@@ -14,6 +15,7 @@ import { getFaculties } from '@/api/FacultyAPI'
 import { getDepartments } from '@/api/DepartmentAPI'
 import { getAcademicLevels } from '@/api/AcademicLevelAPI'
 import { IoFilter, IoSearch } from 'react-icons/io5'
+import { TeacherTimetable } from '@/features/schedule/components/TeacherTimetable'
 
 type ScheduleSearch = {
   name?: string
@@ -98,7 +100,21 @@ function ScheduleListComponent() {
           academicLevelId === 'all' ? undefined : Number(academicLevelId),
       })
     },
-    enabled: role === 'student' ? true : !!selectedYearId,
+    enabled: (role === 'student' || !['student', 'teacher'].includes(role)) && !!selectedYearId,
+  })
+
+  const {
+    data: teacherCoursesResponse,
+    isLoading: isLoadingTeacherCourses,
+    error: teacherCoursesError,
+  } = useQuery({
+    queryKey: ['teacher-courses', selectedYearId],
+    queryFn: () =>
+      getCourses({
+        academicYearId: selectedYearId || undefined,
+        limit: 100,
+      }),
+    enabled: role === 'teacher' && !!selectedYearId,
   })
 
   const schedules = schedulesResponse || []
@@ -154,14 +170,16 @@ function ScheduleListComponent() {
         <Text size="5" weight="bold">
           {role === 'student'
             ? 'កាលវិភាគសិក្សារបស់ខ្ញុំ'
-            : 'គ្រប់គ្រងកាលវិភាគសិក្សា'}
+            : role === 'teacher'
+              ? 'កាលវិភាគបង្រៀនរបស់ខ្ញុំ'
+              : 'គ្រប់គ្រងកាលវិភាគសិក្សា'}
         </Text>
         <Flex gap="3">
           {['admin', 'manager', 'staff'].includes(role) && <ScheduleCreate />}
         </Flex>
       </Flex>
 
-      {role !== 'student' && (
+      {!['student', 'teacher'].includes(role) && (
         <Flex justify="between" align="center" mb="4">
           <Box flexGrow="1" maxWidth="300px">
             <Text as="div" size="2" mb="1" weight="bold">
@@ -266,9 +284,17 @@ function ScheduleListComponent() {
         </Flex>
       )}
 
-      <FetchData isLoading={isLoading} error={error} data={schedules}>
-        <ScheduleTable data={enrichedSchedules} />
-      </FetchData>
+      {role === 'teacher' ? (
+        <FetchData isLoading={isLoadingTeacherCourses} error={teacherCoursesError} data={teacherCoursesResponse}>
+          <Box mt="4">
+            <TeacherTimetable courses={teacherCoursesResponse?.data || []} />
+          </Box>
+        </FetchData>
+      ) : (
+        <FetchData isLoading={isLoading} error={error} data={schedules}>
+          <ScheduleTable data={enrichedSchedules} />
+        </FetchData>
+      )}
 
       <ScheduleUpdate
         scheduleId={editingScheduleId}

@@ -6,7 +6,7 @@ import React, { useEffect, useState } from "react";
 import { useSession, authClient } from "@/lib/auth-client";
 import { getTeacherMe, updateTeacherMe } from "@/api/TeacherAPI";
 import { getStudentMe, updateStudentMe } from "@/api/StudentAPI";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "../../../../node_modules/react-i18next";
 import {
   ActivityIndicator,
   Alert,

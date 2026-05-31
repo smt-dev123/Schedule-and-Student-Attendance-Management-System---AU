@@ -1,6 +1,7 @@
 import TeacherDetail from '@/routes/admin/teacher/-actions/ShowDetail'
 import TeacherDelete from '@/routes/admin/teacher/-actions/Delete'
 import TeacherUpdate from '@/routes/admin/teacher/-actions/Update'
+import TeacherScheduleDialog from '@/routes/admin/teacher/-actions/TeacherScheduleDialog'
 import ChangePassword from '@/routes/admin/user/-actions/ChangePassword'
 import type { TeachersType } from '@/types'
 import { Avatar, Badge, Flex } from '@radix-ui/themes'
@@ -71,6 +72,7 @@ function TeacherActions({ row }: { row: any }) {
   return (
     <Flex gap="2">
       <TeacherDetail data={row.original} />
+      <TeacherScheduleDialog data={row.original} />
 
       {['admin', 'manager'].includes(role) && row.original.userId && (
         <ChangePassword user={{ id: row.original.userId, name: row.original.name } as any} />

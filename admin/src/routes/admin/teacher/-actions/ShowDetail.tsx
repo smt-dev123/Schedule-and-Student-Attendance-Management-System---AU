@@ -18,7 +18,6 @@ import {
   FaMapMarkerAlt,
   FaPhoneAlt,
   FaEnvelope,
-  FaCalendarAlt,
   FaIdCard,
   FaInfoCircle,
 } from 'react-icons/fa'
