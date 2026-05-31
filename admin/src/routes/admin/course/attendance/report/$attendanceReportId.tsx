@@ -11,8 +11,10 @@ import { FaArrowLeft, FaFileExcel } from 'react-icons/fa'
 import { useState, useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { getCourseAttendanceReport } from '@/api/AttendanceAPI'
-
 import { getCourseById } from '@/api/CourseAPI'
+import ExportAttendanceExcel from './-exports/ExportAttendanceExcel'
+import PDFDownload from '@/components/ui/PDFDownload'
+import { AttendanceReportDocument } from './-exports/ExportAttendancePDF'
 
 export const Route = createFileRoute(
   '/admin/course/attendance/report/$attendanceReportId',
@@ -54,12 +56,15 @@ function RouteComponent() {
           <FaArrowLeft /> ត្រឡប់ក្រោយ
         </Button>
         <Flex gap="2">
-          <Button variant="soft" color="green">
-            <FaFileExcel /> Export Excel
-          </Button>
-          <Button variant="soft" color="blue">
-            <FaFileExcel /> Export PDF
-          </Button>
+          {course && students && (
+            <>
+              <ExportAttendanceExcel course={course} students={students} />
+              <PDFDownload
+                document={<AttendanceReportDocument course={course} students={students} />}
+                fileName={`វត្តមាន_${course?.name || ''}.pdf`}
+              />
+            </>
+          )}
         </Flex>
       </Flex>
 

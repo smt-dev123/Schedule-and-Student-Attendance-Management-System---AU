@@ -48,7 +48,7 @@ function RouteComponent() {
 
   return (
     <div className="space-y-6 print:p-0">
-      <ScheduleHeader scheduleId={Number(scheduleId)} />
+      <ScheduleHeader schedule={schedule} />
 
       <ScheduleInfoCard
         schedule={schedule}

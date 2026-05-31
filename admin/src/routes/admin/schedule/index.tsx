@@ -8,6 +8,9 @@ import FetchData from '@/components/FetchData'
 import { ScheduleTable } from '@/features/schedule/ScheduleTable'
 import ScheduleCreate from './-actions/Create'
 import ScheduleUpdate from './-actions/Update'
+import ExportExcel from './-exports/ExportExcel'
+import PDFDownload from '@/components/ui/PDFDownload'
+import { ScheduleReport } from './-exports/ExportPDF'
 import { useSessionContext } from '@/providers/AuthProvider'
 import { useState, useEffect } from 'react'
 import { getFaculties } from '@/api/FacultyAPI'
@@ -156,6 +159,12 @@ function ScheduleListComponent() {
               : 'គ្រប់គ្រងកាលវិភាគសិក្សា'}
         </Text>
         <Flex gap="3">
+          <PDFDownload
+            document={<ScheduleReport data={schedules} />}
+            fileName="schedule-report.pdf"
+          />
+          <ExportExcel data={schedules} />
+
           {['admin', 'manager', 'staff'].includes(role) && <ScheduleCreate />}
         </Flex>
       </Flex>

@@ -1,14 +1,17 @@
-import { Button, Flex, Text, Box } from '@radix-ui/themes'
-import { FaArrowLeft, FaFileExport, FaPrint } from 'react-icons/fa'
+import { Flex, Text, Box } from '@radix-ui/themes'
+import { FaArrowLeft } from 'react-icons/fa'
 import { useRouter } from '@tanstack/react-router'
 import OverrideCreate from '@/routes/admin/schedule/-actions/OverrideCreate'
 import { useSessionContext } from '@/providers/AuthProvider'
+import ExportTimetableExcel from '@/routes/admin/schedule/-exports/ExportTimetableExcel'
+import PDFDownload from '@/components/ui/PDFDownload'
+import { TimetableReport } from '@/routes/admin/schedule/-exports/ExportTimetablePDF'
 
 interface ScheduleHeaderProps {
-  scheduleId: number
+  schedule: any
 }
 
-export function ScheduleHeader({ scheduleId }: ScheduleHeaderProps) {
+export function ScheduleHeader({ schedule }: ScheduleHeaderProps) {
   const router = useRouter()
   const { data: session } = useSessionContext()
   const role = (session?.user as any)?.role
@@ -35,16 +38,14 @@ export function ScheduleHeader({ scheduleId }: ScheduleHeaderProps) {
         </Box>
       </Flex>
       <Flex gap="2" wrap="wrap">
-        <Button variant="soft" color="gray">
-          <FaFileExport />{' '}
-          <span className="hidden md:inline">Export Excel</span>
-        </Button>
-        <Button variant="soft" onClick={() => window.print()}>
-          <FaPrint /> <span className="hidden md:inline">បោះពុម្ភ</span>
-        </Button>
+        <PDFDownload
+          document={<TimetableReport schedule={schedule} />}
+          fileName={`timetable_${schedule?.id}.pdf`}
+        />
+        <ExportTimetableExcel schedule={schedule} />
 
         {(role === 'staff' || role === 'admin' || role === 'manager') && (
-          <OverrideCreate scheduleId={scheduleId} />
+          <OverrideCreate scheduleId={schedule?.id} />
         )}
       </Flex>
     </Flex>
